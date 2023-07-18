@@ -1,0 +1,20 @@
+{
+  "name": "alphazero",
+  "version": "1.0.0",
+  "description": "Engine to simulate tabletop games, inspired by AlphaZero algorithm",
+  "main": "index.js",
+  "scripts": {
+    "dev": "npx nodemon",
+    "build": "rimraf ./build && tsc",
+    "start": "npm run build && node build/index.js"
+  },
+  "author": "Gabriel Malosto",
+  "license": "ISC",
+  "devDependencies": {
+    "@types/node": "^20.4.2",
+    "nodemon": "^3.0.1",
+    "rimraf": "^5.0.1",
+    "ts-node": "^10.9.1",
+    "typescript": "^5.1.6"
+  }
+}
