@@ -5,7 +5,7 @@ export enum Player {
   Two = 2,
 }
 export type State = Player[][];
-type Action = number;
+export type Action = number;
 type ActionOutcome = {
   isTerminal: boolean;
   hasWon: boolean;
@@ -55,7 +55,7 @@ export default class TicTacToe {
 
   // Perform the action and return the new state
   getNextState(state: State, action: Action, player: Player): State {
-    const row = action;
+    const row = Math.floor(action / this.columnCount);
     const column = action % this.columnCount;
     // Play the action on the given state
     state[row][column] = player;
@@ -76,7 +76,7 @@ export default class TicTacToe {
 
   // Return if the player has won when playing the action
   checkWin(state: State, action: Action): boolean {
-    const row = action;
+    const row = Math.floor(action / this.columnCount);
     const column = action % this.columnCount;
     const player = state[row][column];
 
@@ -102,5 +102,10 @@ export default class TicTacToe {
       return { isTerminal: true, hasWon: false };
     // No terminal state
     return { isTerminal: false, hasWon: false };
+  }
+
+  // Return the opponent of the given player
+  getOpponent(player: Player): Player {
+    return player === Player.One ? Player.Two : Player.One;
   }
 }
