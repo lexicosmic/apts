@@ -4,8 +4,12 @@ export enum Player {
   One = 1,
   Two = 2,
 }
-type State = number[][];
+export type State = Player[][];
 type Action = number;
+type ActionOutcome = {
+  isTerminal: boolean;
+  hasWon: boolean;
+};
 
 export default class TicTacToe {
   // Attributes
@@ -22,8 +26,8 @@ export default class TicTacToe {
 
   /// Methods
 
-  // Print the board to the console
-  printGame(state: State) {
+  // Print the state to the console
+  printState(state: State) {
     let boardString = "";
     for (let i = 0; i < this.rowCount; i++) {
       boardString += "|";
@@ -49,13 +53,54 @@ export default class TicTacToe {
     ];
   }
 
-  // Perform the move and return the new state
+  // Perform the action and return the new state
   getNextState(state: State, action: Action, player: Player): State {
     const row = action;
     const column = action % this.columnCount;
-    // TODO: Check if the move is valid
-    // Play the move
+    // Play the action on the given state
     state[row][column] = player;
     return state;
+  }
+
+  // Return the list of valid actions
+  getValidActions(state: State): boolean[] {
+    const validActions: boolean[] = [];
+    for (let i = 0; i < this.rowCount; i++) {
+      for (let j = 0; j < this.columnCount; j++) {
+        const cell = state[i][j];
+        validActions.push(cell === Player.None);
+      }
+    }
+    return validActions;
+  }
+
+  // Return if the player has won when playing the action
+  checkWin(state: State, action: Action): boolean {
+    const row = action;
+    const column = action % this.columnCount;
+    const player = state[row][column];
+
+    // Won on the row
+    if (state[row].every((cell) => cell === player)) return true;
+    // Won on the column
+    if (state.every((row) => row[column] === player)) return true;
+    // Won on the primary diagonal
+    if (state.every((row, i) => row[i] === player)) return true;
+    // Won on the secondary diagonal
+    if (state.every((row, i) => row[this.columnCount - 1 - i] === player))
+      return true;
+    // No win
+    return false;
+  }
+
+  // Return if the game is over and if the player has won
+  getActionOutcome(state: State, action: Action): ActionOutcome {
+    // Check if the player has won
+    if (this.checkWin(state, action)) return { isTerminal: true, hasWon: true };
+    // Check if the board is full
+    if (!this.getValidActions(state).some((valid) => valid))
+      return { isTerminal: true, hasWon: false };
+    // No terminal state
+    return { isTerminal: false, hasWon: false };
   }
 }

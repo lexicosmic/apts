@@ -1,8 +1,12 @@
 import TicTacToe, { Player } from "./TicTacToe";
 
 const game = new TicTacToe();
-const board = game.getInitialState();
-game.printGame(board);
+let board = game.getInitialState();
+let validActions = game.getValidActions(board);
+game.printState(board);
+console.table(validActions);
 
-game.getNextState(board, 0, Player.One);
-game.printGame(board);
+board = game.getNextState(board, 0, Player.One);
+validActions = game.getValidActions(board);
+game.printState(board);
+console.table(validActions);
