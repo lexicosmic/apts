@@ -6,6 +6,7 @@ export enum Player {
 }
 export type State = Player[][];
 export type Action = number;
+export type ValidAction = boolean;
 type ActionOutcome = {
   isTerminal: boolean;
   hasWon: boolean;
@@ -63,8 +64,8 @@ export default class TicTacToe {
   }
 
   // Return the list of valid actions
-  getValidActions(state: State): boolean[] {
-    const validActions: boolean[] = [];
+  getValidActions(state: State): ValidAction[] {
+    const validActions: ValidAction[] = [];
     for (let i = 0; i < this.rowCount; i++) {
       for (let j = 0; j < this.columnCount; j++) {
         const cell = state[i][j];
