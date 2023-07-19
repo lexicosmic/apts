@@ -1,15 +1,15 @@
 // Definitions
 export enum Player {
   None = 0,
-  One = 1,
-  Two = 2,
+  X = 1,
+  O = -1,
 }
 export enum Outcome {
   Win = 1,
   Loss = 0,
 }
 
-export type State = Player[][];
+export type State = Array<Array<Player>>;
 export type Action = number;
 export type ValidAction = boolean;
 export type ActionOutcome = {
@@ -39,8 +39,8 @@ export default class TicTacToe {
       for (let j = 0; j < this.columnCount; j++) {
         const cell = state[i][j];
         boardString += " ";
-        if (cell === Player.One) boardString += "X";
-        else if (cell === Player.Two) boardString += "O";
+        if (cell === Player.X) boardString += "X";
+        else if (cell === Player.O) boardString += "O";
         else boardString += "-";
         boardString += " |";
       }
@@ -114,11 +114,16 @@ export default class TicTacToe {
 
   // Return the opponent of the given player
   getOpponent(player: Player): Player {
-    return player === Player.One ? Player.Two : Player.One;
+    return player === Player.X ? Player.O : Player.X;
   }
 
   // Return the outcome value, considering that the opponent is the one playing
   getOpponentValue(value: ActionOutcome["value"]): ActionOutcome["value"] {
     return -value;
+  }
+
+  // Return the state with the perspective changed, i.e. the opponent is now the player
+  changePerspective(state: State, player: Player): State {
+    return state.map((row) => row.map((cell) => cell * player));
   }
 }

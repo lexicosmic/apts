@@ -1,4 +1,4 @@
-import Game, { Action, State, ValidAction } from "./TicTacToe";
+import Game, { Action, Player, State, ValidAction } from "./TicTacToe";
 
 interface MonteCarloTreeSearchParams {
   readonly numSearches: number;
@@ -71,6 +71,35 @@ class MonteCarloNode {
     }
     return bestChild;
   }
+
+  expand(): MonteCarloNode {
+    const validActions: Action[] = this.expandableActions.reduce(
+      (actions, currentIsValid, index) =>
+        currentIsValid ? [...actions, index] : actions,
+      [] as Action[]
+    );
+
+    if (validActions.length > 0) {
+      const randomIndex = Math.floor(Math.random() * validActions.length);
+      const selectedAction = validActions[randomIndex];
+      this.expandableActions[selectedAction] = false;
+
+      // Copy the state and play the action on the copy
+      let childState = this.state.map((row) => row.slice());
+      childState = this.game.getNextState(childState, selectedAction, Player.X);
+      childState = this.game.changePerspective(childState, Player.O);
+
+      const child = new MonteCarloNode(
+        this.game,
+        this.params,
+        childState,
+        this,
+        selectedAction
+      );
+      this.children.push(child);
+      return child;
+    } else return this;
+  }
 }
 
 export default class MonteCarloTreeSearch {
@@ -97,6 +126,8 @@ export default class MonteCarloTreeSearch {
     for (let i = 0; i < this.params.numSearches; i++) {
       let node = this.#selectionPhase(root);
 
+      console.log("SELECTED NODE\n", node);
+
       const actionOutcome = this.game.getActionOutcome(
         node.state,
         node.actionTaken
@@ -106,6 +137,8 @@ export default class MonteCarloTreeSearch {
 
       if (!actionOutcome.isTerminal) {
         // Expansion phase
+        node = node.expand();
+
         // Simulation phase
       }
 

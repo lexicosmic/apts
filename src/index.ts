@@ -1,5 +1,6 @@
-import { Action } from "./TicTacToe";
+import TicTacToe, { Action } from "./TicTacToe";
 import { play } from "./InteractiveGame";
+import MonteCarloTreeSearch from "./MonteCarloTree";
 
 const readline = require("readline").createInterface({
   input: process.stdin,
@@ -33,4 +34,14 @@ const ticTacToe = async () => {
   readline.close();
   return;
 };
-ticTacToe();
+// ticTacToe();
+
+const game = new TicTacToe();
+
+const monteCarloTreeSearch = new MonteCarloTreeSearch(game, {
+  numSearches: 1000,
+  explorationConstant: 1.41,
+});
+
+const state = game.getInitialState();
+monteCarloTreeSearch.search(state);

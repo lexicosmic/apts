@@ -2,7 +2,7 @@ import { askForAction } from ".";
 import TicTacToe, { Outcome, Player } from "./TicTacToe";
 
 const game = new TicTacToe();
-let player = Player.One;
+let player = Player.X;
 let state = game.getInitialState();
 
 // Play a turn of TicTacToe and return whether the game is over
