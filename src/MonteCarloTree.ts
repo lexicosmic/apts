@@ -85,15 +85,31 @@ export default class MonteCarloTreeSearch {
 
   /// Methods
 
+  #selectionPhase(node: MonteCarloNode): MonteCarloNode {
+    while (node.isFullyExpanded()) node = node.selectBestChild();
+    return node;
+  }
+
   // Search for the best action to take
   search(state: State) {
     const root = new MonteCarloNode(this.game, this.params, state);
 
     for (let i = 0; i < this.params.numSearches; i++) {
-      let node = root;
+      let node = this.#selectionPhase(root);
 
-      // Selection
-      while (node.isFullyExpanded()) node = node.selectBestChild();
+      const actionOutcome = this.game.getActionOutcome(
+        node.state,
+        node.actionTaken
+      );
+      // Flip the value, as the action was taken by the opponent
+      const outcomeValue = this.game.getOpponentValue(actionOutcome.value);
+
+      if (!actionOutcome.isTerminal) {
+        // Expansion phase
+        // Simulation phase
+      }
+
+      // Backpropagation phase
     }
     return root;
   }

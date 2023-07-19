@@ -80,7 +80,9 @@ export default class TicTacToe {
   }
 
   // Return if the player has won when playing the action
-  checkWin(state: State, action: Action): boolean {
+  checkWin(state: State, action: Action | null): boolean {
+    if (action === null) return false;
+
     const row = Math.floor(action / this.columnCount);
     const column = action % this.columnCount;
     const player = state[row][column];
@@ -99,7 +101,7 @@ export default class TicTacToe {
   }
 
   // Return if the game is over and if the player has won
-  getActionOutcome(state: State, action: Action): ActionOutcome {
+  getActionOutcome(state: State, action: Action | null): ActionOutcome {
     // Check if the player has won
     if (this.checkWin(state, action))
       return { isTerminal: true, value: Outcome.Win };
@@ -113,5 +115,10 @@ export default class TicTacToe {
   // Return the opponent of the given player
   getOpponent(player: Player): Player {
     return player === Player.One ? Player.Two : Player.One;
+  }
+
+  // Return the outcome value, considering that the opponent is the one playing
+  getOpponentValue(value: ActionOutcome["value"]): ActionOutcome["value"] {
+    return -value;
   }
 }
