@@ -1,4 +1,10 @@
-import Game, { Action, Player, State, ValidAction } from "./TicTacToe";
+import Game, {
+  Action,
+  ActionOutcome,
+  Player,
+  State,
+  ValidAction,
+} from "./TicTacToe";
 
 interface MonteCarloTreeSearchParams {
   readonly numSearches: number;
@@ -72,33 +78,68 @@ class MonteCarloNode {
     return bestChild;
   }
 
-  expand(): MonteCarloNode {
+  // Pick a random action from the list of valid actions
+  #pickRandomAction(): Action {
     const validActions: Action[] = this.expandableActions.reduce(
       (actions, currentIsValid, index) =>
         currentIsValid ? [...actions, index] : actions,
       [] as Action[]
     );
+    const randomIndex = Math.floor(Math.random() * validActions.length);
+    return validActions[randomIndex];
+  }
 
-    if (validActions.length > 0) {
-      const randomIndex = Math.floor(Math.random() * validActions.length);
-      const selectedAction = validActions[randomIndex];
-      this.expandableActions[selectedAction] = false;
+  // Pick a random action and perform it, returning the outcome state as a child node
+  expand(): MonteCarloNode {
+    const selectedAction = this.#pickRandomAction();
+    this.expandableActions[selectedAction] = false;
 
-      // Copy the state and play the action on the copy
-      let childState = this.state.map((row) => row.slice());
-      childState = this.game.getNextState(childState, selectedAction, Player.X);
-      childState = this.game.changePerspective(childState, Player.O);
+    // Copy the state and play the action on the copy
+    let childState = this.state.map((row) => row.slice());
+    childState = this.game.getNextState(childState, selectedAction, Player.X);
+    childState = this.game.changePerspective(childState, Player.O);
 
-      const child = new MonteCarloNode(
-        this.game,
-        this.params,
-        childState,
-        this,
+    const child = new MonteCarloNode(
+      this.game,
+      this.params,
+      childState,
+      this,
+      selectedAction
+    );
+    this.children.push(child);
+    return child;
+  }
+
+  // Simulate a game from the current state, returning the outcome value
+  simulate(): ActionOutcome["value"] {
+    const actionOutcome = this.game.getActionOutcome(
+      this.state,
+      this.actionTaken
+    );
+    let outcomeValue = this.game.getOpponentValue(actionOutcome.value);
+    if (actionOutcome.isTerminal) return outcomeValue;
+
+    // Copy the state and play random actions, with alternate players, until the game is over
+    let rolloutState = this.state.map((row) => row.slice());
+    let rolloutPlayer = Player.X;
+    while (true) {
+      const selectedAction = this.#pickRandomAction();
+      rolloutState = this.game.getNextState(
+        rolloutState,
+        selectedAction,
+        rolloutPlayer
+      );
+      const actionOutcome = this.game.getActionOutcome(
+        rolloutState,
         selectedAction
       );
-      this.children.push(child);
-      return child;
-    } else return this;
+      if (actionOutcome.isTerminal) {
+        if (rolloutPlayer === Player.O)
+          outcomeValue = this.game.getOpponentValue(actionOutcome.value);
+        return outcomeValue;
+      }
+      rolloutPlayer = this.game.getOpponent(rolloutPlayer);
+    }
   }
 }
 
@@ -126,24 +167,24 @@ export default class MonteCarloTreeSearch {
     for (let i = 0; i < this.params.numSearches; i++) {
       let node = this.#selectionPhase(root);
 
-      console.log("SELECTED NODE\n", node);
-
       const actionOutcome = this.game.getActionOutcome(
         node.state,
         node.actionTaken
       );
       // Flip the value, as the action was taken by the opponent
-      const outcomeValue = this.game.getOpponentValue(actionOutcome.value);
+      let outcomeValue = this.game.getOpponentValue(actionOutcome.value);
 
       if (!actionOutcome.isTerminal) {
         // Expansion phase
         node = node.expand();
 
         // Simulation phase
+        outcomeValue = node.simulate();
       }
 
       // Backpropagation phase
     }
+    console.log(root);
     return root;
   }
 }
