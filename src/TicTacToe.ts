@@ -23,9 +23,9 @@ export default class TicTacToe {
   readonly columnCount: number;
   readonly actionSize: number;
 
-  constructor() {
-    this.rowCount = 3;
-    this.columnCount = 3;
+  constructor(rowCount?: number, columnCount?: number) {
+    this.rowCount = rowCount || 3;
+    this.columnCount = columnCount || 3;
     this.actionSize = this.rowCount * this.columnCount;
   }
 
@@ -51,11 +51,9 @@ export default class TicTacToe {
 
   // Return the initial board (3x3 zero matrix)
   getInitialState(): State {
-    return [
-      [Player.None, Player.None, Player.None],
-      [Player.None, Player.None, Player.None],
-      [Player.None, Player.None, Player.None],
-    ];
+    return Array.from(Array(this.rowCount), () =>
+      Array(this.columnCount).fill(Player.None)
+    );
   }
 
   // Perform the action and return the new state
