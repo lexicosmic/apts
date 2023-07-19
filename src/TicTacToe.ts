@@ -4,12 +4,17 @@ export enum Player {
   One = 1,
   Two = 2,
 }
+export enum Outcome {
+  Win = 1,
+  Loss = 0,
+}
+
 export type State = Player[][];
 export type Action = number;
 export type ValidAction = boolean;
-type ActionOutcome = {
+export type ActionOutcome = {
   isTerminal: boolean;
-  hasWon: boolean;
+  value: number;
 };
 
 export default class TicTacToe {
@@ -19,7 +24,6 @@ export default class TicTacToe {
   readonly actionSize: number;
 
   constructor() {
-    console.log("TicTacToe\n");
     this.rowCount = 3;
     this.columnCount = 3;
     this.actionSize = this.rowCount * this.columnCount;
@@ -97,12 +101,13 @@ export default class TicTacToe {
   // Return if the game is over and if the player has won
   getActionOutcome(state: State, action: Action): ActionOutcome {
     // Check if the player has won
-    if (this.checkWin(state, action)) return { isTerminal: true, hasWon: true };
+    if (this.checkWin(state, action))
+      return { isTerminal: true, value: Outcome.Win };
     // Check if the board is full
     if (!this.getValidActions(state).some((valid) => valid))
-      return { isTerminal: true, hasWon: false };
+      return { isTerminal: true, value: Outcome.Loss };
     // No terminal state
-    return { isTerminal: false, hasWon: false };
+    return { isTerminal: false, value: Outcome.Loss };
   }
 
   // Return the opponent of the given player
