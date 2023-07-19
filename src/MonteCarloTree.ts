@@ -22,8 +22,8 @@ class MonteCarloNode {
   readonly children: MonteCarloNode[] = [];
   readonly expandableActions: ValidAction[] = [];
 
-  readonly visitCount: number = 0;
-  readonly valueSum: number = 0;
+  visitCount: number = 0;
+  valueSum: number = 0;
 
   constructor(
     game: Game,
@@ -141,6 +141,15 @@ class MonteCarloNode {
       rolloutPlayer = this.game.getOpponent(rolloutPlayer);
     }
   }
+
+  // Backpropagate the outcome value to the root node
+  backpropagate(outcomeValue: ActionOutcome["value"]) {
+    this.valueSum += outcomeValue;
+    this.visitCount++;
+
+    outcomeValue = this.game.getOpponentValue(outcomeValue);
+    if (this.parent) this.parent.backpropagate(outcomeValue);
+  }
 }
 
 export default class MonteCarloTreeSearch {
@@ -183,6 +192,7 @@ export default class MonteCarloTreeSearch {
       }
 
       // Backpropagation phase
+      node.backpropagate(outcomeValue);
     }
     console.log(root);
     return root;
