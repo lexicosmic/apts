@@ -1,6 +1,6 @@
-import TicTacToe, { Action } from "./TicTacToe";
-import { play } from "./InteractiveGame";
-import MonteCarloTreeSearch from "./MonteCarloTree";
+import { Action } from "./TicTacToe";
+import { play as PvCPlay } from "./PvCGame";
+import { play as PvPPlay } from "./PvPGame";
 
 const readline = require("readline").createInterface({
   input: process.stdin,
@@ -29,19 +29,18 @@ export async function askForAction(questionText: string): Promise<Action> {
 
 // Play a game of TicTacToe
 const ticTacToe = async () => {
-  console.log("TicTacToe\n");
-  while (await play()) {}
+  console.log("== TicTacToe ==\n");
+  let gameMode = -1;
+  do {
+    gameMode = await askForAction("Pick a game mode\n[0] PvP [1] PvC ");
+  } while (gameMode !== 0 && gameMode !== 1);
+
+  console.log("\nGood luck!\n");
+
+  if (gameMode === 0) while (await PvPPlay()) {}
+  else while (await PvCPlay()) {}
+
   readline.close();
   return;
 };
-// ticTacToe();
-
-const game = new TicTacToe();
-
-const monteCarloTreeSearch = new MonteCarloTreeSearch(game, {
-  numSearches: 1000,
-  explorationConstant: 1.41,
-});
-
-const state = game.getInitialState();
-monteCarloTreeSearch.search(state);
+ticTacToe();
