@@ -2,13 +2,7 @@ import React from 'react';
 import {Box, Text} from 'ink';
 import SelectInput from 'ink-select-input';
 import {GameMode, SelectListItem} from './types.js';
-
-interface GameProps {
-	gameMode: GameMode;
-}
-function Game(props: GameProps) {
-	return <Text>{props.gameMode}</Text>;
-}
+import Game from './Game.js';
 
 export default function App() {
 	const [gameMode, setGameMode] = React.useState<GameMode | null>(null);
@@ -25,13 +19,13 @@ export default function App() {
 
 	return (
 		<Box flexDirection="column">
+			<Box marginBottom={1}>
+				<Text bold inverse color={'magentaBright'}>
+					TicTacToe
+				</Text>
+			</Box>
 			{gameMode === null ? (
 				<>
-					<Box marginBottom={1}>
-						<Text bold inverse color={'magentaBright'}>
-							TicTacToe
-						</Text>
-					</Box>
 					<Text>Pick a game mode</Text>
 					<SelectInput
 						items={[
