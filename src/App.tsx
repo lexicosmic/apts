@@ -2,7 +2,7 @@ import React from 'react';
 import {Box, Text} from 'ink';
 import SelectInput from 'ink-select-input';
 import {GameMode, SelectListItem} from './types.js';
-import Game from './Game.js';
+import Game from './game/Game.js';
 
 export default function App() {
 	const [gameMode, setGameMode] = React.useState<GameMode | null>(null);

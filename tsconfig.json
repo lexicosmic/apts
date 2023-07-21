@@ -8,6 +8,7 @@
 		//   "ink-select-input": ["node_modules/ink-select-input/build/index"],
 		// }
 		"noUnusedLocals": false,
+		"noUnusedParameters": false,
 	},
 	"include": ["src"],
 }
