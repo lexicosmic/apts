@@ -1,4 +1,4 @@
-import React, {useEffect} from 'react';
+import React from 'react';
 import {Box, Newline, Text} from 'ink';
 import {GameMode} from '../types.js';
 import MonteCarloTreeSearch from '../engine/MonteCarloTree.js';
@@ -18,6 +18,10 @@ import PvCGame, {
 	formattedPlayerName as PvCFormattedPlayerName,
 } from './PvCGame.js';
 import HistoryFrame from './HistoryFrame.js';
+import CvCGame, {
+	formattedCellText as CvCFormattedCellText,
+	formattedPlayerName as CvCFormattedPlayerName,
+} from './CvCGame.js';
 
 type ParsedActionParams = {
 	input: string;
@@ -132,22 +136,33 @@ export default function Game({gameMode}: GameProps) {
 				setHistory={setHistory}
 			/>
 		);
-	} else return null;
-
-	useEffect(() => {
-		setHistory([
-			<HistoryFrame
-				key={`history--1`}
+	} else {
+		formattedCellText = CvCFormattedCellText;
+		formattedPlayerName = CvCFormattedPlayerName;
+		gameScreen = (
+			<CvCGame
 				game={game}
 				state={state}
-				formattedCellText={formattedCellText}
-				text="Good luck!"
-			/>,
-		]);
-	}, []);
+				player={player}
+				history={history}
+				monteCarloTreeSearch={monteCarloTreeSearch}
+				setState={setState}
+				setPlayer={setPlayer}
+				setOutcome={setOutcome}
+				setHistory={setHistory}
+			/>
+		);
+	}
 
 	return (
 		<Box flexDirection="column">
+			<HistoryFrame
+				key={`history--1`}
+				game={game}
+				state={game.getInitialState()}
+				formattedCellText={formattedCellText}
+				text="Good luck!"
+			/>
 			{history}
 			{gameOutcome.isTerminal ? (
 				<>
