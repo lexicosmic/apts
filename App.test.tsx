@@ -1,17 +1,16 @@
 import React from 'react';
 import chalk from 'chalk';
-import test from 'ava';
 import {render} from 'ink-testing-library';
-import App from './src/App.js';
+import App from './src/App.tsx';
 
-test('greet unknown user', t => {
+test('greet unknown user', () => {
 	const {lastFrame} = render(<App /*name={undefined}*/ />);
 
-	t.is(lastFrame(), `Hello, ${chalk.green('Stranger')}`);
+	expect(lastFrame()).toBe(`Hello, ${chalk.green('Stranger')}`);
 });
 
-test('greet user with a name', t => {
+test('greet user with a name', () => {
 	const {lastFrame} = render(<App /*name="Jane"*/ />);
 
-	t.is(lastFrame(), `Hello, ${chalk.green('Jane')}`);
+	expect(lastFrame()).toBe(`Hello, ${chalk.green('Jane')}`);
 });

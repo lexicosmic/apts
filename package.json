@@ -12,6 +12,7 @@
 	"scripts": {
 		"build": "tsc",
 		"dev": "tsc --watch",
+		"play": "ts-node src/cli.tsx",
 		"test": "jest"
 	},
 	"files": [
@@ -26,7 +27,11 @@
 		"react": "^18.2.0"
 	},
 	"devDependencies": {
+		"@babel/core": "^7.22.9",
+		"@babel/preset-env": "^7.22.9",
+		"@babel/preset-typescript": "^7.22.5",
 		"@cspotcode/source-map-support": "^0.8.1",
+		"@jest/globals": "^29.6.1",
 		"@sindresorhus/tsconfig": "^3.0.1",
 		"@types/ink-testing-library": "^1.0.1",
 		"@types/jest": "^29.5.3",
