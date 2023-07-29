@@ -93,7 +93,7 @@ export default function Game({gameMode}: GameProps) {
 	const model = new ResNet(game, 4, 64);
 	const monteCarloTreeSearch = new MonteCarloTreeSearch(game, model, {
 		numSearches: 1000,
-		explorationConstant: 1.41,
+		explorationConstant: 2,
 	});
 	let gameScreen = null;
 	let formattedCellText: (player: Player) => string;

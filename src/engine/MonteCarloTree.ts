@@ -45,11 +45,14 @@ class MonteCarloNode {
 
 	// Get the UCB value of a given child
 	getChildUcb(child: MonteCarloNode): number {
-		// Privileges the child with the lowest exploitation, as it means the opponent will have the lowest chance of winning
-		const exploitation = 1 - (child.valueSum / child.visitCount + 1) / 2;
+		let exploitation = 0;
+		if (this.visitCount > 0)
+			// Privileges the child with the lowest exploitation, as it means the opponent will have the lowest chance of winning
+			exploitation = 1 - (child.valueSum / child.visitCount + 1) / 2;
 		const exploration =
 			this.params.explorationConstant *
-			Math.sqrt(Math.log(this.visitCount) / child.visitCount);
+			child.priorProbability *
+			(Math.sqrt(this.visitCount) / (child.visitCount + 1));
 		return exploitation + exploration;
 	}
 

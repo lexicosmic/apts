@@ -1,7 +1,7 @@
 import * as tf from '@tensorflow/tfjs-node';
 import TicTacToe from './TicTacToe.js';
 
-export default class ResNet {
+export default class ResNet extends tf.Sequential {
 	// Attributes
 	readonly game: TicTacToe;
 	readonly numResBlocks: number; // Length of the backbone
@@ -12,6 +12,7 @@ export default class ResNet {
 	readonly valueHead;
 
 	constructor(game: TicTacToe, numResBlocks: number, numHidden: number) {
+		super({});
 		this.game = game;
 		this.numResBlocks = numResBlocks;
 		this.numHidden = numHidden;
@@ -65,7 +66,7 @@ export default class ResNet {
 		});
 	}
 
-	call(input: tf.Tensor): [tf.Tensor, tf.Tensor] {
+	override call(input: tf.Tensor): [tf.Tensor, tf.Tensor] {
 		let value = this.startBlock.apply(input) as tf.Tensor;
 		for (const resBlock of this.backbone) value = resBlock.call(value);
 		const policy = this.policyHead.apply(value) as tf.Tensor;
