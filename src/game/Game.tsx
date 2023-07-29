@@ -22,6 +22,7 @@ import CvCGame, {
 	formattedCellText as CvCFormattedCellText,
 	formattedPlayerName as CvCFormattedPlayerName,
 } from './CvCGame.js';
+import ResNet from '../engine/ResNet.js';
 
 type ParsedActionParams = {
 	input: string;
@@ -89,7 +90,8 @@ interface GameProps {
 }
 export default function Game({gameMode}: GameProps) {
 	const game = new TicTacToe();
-	const monteCarloTreeSearch = new MonteCarloTreeSearch(game, {
+	const model = new ResNet(game, 4, 64);
+	const monteCarloTreeSearch = new MonteCarloTreeSearch(game, model, {
 		numSearches: 1000,
 		explorationConstant: 1.41,
 	});
