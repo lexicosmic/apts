@@ -124,4 +124,22 @@ export default class TicTacToe {
 	changePerspective(state: State, player: Player): State {
 		return state.map(row => row.map(cell => cell * player));
 	}
+
+	// Return three 2D-arrays. Each one represents a player.
+	// The value is 1 if the cell is occupied by the player, or 0 otherwise
+	// The order of the matrices is: O, None, X
+	getEncondedState(state: State): number[][][] {
+		const encodedState = Array.from(Array(3), () =>
+			Array.from(Array(this.rowCount), () => Array(this.columnCount).fill(0)),
+		);
+		for (let i = 0; i < this.rowCount; i++) {
+			for (let j = 0; j < this.columnCount; j++) {
+				const cell = state[i]![j];
+				if (cell === Player.X) encodedState[2]![i]![j] = 1;
+				else if (cell === Player.O) encodedState[0]![i]![j] = 1;
+				else encodedState[1]![i]![j] = 1;
+			}
+		}
+		return encodedState;
+	}
 }
