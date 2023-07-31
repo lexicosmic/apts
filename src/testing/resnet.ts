@@ -12,7 +12,9 @@ const model = new ResNet(game, 4, 64);
 await model.save('file://models/resnet-test');
 
 // Calculate the policy and value from the neural network
-const tensorState = tf.tensor(game.getEncondedState(state)).expandDims(0);
+const tensorState = tf
+	.tensor(game.getEncondedState(state))
+	.expandDims(0) as tf.Tensor4D;
 const [policy, value] = model.call(tensorState);
 const softMaxPolicy = tf.softmax(policy, 1).squeeze([0]);
 

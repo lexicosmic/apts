@@ -144,7 +144,7 @@ export default class MonteCarloTreeSearch {
 				// Calculate the policy and value from the neural network
 				const tensorState = tf
 					.tensor(this.game.getEncondedState(node.state))
-					.expandDims(0);
+					.expandDims(0) as tf.Tensor4D;
 				const [policy, value] = this.model.call(tensorState);
 				const softMaxPolicy = tf.softmax(policy, 1).squeeze([0]);
 

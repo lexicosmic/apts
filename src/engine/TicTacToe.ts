@@ -10,6 +10,7 @@ export enum Outcome {
 }
 
 export type State = Array<Array<Player>>;
+export type EncodedState = Array<State>;
 export type Action = number;
 export type ValidAction = boolean;
 export type ActionOutcome = {
@@ -128,7 +129,7 @@ export default class TicTacToe {
 	// Return three 2D-arrays. Each one represents a player.
 	// The value is 1 if the cell is occupied by the player, or 0 otherwise
 	// The order of the matrices is: O, None, X
-	getEncondedState(state: State): number[][][] {
+	getEncondedState(state: State): EncodedState {
 		const encodedState = Array.from(Array(3), () =>
 			Array.from(Array(this.rowCount), () => Array(this.columnCount).fill(0)),
 		);

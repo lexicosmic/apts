@@ -12,6 +12,26 @@ const params = {
 	numIterations: 3,
 	numSelfPlayIterations: 10,
 	numEpochs: 4,
+	batchSize: 64,
 };
+model.compile({
+	optimizer,
+	loss: ['categoricalCrossentropy', 'meanSquaredError'],
+	metrics: ['accuracy'],
+});
+
 const alphaZero = new AlphaZero(model, optimizer, game, params);
-alphaZero.learn();
+// alphaZero.learn();
+
+console.log('\nstartBlock');
+model.startBlock.weights.forEach(w => {
+	console.log(w.name, w.shape);
+});
+console.log('\npolicyHead');
+model.policyHead.weights.forEach(w => {
+	console.log(w.name, w.shape);
+});
+console.log('\nvalueHead');
+model.valueHead.weights.forEach(w => {
+	console.log(w.name, w.shape);
+});

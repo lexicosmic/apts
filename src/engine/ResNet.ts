@@ -66,12 +66,13 @@ export default class ResNet extends tf.Sequential {
 		});
 	}
 
-	override call(input: tf.Tensor): [tf.Tensor, tf.Tensor] {
+	override call(input: tf.Tensor4D): [tf.Tensor, tf.Tensor] {
+		// input refers to the encoded state
 		let value = this.startBlock.apply(input) as tf.Tensor;
 		for (const resBlock of this.backbone) value = resBlock.call(value);
-		const policy = this.policyHead.apply(value) as tf.Tensor;
+		const policyHead = this.policyHead.apply(value) as tf.Tensor;
 		const valueHead = this.valueHead.apply(value) as tf.Tensor;
-		return [policy, valueHead];
+		return [policyHead, valueHead];
 	}
 }
 
