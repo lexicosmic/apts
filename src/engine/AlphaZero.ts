@@ -1,16 +1,15 @@
 import * as tf from '@tensorflow/tfjs';
-import ResNet from './ResNet.js';
+import ResNet from './ResNet.ts';
 import Game, {
 	Action,
 	ActionOutcome,
 	Player,
 	State,
 	EncodedState,
-} from './TicTacToe.js';
+} from './TicTacToe.ts';
 import MonteCarloTreeSearch, {
 	MonteCarloTreeSearchParams,
-} from './MonteCarloTree.js';
-import {Rank} from '@tensorflow/tfjs-node';
+} from './MonteCarloTree.ts';
 
 type GameMemoryBlock = {
 	state: State;
