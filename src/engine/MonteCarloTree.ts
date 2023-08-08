@@ -1,27 +1,22 @@
-import Game, {
-	Action,
-	ActionOutcome,
-	Player,
-	State,
-	ValidAction,
-} from './TicTacToe.js';
+import * as tf from '@tensorflow/tfjs';
+import ResNet from './ResNet.ts';
+import Game, {Action, ActionOutcome, Player, State} from './TicTacToe.ts';
 
-interface MonteCarloTreeSearchParams {
+export interface MonteCarloTreeSearchParams {
 	readonly numSearches: number;
 	readonly explorationConstant: number;
 }
 
-class MonteCarloNode {
+export class MonteCarloNode {
 	// Attributes
 	readonly game: Game;
 	readonly params: MonteCarloTreeSearchParams;
-	readonly state: State;
+	readonly state: State; // State of the game at this node
 	readonly parent: MonteCarloNode | null;
-	readonly actionTaken: Action | null;
+	readonly actionTaken: Action | null; // Action that led to this node
+	readonly priorProbability: number; // Probability of taking the action that led to this node
 
 	readonly children: MonteCarloNode[] = [];
-	readonly expandableActions: ValidAction[] = [];
-
 	visitCount: number = 0;
 	valueSum: number = 0;
 
@@ -31,34 +26,33 @@ class MonteCarloNode {
 		state: State,
 		parent?: MonteCarloNode,
 		actionTaken?: Action,
+		priorProbability?: number,
 	) {
 		this.game = game;
 		this.params = params;
 		this.state = state;
 		this.parent = parent ? parent : null;
 		this.actionTaken = typeof actionTaken === 'number' ? actionTaken : null;
-
-		this.expandableActions = this.game.getValidActions(this.state);
+		this.priorProbability = priorProbability ? priorProbability : 0;
 	}
 
 	/// Methods
 
 	// Check if the node is fully expanded, i.e. all valid actions have been explored
 	isFullyExpanded(): boolean {
-		const numValidActions = this.expandableActions.reduce(
-			(counter, actionIsValid) => counter + (actionIsValid ? 1 : 0),
-			0,
-		);
-		return numValidActions === 0 && this.children.length > 0;
+		return this.children.length > 0;
 	}
 
 	// Get the UCB value of a given child
 	getChildUcb(child: MonteCarloNode): number {
-		// Privileges the child with the lowest exploitation, as it means the opponent will have the lowest chance of winning
-		const exploitation = 1 - (child.valueSum / child.visitCount + 1) / 2;
+		let exploitation = 0;
+		if (this.visitCount > 0)
+			// Privileges the child with the lowest exploitation, as it means the opponent will have the lowest chance of winning
+			exploitation = 1 - (child.valueSum / child.visitCount + 1) / 2;
 		const exploration =
 			this.params.explorationConstant *
-			Math.sqrt(Math.log(this.visitCount) / child.visitCount);
+			child.priorProbability *
+			(Math.sqrt(this.visitCount) / (child.visitCount + 1));
 		return exploitation + exploration;
 	}
 
@@ -81,71 +75,26 @@ class MonteCarloNode {
 		return bestChild;
 	}
 
-	// Pick a random action from the list of valid actions
-	#pickRandomAction(): Action {
-		const validActions: Action[] = this.expandableActions.reduce(
-			(actions, currentIsValid, index) =>
-				currentIsValid ? [...actions, index] : actions,
-			[] as Action[],
-		);
-		const randomIndex = Math.floor(Math.random() * validActions.length);
-		const selectedAction = validActions[randomIndex];
-		if (typeof selectedAction !== 'number')
-			throw new Error('No valid actions to pick from!');
-		return selectedAction;
-	}
-
 	// Pick a random action and perform it, returning the outcome state as a child node
-	expand(): MonteCarloNode {
-		const selectedAction = this.#pickRandomAction();
-		this.expandableActions[selectedAction] = false;
+	expand(policy: number[]) {
+		policy.forEach((probability, action) => {
+			if (probability > 0) {
+				// Copy the state and play the action on the copy
+				let childState = this.state.map(row => row.slice());
+				childState = this.game.getNextState(childState, action, Player.X);
+				childState = this.game.changePerspective(childState, Player.O);
 
-		// Copy the state and play the action on the copy
-		let childState = this.state.map(row => row.slice());
-		childState = this.game.getNextState(childState, selectedAction, Player.X);
-		childState = this.game.changePerspective(childState, Player.O);
-
-		const child = new MonteCarloNode(
-			this.game,
-			this.params,
-			childState,
-			this,
-			selectedAction,
-		);
-		this.children.push(child);
-		return child;
-	}
-
-	// Simulate a game from the current state, returning the outcome value
-	simulate(): ActionOutcome['value'] {
-		const actionOutcome = this.game.getActionOutcome(
-			this.state,
-			this.actionTaken,
-		);
-		let outcomeValue = this.game.getOpponentValue(actionOutcome.value);
-		if (actionOutcome.isTerminal) return outcomeValue;
-
-		// Copy the state and play random actions, with alternate players, until the game is over
-		let rolloutState = this.state.map(row => row.slice());
-		let rolloutPlayer = Player.X;
-		while (true) {
-			const selectedAction = this.#pickRandomAction();
-			rolloutState = this.game.getNextState(
-				rolloutState,
-				selectedAction,
-				rolloutPlayer,
-			);
-			const actionOutcome = this.game.getActionOutcome(
-				rolloutState,
-				selectedAction,
-			);
-			if (actionOutcome.isTerminal) {
-				if (rolloutPlayer === Player.O)
-					outcomeValue = this.game.getOpponentValue(actionOutcome.value);
-				return outcomeValue;
+				const child = new MonteCarloNode(
+					this.game,
+					this.params,
+					childState,
+					this,
+					action,
+					probability,
+				);
+				this.children.push(child);
 			}
-			rolloutPlayer = this.game.getOpponent(rolloutPlayer);
-		}
+		});
 	}
 
 	// Backpropagate the outcome value to the root node
@@ -162,9 +111,11 @@ export default class MonteCarloTreeSearch {
 	// Attributes
 	readonly game: Game;
 	readonly params: MonteCarloTreeSearchParams;
+	readonly model: ResNet;
 
-	constructor(game: Game, params: MonteCarloTreeSearchParams) {
+	constructor(game: Game, model: ResNet, params: MonteCarloTreeSearchParams) {
 		this.game = game;
+		this.model = model;
 		this.params = params;
 	}
 
@@ -185,18 +136,37 @@ export default class MonteCarloTreeSearch {
 				node.actionTaken,
 			);
 			// Flip the value, as the action was taken by the opponent
-			let outcomeValue = this.game.getOpponentValue(actionOutcome.value);
+			let valueToBackpropagate = this.game.getOpponentValue(
+				actionOutcome.value,
+			);
 
 			if (!actionOutcome.isTerminal) {
-				// Expansion phase
-				node = node.expand();
+				// Calculate the policy and value from the neural network
+				const tensorState = tf
+					.tensor(this.game.getEncondedState(node.state))
+					.expandDims(0) as tf.Tensor4D;
+				const [policy, value] = this.model.call(tensorState);
+				const softMaxPolicy = tf.softmax(policy, 1).squeeze([0]);
 
-				// Simulation phase
-				outcomeValue = node.simulate();
+				// Mask the policy to only allow valid actions
+				const validActions = this.game.getValidActions(node.state);
+				const maskedPolicy = softMaxPolicy.mul(
+					tf.tensor(validActions).expandDims(0),
+				);
+				const sum = maskedPolicy.sum().arraySync();
+				const actionProbabilities = maskedPolicy
+					.div(sum)
+					.squeeze()
+					.arraySync() as number[];
+
+				valueToBackpropagate = value.dataSync()[0]!;
+
+				// Expansion phase
+				node.expand(actionProbabilities);
 			}
 
 			// Backpropagation phase
-			node.backpropagate(outcomeValue);
+			node.backpropagate(valueToBackpropagate);
 		}
 
 		// Get the action probabilities from the root node

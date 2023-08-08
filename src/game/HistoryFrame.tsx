@@ -1,7 +1,7 @@
 import React from 'react';
 import {Box, Text} from 'ink';
 import TicTacToe, {Player, State} from '../engine/TicTacToe.js';
-import Board from '../Board.js';
+import Board from './Board.js';
 
 type HistoryFrameProps = {
 	game: TicTacToe;

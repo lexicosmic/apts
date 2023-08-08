@@ -123,7 +123,7 @@ describe('TicTacToe', () => {
       const state: State = [
         [Player.X, Player.O, Player.None],
         [Player.None, Player.X, Player.O],
-        [Player.X, Player.None, Player.None],
+        [Player.X, Player.None, Player.X],
       ];
 
       const action: Action = 8; // Player X wins with action 8 (row 2, column 2)
