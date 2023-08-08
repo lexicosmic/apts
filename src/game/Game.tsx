@@ -23,6 +23,7 @@ import CvCGame, {
 	formattedPlayerName as CvCFormattedPlayerName,
 } from './CvCGame.js';
 import ResNet from '../engine/ResNet.js';
+import * as tf from '@tensorflow/tfjs-node';
 
 type ParsedActionParams = {
 	input: string;
@@ -90,7 +91,8 @@ interface GameProps {
 }
 export default function Game({gameMode}: GameProps) {
 	const game = new TicTacToe();
-	const model = new ResNet(game, 4, 64);
+	// const model = new ResNet(game, 4, 64);
+	const model = tf.sequential();
 	// model.eval();
 	const monteCarloTreeSearch = new MonteCarloTreeSearch(game, model, {
 		numSearches: 1000,

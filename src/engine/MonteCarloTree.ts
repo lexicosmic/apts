@@ -1,4 +1,4 @@
-import * as tf from '@tensorflow/tfjs';
+import * as tf from '@tensorflow/tfjs-node';
 import ResNet from './ResNet.js';
 import Game, {Action, ActionOutcome, Player, State} from './TicTacToe.js';
 
@@ -111,9 +111,13 @@ export default class MonteCarloTreeSearch {
 	// Attributes
 	readonly game: Game;
 	readonly params: MonteCarloTreeSearchParams;
-	readonly model: ResNet;
+	readonly model: tf.Sequential;
 
-	constructor(game: Game, model: ResNet, params: MonteCarloTreeSearchParams) {
+	constructor(
+		game: Game,
+		model: tf.Sequential,
+		params: MonteCarloTreeSearchParams,
+	) {
 		this.game = game;
 		this.model = model;
 		this.params = params;
@@ -143,9 +147,13 @@ export default class MonteCarloTreeSearch {
 			if (!actionOutcome.isTerminal) {
 				// Calculate the policy and value from the neural network
 				const tensorState = tf
-					.tensor(this.game.getEncondedState(node.state))
+					.tensor(this.game.getEncodedState(node.state))
 					.expandDims(0) as tf.Tensor4D;
-				const [policy, value] = this.model.call(tensorState);
+				// const [policy, value] = this.model.predict(tensorState) as [
+				// 	tf.Tensor,
+				// 	tf.Tensor,
+				// ];
+				const [policy, value] = [0, 0];
 				const softMaxPolicy = tf.softmax(policy, 1).squeeze([0]);
 
 				// Mask the policy to only allow valid actions
@@ -159,7 +167,7 @@ export default class MonteCarloTreeSearch {
 					.squeeze()
 					.arraySync() as number[];
 
-				valueToBackpropagate = value.dataSync()[0]!;
+				// valueToBackpropagate = value.dataSync()[0]!;
 
 				// Expansion phase
 				node.expand(actionProbabilities);
