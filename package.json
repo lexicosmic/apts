@@ -1,6 +1,6 @@
 {
 	"name": "alphazero",
-	"version": "1.0.0",
+	"version": "2.0.0",
 	"description": "Engine to simulate tabletop games, inspired by AlphaZero algorithm",
 	"author": "Gabriel Malosto",
 	"license": "MIT",
@@ -10,16 +10,20 @@
 		"node": ">=16"
 	},
 	"scripts": {
-		"build": "tsc",
+		"build": "rimraf ./dist && tsc",
+		"build:watch": "tsc --watch",
 		"dev": "tsc --watch",
 		"play": "ts-node src/cli.tsx",
-		"test": "jest"
+		"test": "jest",
+		"test:ava": "prettier --check . && xo && ava",
+		"start": "npm run build && node dist/cli.js"
 	},
 	"files": [
 		"dist"
 	],
 	"dependencies": {
 		"@types/ink": "^2.0.3",
+		"@tensorflow/tfjs-node": "^4.9.0",
 		"ink": "^4.1.0",
 		"ink-select-input": "^5.0.0",
 		"ink-text-input": "^5.0.1",

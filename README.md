@@ -5,7 +5,7 @@
 ## Install
 
 ```bash
-$ npm install --global alphazero
+$ npm install --global
 ```
 
 ## CLI

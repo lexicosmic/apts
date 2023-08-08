@@ -4,7 +4,7 @@ import TextInput from 'ink-text-input';
 import TicTacToe, {ActionOutcome, Player, State} from '../engine/TicTacToe.js';
 import {getValidAction, performAction} from './Game.js';
 import HistoryFrame from './HistoryFrame.js';
-import Board from '../Board.js';
+import Board from './Board.js';
 
 export const formattedCellText = (player: Player) => {
 	const cellText = player === Player.X ? 'X' : player === Player.O ? 'O' : ' ';
