@@ -1,5 +1,5 @@
 import * as tf from '@tensorflow/tfjs-node';
-import TicTacToe from './TicTacToe.js';
+import TicTacToe from './TicTacToe.ts';
 
 export default class ResNet extends tf.Sequential {
 	// Attributes
@@ -76,7 +76,7 @@ export default class ResNet extends tf.Sequential {
 	}
 }
 
-class ResBlock extends tf.layers.Layer {
+export class ResBlock extends tf.layers.Layer {
 	readonly convolution1: tf.layers.Layer;
 	readonly normalization1: tf.layers.Layer;
 	readonly convolution2: tf.layers.Layer;
