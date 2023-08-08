@@ -123,7 +123,9 @@ export default class TicTacToe {
 
 	// Return the state with the perspective changed, i.e. the opponent is now the player
 	changePerspective(state: State, player: Player): State {
-		return state.map(row => row.map(cell => cell * player));
+		return state.map(row =>
+			row.map(cell => (cell * player === -0 ? 0 : cell * player)),
+		);
 	}
 
 	// Return three 2D-arrays. Each one represents a player.
