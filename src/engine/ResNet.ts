@@ -3,7 +3,138 @@ import TicTacToe from './TicTacToe.js';
 
 const INPUT_CHANNELS = 3;
 
-export default function getResNet(
+export default class ResNet {
+	/// Attributes
+	#model: tf.LayersModel;
+
+	/// Constructor
+	constructor(
+		game: TicTacToe,
+		numResBlocks: number, // Length of the backbone
+		numHiddenChannels: number, // Number of channels in the backbone
+	) {
+		this.#model = getResNetModel(game, numResBlocks, numHiddenChannels);
+	}
+
+	/// Methods
+	// Saves the model to the given path, and returns a promise
+	save(path: string) {
+		return this.#model.save(path);
+	}
+
+	// Prints a summary of the model
+	summary() {
+		this.#model.summary();
+	}
+
+	// Disposes the model
+	dispose() {
+		this.#model.dispose();
+	}
+
+	// Compiles the model with the most proper optimizer and loss functions
+	#compile() {
+		this.#model.compile({
+			optimizer: tf.train.adam(0.001),
+			loss: {
+				policyHead: 'categoricalCrossentropy',
+				valueHead: 'meanSquaredError',
+			},
+			metrics: ['accuracy'],
+		});
+	}
+
+	// Prints the progress of the training
+	#logProgress(epoch: number, logs: tf.Logs) {
+		console.log('Data for epoch ' + epoch, logs);
+	}
+
+	// Trains the model on the given batch of data
+	async train(
+		inputsBatch: tf.Tensor4D,
+		policyOutputsBatch: tf.Tensor2D,
+		valueOutputsBatch: tf.Tensor2D,
+		batchSize: number,
+		numEpochs: number,
+	) {
+		this.#compile();
+
+		// Fit the model using the prepared training data
+		const results = await this.#model.fit(
+			inputsBatch,
+			[policyOutputsBatch, valueOutputsBatch],
+			{
+				shuffle: true, // Ensure data is shuffled again before using each time.
+				// validationSplit: 0.15,
+				batchSize: batchSize, // Update weights after every N examples.
+				epochs: numEpochs, // Go over the data M times!
+				callbacks: {
+					onEpochEnd: (epoch, logs) => this.#logProgress(epoch, logs!),
+				},
+			},
+		);
+
+		// // Dispose the tensors
+		// tf.dispose([inputsBatch, policyOutputsBatch, valueOutputsBatch]);
+
+		// Test the model
+		tf.tidy(() => {
+			this.#evaluate(
+				tf.tensor4d(
+					[
+						[
+							[
+								[1, 0, 0],
+								[0, 0, 0],
+								[0, 0, 0],
+							],
+							[
+								[0, 0, 0],
+								[0, 1, 0],
+								[0, 0, 0],
+							],
+							[
+								[0, 0, 0],
+								[0, 0, 0],
+								[0, 0, 1],
+							],
+						],
+					],
+					[1, 3, 3, 3],
+				),
+			);
+		});
+	}
+
+	// Evaluates the model on the given batch of data
+	#evaluate(inputsBatch: tf.Tensor4D) {
+		let answer = tf.tidy(() => {
+			const [policy, value] = this.predict(inputsBatch);
+			policy.print();
+			value.print();
+			const softMaxPolicy = tf.softmax(policy, 1).squeeze([0]);
+			softMaxPolicy.print();
+			const argMaxPolicy = policy.squeeze([0]).argMax();
+			argMaxPolicy.print();
+
+			console.log(policy.shape);
+			console.log(value.shape);
+
+			return argMaxPolicy;
+		});
+	}
+
+	// Makes a prediction on the given state, and returns the policy and value
+	predict(state: tf.Tensor4D): [tf.Tensor2D, tf.Tensor2D] {
+		return tf.tidy(() => {
+			const outputs = this.#model.predict(state) as [tf.Tensor2D, tf.Tensor2D];
+			return outputs;
+		});
+	}
+}
+
+// Build and return a residual model
+function getResNetModel(
 	game: TicTacToe,
 	numResBlocks: number, // Length of the backbone
 	numHiddenChannels: number, // Number of channels in the backbone
@@ -62,7 +193,7 @@ export default function getResNet(
 	// Connecting parts of the model
 	const inputLayer = tf.input({
 		name: 'input',
-		shape: [game.rowCount, game.columnCount, 3],
+		shape: [game.rowCount, game.columnCount, INPUT_CHANNELS],
 	});
 
 	const backbone = tf.sequential({
@@ -85,15 +216,10 @@ export default function getResNet(
 		inputs: inputLayer,
 		outputs: [policyOutput, valueOutput],
 	});
-	model.summary();
-	// model.add(startBlock);
-	// // Successively applies ResBlocks to the model
-	// for (let i = 0; i < numResBlocks; i++)
-	// 	addResBlock(model, game.rowCount, game.columnCount, numHiddenChannels, i);
-	// model.add(policyHead);
 	return model;
 }
 
+// Build and return a residual block
 function getResBlock(
 	dim1Size: number,
 	dim2Size: number,
@@ -111,7 +237,7 @@ function getResBlock(
 	const normalization1 = tf.layers.batchNormalization({
 		name: `ResBlock_${idNumber}_normalization1`,
 	});
-	
+
 	const convolution2 = tf.layers.conv2d({
 		filters: numHiddenChannels,
 		kernelSize: 3,
@@ -126,40 +252,6 @@ function getResBlock(
 		name: `ResBlock_${idNumber}`,
 		layers: [convolution1, normalization1, convolution2, normalization2],
 	});
-}
 
-// function addResBlock(
-// 	model: tf.Sequential,
-// 	dim1Size: number,
-// 	dim2Size: number,
-// 	numHiddenChannels: number,
-// 	idNumber: number,
-// ) {
-// 	const convolution1 = tf.layers.conv2d({
-// 		filters: numHiddenChannels,
-// 		kernelSize: 3,
-// 		padding: 'same',
-// 		activation: 'relu',
-// 		inputShape: [dim1Size, dim2Size, numHiddenChannels],
-// 		name: `ResBlock_${idNumber}_convolution1`,
-// 	});
-// 	const normalization1 = tf.layers.batchNormalization({
-// 		name: `ResBlock_${idNumber}_normalization1`,
-// 	});
-// 	const convolution2 = tf.layers.conv2d({
-// 		filters: numHiddenChannels,
-// 		kernelSize: 3,
-// 		padding: 'same',
-// 		activation: 'relu',
-// 		name: `ResBlock_${idNumber}_convolution2`,
-// 	});
-// 	const normalization2 = tf.layers.batchNormalization({
-// 		name: `ResBlock_${idNumber}_normalization2`,
-// 	});
-// 	model.add(
-// 		tf.sequential({
-// 			name: `ResBlock_${idNumber}`,
-// 			layers: [convolution1, normalization1, convolution2, normalization2],
-// 		}),
-// 	);
-// }
+	// TODO: apply the input to the blocks, preserving the ResNet structure
+}

@@ -111,13 +111,9 @@ export default class MonteCarloTreeSearch {
 	// Attributes
 	readonly game: Game;
 	readonly params: MonteCarloTreeSearchParams;
-	readonly model: tf.Sequential;
+	readonly model: ResNet;
 
-	constructor(
-		game: Game,
-		model: tf.Sequential,
-		params: MonteCarloTreeSearchParams,
-	) {
+	constructor(game: Game, model: ResNet, params: MonteCarloTreeSearchParams) {
 		this.game = game;
 		this.model = model;
 		this.params = params;
@@ -149,11 +145,10 @@ export default class MonteCarloTreeSearch {
 				const tensorState = tf
 					.tensor(this.game.getEncodedState(node.state))
 					.expandDims(0) as tf.Tensor4D;
-				// const [policy, value] = this.model.predict(tensorState) as [
-				// 	tf.Tensor,
-				// 	tf.Tensor,
-				// ];
-				const [policy, value] = [0, 0];
+				const [policy, value] = this.model.predict(tensorState) as [
+					tf.Tensor,
+					tf.Tensor,
+				];
 				const softMaxPolicy = tf.softmax(policy, 1).squeeze([0]);
 
 				// Mask the policy to only allow valid actions
@@ -167,7 +162,7 @@ export default class MonteCarloTreeSearch {
 					.squeeze()
 					.arraySync() as number[];
 
-				// valueToBackpropagate = value.dataSync()[0]!;
+				valueToBackpropagate = value.dataSync()[0]!;
 
 				// Expansion phase
 				node.expand(actionProbabilities);

@@ -1,4 +1,4 @@
-import * as tf from '@tensorflow/tfjs';
+import * as tf from '@tensorflow/tfjs-node';
 import ResNet from './ResNet.js';
 import Game, {
 	Action,
@@ -10,7 +10,6 @@ import Game, {
 import MonteCarloTreeSearch, {
 	MonteCarloTreeSearchParams,
 } from './MonteCarloTree.js';
-import {Rank} from '@tensorflow/tfjs-node';
 
 type GameMemoryBlock = {
 	state: State;
@@ -92,7 +91,7 @@ export default class AlphaZero {
 							? actionOutcome.value
 							: this.game.getOpponentValue(actionOutcome.value);
 					trainingMemory.push({
-						encodedState: this.game.getEncondedState(memoryBlock.state),
+						encodedState: this.game.getEncodedState(memoryBlock.state),
 						actionProbabilities: memoryBlock.actionProbabilities,
 						outcomeValue: memoryOutcomeValue,
 					});
@@ -146,7 +145,9 @@ export default class AlphaZero {
 
 				// Calculate the loss value
 				const loss = () => {
-					const [outPolicy, outValue] = this.model.call(encodedStatesTensor);
+					const [outPolicy, outValue] = this.model.predict(
+						encodedStatesTensor,
+					) as [tf.Tensor, tf.Tensor];
 					const policyLoss = tf.losses.softmaxCrossEntropy(
 						policyTargetsTensor,
 						outPolicy,
@@ -158,8 +159,8 @@ export default class AlphaZero {
 					return policyLoss.add(valueLoss) as tf.Scalar;
 				};
 
-				const wheigts = this.model.getWeights() as tf.Variable[];
-				this.optimizer.minimize(loss, true, wheigts);
+				// const wheigts = this.model.getWeights() as tf.Variable[];
+				// this.optimizer.minimize(loss, true, wheigts);
 
 				tf.dispose([
 					encodedStatesTensor,
@@ -174,14 +175,14 @@ export default class AlphaZero {
 		for (let i = 0; i < this.params.numIterations; i++) {
 			const memory: TrainingMemory = [];
 
-			this.model.trainable = false;
+			// this.model.trainable = false;
 			for (let j = 0; j < this.params.numSelfPlayIterations; j++) {
 				const selfPlayMemory = await this.selfPlay();
 				memory.push(...selfPlayMemory);
 			}
 
-			this.model.trainable = true;
-			for (let j = 0; j < this.params.numEpochs; j++) await this.train(memory);
+			// this.model.trainable = true;
+			// for (let j = 0; j < this.params.numEpochs; j++) await this.train(memory);
 
 			// Save the model architecture and optimizer weights
 			await this.model.save(`file://models/alphazero_${i}`);

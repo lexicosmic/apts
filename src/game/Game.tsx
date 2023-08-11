@@ -91,8 +91,7 @@ interface GameProps {
 }
 export default function Game({gameMode}: GameProps) {
 	const game = new TicTacToe();
-	// const model = new ResNet(game, 4, 64);
-	const model = tf.sequential();
+	const model = new ResNet(game, 4, 64);
 	// model.eval();
 	const monteCarloTreeSearch = new MonteCarloTreeSearch(game, model, {
 		numSearches: 1000,
