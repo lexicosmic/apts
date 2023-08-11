@@ -17,6 +17,10 @@ export default class ResNet {
 	}
 
 	/// Methods
+	// getModel() {
+	// 	return this.#model;
+	// }
+
 	// Saves the model to the given path, and returns a promise
 	save(path: string) {
 		return this.#model.save(path);
