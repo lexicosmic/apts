@@ -15,9 +15,10 @@ const params = {
 	explorationConstant: 2,
 	numSearches: 60,
 	numIterations: 3,
-	numSelfPlayIterations: 10, // TODO: Set to 500
+	numSelfPlayIterations: 500, // TODO: Set to 500
 	numEpochs: 4,
 	batchSize: 64,
+	learningRate: 0.001,
 };
 const resNet = new ResNet(game, 4, numHidden);
 

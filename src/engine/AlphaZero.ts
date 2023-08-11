@@ -30,6 +30,7 @@ interface AlphaZeroSearchParams extends MonteCarloTreeSearchParams {
 	numSelfPlayIterations: number;
 	numEpochs: number;
 	batchSize: number;
+	learningRate: number;
 }
 
 export default class AlphaZero {
@@ -54,16 +55,16 @@ export default class AlphaZero {
 
 	/// Methods
 
-	async selfPlay(): Promise<TrainingMemory> {
+	async #selfPlay(): Promise<TrainingMemory> {
 		let player = Player.X;
 		let state = this.game.getInitialState();
-		const memory: GameMemory = [];
+		const gameMemory: GameMemory = [];
 
 		while (true) {
 			// Get the state from the perspective of the current player and save it in the game memory
 			const neutralState = this.game.changePerspective(state, player);
 			const actionProbabilities = this.mcts.search(neutralState);
-			memory.push({state: neutralState, actionProbabilities, player});
+			gameMemory.push({state: neutralState, actionProbabilities, player});
 
 			// Pick an action based on the probabilities from the MCTS
 			const logActionProbabilities = actionProbabilities.map(p => Math.log(p));
@@ -82,7 +83,7 @@ export default class AlphaZero {
 			if (actionOutcome.isTerminal) {
 				// When the game is over, construct the training memory from the perspective of the current player
 				const trainingMemory: TrainingMemory = [];
-				for (const memoryBlock of memory) {
+				for (const memoryBlock of gameMemory) {
 					// Get the outcome value from the perspective of the current player
 					const memoryOutcomeValue =
 						memoryBlock.player === player
@@ -103,7 +104,7 @@ export default class AlphaZero {
 	}
 
 	// Transpose the training memory to a format that can be used to train the model
-	#transposeSample(memorySample: TrainingMemoryBlock[]) {
+	#transposeMemory(trainingMemory: TrainingMemory) {
 		const encodedStates: EncodedState[] = [];
 		const policyTargets: number[][] = [];
 		const valueTargets: ActionOutcome['value'][] = [];
@@ -111,7 +112,7 @@ export default class AlphaZero {
 			encodedState,
 			actionProbabilities,
 			outcomeValue,
-		} of memorySample) {
+		} of trainingMemory) {
 			encodedStates.push(encodedState);
 			policyTargets.push(actionProbabilities);
 			valueTargets.push(outcomeValue);
@@ -120,50 +121,29 @@ export default class AlphaZero {
 	}
 
 	async #train(memory: TrainingMemory) {
-		// tf.util.shuffle(memory);
-		// Get the index of the first item on the each batch
-		for (
-			let batchIdx = 0;
-			batchIdx < memory.length;
-			batchIdx += this.params.batchSize
-		) {
-			console.log(`BATCH ${batchIdx}`);
+		// Convert the memory to a format that can be used to train the model
+		const {encodedStates, policyTargets, valueTargets} =
+			this.#transposeMemory(memory);
 
-			// Get the size of the batch, limited by the memory size
-			const batchSize = Math.min(
-				batchIdx + this.params.batchSize,
-				memory.length - 1,
-			);
+		// Convert the memory into tensors
+		const encodedStatesTensor = tf.tensor(encodedStates) as tf.Tensor4D;
+		const policyTargetsTensor = tf.tensor(policyTargets) as tf.Tensor2D;
+		const valueTargetsTensor = tf
+			.tensor(valueTargets)
+			.reshape([-1, 1]) as tf.Tensor2D;
 
-			// Slice the sample from the memory, in a format that can be used to train the model
-			const memorySample = memory.slice(batchIdx, batchSize);
-			const {encodedStates, policyTargets, valueTargets} =
-				this.#transposeSample(memorySample);
+		// Train the model
+		await this.model.train(
+			encodedStatesTensor,
+			policyTargetsTensor,
+			valueTargetsTensor,
+			this.params.batchSize,
+			this.params.numEpochs,
+			this.params.learningRate,
+		);
 
-			// Convert the sample into tensors
-			const encodedStatesTensor = tf.tensor(encodedStates) as tf.Tensor4D;
-			const policyTargetsTensor = tf.tensor(policyTargets) as tf.Tensor2D;
-			const valueTargetsTensor = tf
-				.tensor(valueTargets)
-				.reshape([-1, 1]) as tf.Tensor2D;
-
-			// Train the model
-			await this.model.train(
-				encodedStatesTensor,
-				policyTargetsTensor,
-				valueTargetsTensor,
-				batchSize,
-				this.params.numEpochs,
-				0.001,
-			);
-
-			// Dispose the tensors
-			tf.dispose([
-				encodedStatesTensor,
-				policyTargetsTensor,
-				valueTargetsTensor,
-			]);
-		}
+		// Dispose the tensors
+		tf.dispose([encodedStatesTensor, policyTargetsTensor, valueTargetsTensor]);
 	}
 
 	async learn() {
@@ -173,11 +153,12 @@ export default class AlphaZero {
 			console.log(`ITERATION ${i + 1}/${this.params.numIterations}`);
 			const memory: TrainingMemory = [];
 
+			// Construct the training memory from self-playing the game
 			for (let j = 0; j < this.params.numSelfPlayIterations; j++) {
-				const selfPlayMemory = await this.selfPlay();
+				const selfPlayMemory = await this.#selfPlay();
 				memory.push(...selfPlayMemory);
 			}
-
+			console.log(`Memory size: ${memory.length}`);
 			await this.#train(memory);
 
 			// Save the model architecture and optimizer weights

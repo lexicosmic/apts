@@ -60,7 +60,7 @@ export default class ResNet {
 		valueOutputsBatch: tf.Tensor2D,
 		batchSize: number,
 		numEpochs: number,
-		learningRate: number = 0.001,
+		learningRate: number,
 		validationSplit: number = 0,
 	) {
 		this.#compile(learningRate);

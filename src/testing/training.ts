@@ -19,5 +19,5 @@ const inputsTensor = tf.tensor4d([encodedState]); // Nx3x3x3 - Batch of encoded 
 const outputPolicyTensor = tf.tensor2d([[0, 0, 0, 0, 0, 0, 0, 0, 0]]); // N - Batch of outcomes
 const outputValueTensor = tf.tensor2d([[outcome.value]]); // N - Batch of outcomes
 await resNet.save(`file://models/alphazero_${0}`);
-resNet.train(inputsTensor, outputPolicyTensor, outputValueTensor, 1, 30);
+resNet.train(inputsTensor, outputPolicyTensor, outputValueTensor, 1, 30, 0.001);
 await resNet.save(`file://models/alphazero_${1}`);

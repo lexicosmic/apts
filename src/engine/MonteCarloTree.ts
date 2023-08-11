@@ -48,7 +48,7 @@ class MonteCarloNode {
 		let exploitation = 0;
 		if (this.visitCount > 0)
 			// Privileges the child with the lowest exploitation, as it means the opponent will have the lowest chance of winning
-			exploitation = 1 - (child.valueSum / child.visitCount + 1) / 2;
+			exploitation = 1 - child.valueSum / (child.visitCount + 1) / 2;
 		const exploration =
 			this.params.explorationConstant *
 			child.priorProbability *
