@@ -37,9 +37,9 @@ export default class ResNet {
 	}
 
 	// Compiles the model with the most proper optimizer and loss functions
-	#compile() {
+	#compile(learningRate: number = 0.001) {
 		this.#model.compile({
-			optimizer: tf.train.adam(0.001),
+			optimizer: tf.train.adam(learningRate),
 			loss: {
 				policyHead: 'categoricalCrossentropy',
 				valueHead: 'meanSquaredError',
@@ -50,7 +50,7 @@ export default class ResNet {
 
 	// Prints the progress of the training
 	#logProgress(epoch: number, logs: tf.Logs) {
-		console.log('Data for epoch ' + epoch, logs);
+		console.log(logs);
 	}
 
 	// Trains the model on the given batch of data
@@ -60,18 +60,20 @@ export default class ResNet {
 		valueOutputsBatch: tf.Tensor2D,
 		batchSize: number,
 		numEpochs: number,
+		learningRate: number = 0.001,
+		validationSplit: number = 0,
 	) {
-		this.#compile();
+		this.#compile(learningRate);
 
 		// Fit the model using the prepared training data
-		const results = await this.#model.fit(
+		await this.#model.fit(
 			inputsBatch,
 			[policyOutputsBatch, valueOutputsBatch],
 			{
 				shuffle: true, // Ensure data is shuffled again before using each time.
-				// validationSplit: 0.15,
+				validationSplit: validationSplit, // Use N% of the data for validation.
 				batchSize: batchSize, // Update weights after every N examples.
-				epochs: numEpochs, // Go over the data M times!
+				epochs: numEpochs, // Go over the data N times!
 				callbacks: {
 					onEpochEnd: (epoch, logs) => this.#logProgress(epoch, logs!),
 				},
@@ -81,50 +83,42 @@ export default class ResNet {
 		// // Dispose the tensors
 		// tf.dispose([inputsBatch, policyOutputsBatch, valueOutputsBatch]);
 
-		// Test the model
-		tf.tidy(() => {
-			this.#evaluate(
-				tf.tensor4d(
-					[
-						[
-							[
-								[1, 0, 0],
-								[0, 0, 0],
-								[0, 0, 0],
-							],
-							[
-								[0, 0, 0],
-								[0, 1, 0],
-								[0, 0, 0],
-							],
-							[
-								[0, 0, 0],
-								[0, 0, 0],
-								[0, 0, 1],
-							],
-						],
-					],
-					[1, 3, 3, 3],
-				),
-			);
-		});
+		// // Test the model
+		// tf.tidy(() => {
+		// 	this.#evaluate(
+		// 		tf.tensor4d(
+		// 			[
+		// 				[
+		// 					[
+		// 						[1, 0, 0],
+		// 						[0, 0, 0],
+		// 						[0, 0, 0],
+		// 					],
+		// 					[
+		// 						[0, 0, 0],
+		// 						[0, 1, 0],
+		// 						[0, 0, 0],
+		// 					],
+		// 					[
+		// 						[0, 0, 0],
+		// 						[0, 0, 0],
+		// 						[0, 0, 1],
+		// 					],
+		// 				],
+		// 			],
+		// 			[1, 3, 3, 3],
+		// 		),
+		// 	);
+		// });
 	}
 
 	// Evaluates the model on the given batch of data
 	#evaluate(inputsBatch: tf.Tensor4D) {
 		let answer = tf.tidy(() => {
 			const [policy, value] = this.predict(inputsBatch);
-			policy.print();
-			value.print();
 			const softMaxPolicy = tf.softmax(policy, 1).squeeze([0]);
-			softMaxPolicy.print();
-			const argMaxPolicy = policy.squeeze([0]).argMax();
-			argMaxPolicy.print();
-
-			console.log(policy.shape);
-			console.log(value.shape);
-
-			return argMaxPolicy;
+			// const argMaxPolicy = policy.squeeze([0]).argMax();
+			return softMaxPolicy;
 		});
 	}
 

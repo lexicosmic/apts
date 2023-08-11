@@ -33,22 +33,16 @@ interface AlphaZeroSearchParams extends MonteCarloTreeSearchParams {
 }
 
 export default class AlphaZero {
-	// Attributes
+	/// Attributes
 	readonly model: ResNet;
-	readonly optimizer: tf.AdamOptimizer;
 	readonly game: Game;
 	readonly params: AlphaZeroSearchParams;
 
 	readonly mcts: MonteCarloTreeSearch;
 
-	constructor(
-		model: ResNet,
-		optimizer: tf.AdamOptimizer,
-		game: Game,
-		params: AlphaZeroSearchParams,
-	) {
+	/// Constructor
+	constructor(model: ResNet, game: Game, params: AlphaZeroSearchParams) {
 		this.model = model;
-		this.optimizer = optimizer;
 		this.game = game;
 		this.params = params;
 
@@ -66,12 +60,14 @@ export default class AlphaZero {
 		const memory: GameMemory = [];
 
 		while (true) {
+			// Get the state from the perspective of the current player and save it in the game memory
 			const neutralState = this.game.changePerspective(state, player);
 			const actionProbabilities = this.mcts.search(neutralState);
 			memory.push({state: neutralState, actionProbabilities, player});
 
+			// Pick an action based on the probabilities from the MCTS
 			const logActionProbabilities = actionProbabilities.map(p => Math.log(p));
-			const action: Action = tf.tidy(() => {
+			const pickedAction: Action = tf.tidy(() => {
 				const actionTensor = tf.tensor(logActionProbabilities) as tf.Tensor1D;
 				const actionIndex = tf
 					.multinomial(actionTensor, 1)
@@ -79,13 +75,15 @@ export default class AlphaZero {
 				return actionIndex;
 			});
 
-			state = this.game.getNextState(state, action, player);
-			const actionOutcome = this.game.getActionOutcome(state, action);
+			// Perform the action and check if the game is over
+			state = this.game.getNextState(state, pickedAction, player);
+			const actionOutcome = this.game.getActionOutcome(state, pickedAction);
 
 			if (actionOutcome.isTerminal) {
+				// When the game is over, construct the training memory from the perspective of the current player
 				const trainingMemory: TrainingMemory = [];
 				for (const memoryBlock of memory) {
-					// Save the value based on the current perspective of the player
+					// Get the outcome value from the perspective of the current player
 					const memoryOutcomeValue =
 						memoryBlock.player === player
 							? actionOutcome.value
@@ -99,10 +97,12 @@ export default class AlphaZero {
 				return trainingMemory;
 			}
 
+			// If the game is not over, switch the player and continue
 			player = this.game.getOpponent(player);
 		}
 	}
 
+	// Transpose the training memory to a format that can be used to train the model
 	#transposeSample(memorySample: TrainingMemoryBlock[]) {
 		const encodedStates: EncodedState[] = [];
 		const policyTargets: number[][] = [];
@@ -119,73 +119,69 @@ export default class AlphaZero {
 		return {encodedStates, policyTargets, valueTargets};
 	}
 
-	async train(memory: TrainingMemory) {
-		tf.util.shuffle(memory);
+	async #train(memory: TrainingMemory) {
+		// tf.util.shuffle(memory);
+		// Get the index of the first item on the each batch
 		for (
 			let batchIdx = 0;
 			batchIdx < memory.length;
 			batchIdx += this.params.batchSize
 		) {
+			console.log(`BATCH ${batchIdx}`);
+
 			// Get the size of the batch, limited by the memory size
 			const batchSize = Math.min(
 				batchIdx + this.params.batchSize,
 				memory.length - 1,
 			);
 
-			// Slice the sample from the memory
+			// Slice the sample from the memory, in a format that can be used to train the model
 			const memorySample = memory.slice(batchIdx, batchSize);
 			const {encodedStates, policyTargets, valueTargets} =
 				this.#transposeSample(memorySample);
 
-			tf.tidy(() => {
-				// Convert the sample into tensors
-				const encodedStatesTensor = tf.tensor(encodedStates) as tf.Tensor4D;
-				const policyTargetsTensor = tf.tensor(policyTargets);
-				const valueTargetsTensor = tf.tensor(valueTargets).reshape([-1, 1]);
+			// Convert the sample into tensors
+			const encodedStatesTensor = tf.tensor(encodedStates) as tf.Tensor4D;
+			const policyTargetsTensor = tf.tensor(policyTargets) as tf.Tensor2D;
+			const valueTargetsTensor = tf
+				.tensor(valueTargets)
+				.reshape([-1, 1]) as tf.Tensor2D;
 
-				// Calculate the loss value
-				const loss = () => {
-					const [outPolicy, outValue] = this.model.predict(
-						encodedStatesTensor,
-					) as [tf.Tensor, tf.Tensor];
-					const policyLoss = tf.losses.softmaxCrossEntropy(
-						policyTargetsTensor,
-						outPolicy,
-					);
-					const valueLoss = tf.losses.meanSquaredError(
-						valueTargetsTensor,
-						outValue,
-					);
-					return policyLoss.add(valueLoss) as tf.Scalar;
-				};
+			// Train the model
+			await this.model.train(
+				encodedStatesTensor,
+				policyTargetsTensor,
+				valueTargetsTensor,
+				batchSize,
+				this.params.numEpochs,
+				0.001,
+			);
 
-				// const wheigts = this.model.getWeights() as tf.Variable[];
-				// this.optimizer.minimize(loss, true, wheigts);
-
-				tf.dispose([
-					encodedStatesTensor,
-					policyTargetsTensor,
-					valueTargetsTensor,
-				]);
-			});
+			// Dispose the tensors
+			tf.dispose([
+				encodedStatesTensor,
+				policyTargetsTensor,
+				valueTargetsTensor,
+			]);
 		}
 	}
 
 	async learn() {
+		console.log('=-=-=-=-=-=-=-= AlphaZero LEARNING =-=-=-=-=-=-=-=');
+
 		for (let i = 0; i < this.params.numIterations; i++) {
+			console.log(`ITERATION ${i + 1}/${this.params.numIterations}`);
 			const memory: TrainingMemory = [];
 
-			// this.model.trainable = false;
 			for (let j = 0; j < this.params.numSelfPlayIterations; j++) {
 				const selfPlayMemory = await this.selfPlay();
 				memory.push(...selfPlayMemory);
 			}
 
-			// this.model.trainable = true;
-			// for (let j = 0; j < this.params.numEpochs; j++) await this.train(memory);
+			await this.#train(memory);
 
 			// Save the model architecture and optimizer weights
-			await this.model.save(`file://models/alphazero_${i}`);
+			await this.model.save(`file://models/alphazero_it${i}`);
 		}
 	}
 }
