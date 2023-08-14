@@ -1,5 +1,5 @@
 import * as tf from '@tensorflow/tfjs-node';
-import TicTacToe from './TicTacToe.js';
+import TicTacToe from './TicTacToe.ts';
 
 const INPUT_CHANNELS = 3;
 
@@ -218,7 +218,7 @@ function getResNetModel(
 }
 
 // Build and return a residual block
-function getResBlock(
+export function getResBlock(
 	dim1Size: number,
 	dim2Size: number,
 	numHiddenChannels: number,

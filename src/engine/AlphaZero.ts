@@ -6,10 +6,10 @@ import Game, {
 	Player,
 	State,
 	EncodedState,
-} from './TicTacToe.js';
+} from './TicTacToe.ts';
 import MonteCarloTreeSearch, {
 	MonteCarloTreeSearchParams,
-} from './MonteCarloTree.js';
+} from './MonteCarloTree.ts';
 
 type GameMemoryBlock = {
 	state: State;
