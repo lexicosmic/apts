@@ -146,7 +146,7 @@ export default class AlphaZero {
 		tf.dispose([encodedStatesTensor, policyTargetsTensor, valueTargetsTensor]);
 	}
 
-	async learn() {
+	async learn(directoryName: string) {
 		console.log('=-=-=-=-=-=-=-= AlphaZero LEARNING =-=-=-=-=-=-=-=');
 
 		for (let i = 0; i < this.params.numIterations; i++) {
@@ -162,7 +162,7 @@ export default class AlphaZero {
 			await this.#train(memory);
 
 			// Save the model architecture and optimizer weights
-			await this.model.save(`file://models/alphazero_it${i}`);
+			await this.model.save(`file://models/${directoryName}/alphazero_it${i}`);
 		}
 	}
 }

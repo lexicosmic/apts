@@ -10,7 +10,6 @@ state = game.getNextState(state, 5, Player.X);
 state = game.getNextState(state, 8, Player.O);
 game.printState(state);
 
-const numHidden = 64;
 const params = {
 	explorationConstant: 2,
 	numSearches: 60,
@@ -20,7 +19,7 @@ const params = {
 	batchSize: 64,
 	learningRate: 0.001,
 };
-const resNet = new ResNet(game, 4, numHidden);
+const resNet = new ResNet({game, numResBlocks: 4, numHiddenChannels: 64});
 
 const alphaZero = new AlphaZero(resNet, game, params);
-await alphaZero.learn();
+await alphaZero.learn(`${new Date().toISOString()}`);

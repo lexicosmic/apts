@@ -5,14 +5,14 @@ import * as tf from '@tensorflow/tfjs-node';
 describe('ResNet', () => {
 	let game: TicTacToe;
 	let numResBlocks: number;
-	let numHidden: number;
+	let numHiddenChannels: number;
 	let resNet: ResNet;
 
 	beforeEach(() => {
 		game = new TicTacToe();
 		numResBlocks = 3;
-		numHidden = 64;
-		resNet = new ResNet(game, numResBlocks, numHidden);
+		numHiddenChannels = 64;
+		resNet = new ResNet({game, numResBlocks, numHiddenChannels});
 	});
 
 	describe('call', () => {
@@ -43,7 +43,7 @@ describe('ResBlock', () => {
 
 	beforeEach(() => {
 		numHidden = 64;
-		resBlock = getResBlock(3, 3, numHidden, 0);
+		resBlock = getResBlock(8, 8, numHidden, 0);
 	});
 
 	describe('call', () => {

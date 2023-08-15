@@ -1,6 +1,7 @@
 import React from 'react';
 import {Box, Newline, Text} from 'ink';
 import {GameMode} from '../types.js';
+import ResNet from '../engine/ResNet.js';
 import MonteCarloTreeSearch from '../engine/MonteCarloTree.js';
 import TicTacToe, {
 	Action,
@@ -22,8 +23,6 @@ import CvCGame, {
 	formattedCellText as CvCFormattedCellText,
 	formattedPlayerName as CvCFormattedPlayerName,
 } from './CvCGame.js';
-import ResNet from '../engine/ResNet.js';
-import * as tf from '@tensorflow/tfjs-node';
 
 type ParsedActionParams = {
 	input: string;
@@ -91,7 +90,7 @@ interface GameProps {
 }
 export default function Game({gameMode}: GameProps) {
 	const game = new TicTacToe();
-	const model = new ResNet(game, 4, 64);
+	const model = new ResNet({game, path: 'file://models/main_model'});
 	// model.eval();
 	const monteCarloTreeSearch = new MonteCarloTreeSearch(game, model, {
 		numSearches: 1000,
