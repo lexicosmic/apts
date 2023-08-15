@@ -213,7 +213,13 @@ function buildResNetModel(
 	});
 	for (let i = 0; i < numResBlocks; i++)
 		backbone.add(
-			getResBlock(game.rowCount, game.columnCount, numHiddenChannels, i),
+			getResBlock(
+				game.rowCount,
+				game.columnCount,
+				numHiddenChannels,
+				inputLayer,
+				i,
+			),
 		);
 
 	const policyOutput = policyHead.apply(
@@ -236,6 +242,7 @@ export function getResBlock(
 	dim1Size: number,
 	dim2Size: number,
 	numHiddenChannels: number,
+	input: tf.SymbolicTensor,
 	idNumber: number,
 ) {
 	const convolution1 = tf.layers.conv2d({
@@ -260,10 +267,20 @@ export function getResBlock(
 	const normalization2 = tf.layers.batchNormalization({
 		name: `ResBlock_${idNumber}_normalization2`,
 	});
-	return tf.sequential({
-		name: `ResBlock_${idNumber}`,
-		layers: [convolution1, normalization1, convolution2, normalization2],
+
+	const residual = tf.layers.add({
+		name: `ResBlock_${idNumber}_residual`,
 	});
 
-	// TODO: apply the input to the blocks, preserving the ResNet structure
+	const output = residual.apply(
+		normalization2.apply(
+			convolution2.apply(normalization1.apply(convolution1.apply(input))),
+		),
+	) as tf.SymbolicTensor;
+
+	return tf.model({
+		name: `ResBlock_${idNumber}`,
+		inputs: [input],
+		outputs: [output],
+	});
 }
