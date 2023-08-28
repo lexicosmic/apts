@@ -10,10 +10,10 @@
 		"node": ">=16"
 	},
 	"scripts": {
-		"build": "rimraf ./dist && tsc",
-		"build:watch": "tsc --watch",
 		"play": "ts-node src/cli.tsx",
-		"selfplay": "ts-node src/testing/selfplay.ts",
+		"train:structure": "ts-node src/train/structure.ts",
+		"train:blind": "ts-node src/train/blindTrain.ts",
+		"train:selfplay": "ts-node src/train/selfPlayTrain.ts",
 		"test": "jest",
 		"test:ava": "prettier --check . && xo && ava",
 		"start": "npm run build && node dist/cli.js"

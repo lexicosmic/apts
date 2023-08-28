@@ -2,15 +2,16 @@ import * as tf from '@tensorflow/tfjs';
 import TicTacToe from '../engine/TicTacToe.js';
 import ResNet from '../engine/ResNet.js';
 
+// Set game and state data
 const game = new TicTacToe();
-
 let state = game.getInitialState();
 state = game.getNextState(state, 2, 1);
 state = game.getNextState(state, 7, -1);
 
+// Build model and save it
 const resNet = new ResNet({game, numResBlocks: 4, numHiddenChannels: 64});
 resNet.summary();
-await resNet.save('file://models/resnet-test');
+await resNet.save('file://models/test-structure');
 
 // Calculate the policy and value from the neural network
 const tensorState = tf
@@ -37,8 +38,8 @@ const action = tf.tidy(() => {
 	return actionIndex;
 });
 
+// Log the results
 console.log('action', action);
-
 console.table(state);
 console.log(actionProbabilities);
 console.log(valueData);
