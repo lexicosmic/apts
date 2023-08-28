@@ -9,7 +9,7 @@ const params = {
 	explorationConstant: 2,
 	numSearches: 60,
 	numIterations: 3,
-	numSelfPlayIterations: 25,
+	numSelfPlayIterations: 500,
 	numEpochs: 4,
 	batchSize: 64,
 	learningRate: 0.001,
@@ -17,11 +17,14 @@ const params = {
 const resNet = new ResNet({game, numResBlocks: 4, numHiddenChannels: 64});
 const alphaZero = new AlphaZero(resNet, game, params);
 
+const memory = await alphaZero.buildTrainingMemory(true, true);
+
 const currentTime = new Date().valueOf();
-const modelDirectory = `models/selfplay_${currentTime}`;
 try {
-	fs.mkdirSync(`./${modelDirectory}`);
+	fs.writeFileSync(
+		`./trainingData/trainingData_${currentTime}.json`,
+		JSON.stringify(memory),
+	);
 } catch (e) {
 	console.error(e);
 }
-await alphaZero.learn(modelDirectory);

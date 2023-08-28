@@ -120,6 +120,23 @@ export default class AlphaZero {
 		return {encodedStates, policyTargets, valueTargets};
 	}
 
+	// Build the training memory by self-playing the game
+	async buildTrainingMemory(showProgress = false, showMemorySize = false) {
+		const memory: TrainingMemory = [];
+		// Construct the training memory from self-playing the game
+		for (let j = 0; j < this.params.numSelfPlayIterations; j++) {
+			if (showProgress)
+				console.log(
+					`Self-play iteration ${j + 1}/${this.params.numSelfPlayIterations}`,
+				);
+			const selfPlayMemory = await this.#selfPlay();
+			memory.push(...selfPlayMemory);
+		}
+		if (showMemorySize) console.log(`Memory size: ${memory.length}`);
+		return memory;
+	}
+
+	// Train the model using the training memory
 	async #train(memory: TrainingMemory) {
 		// Convert the memory to a format that can be used to train the model
 		const {encodedStates, policyTargets, valueTargets} =
@@ -146,23 +163,24 @@ export default class AlphaZero {
 		tf.dispose([encodedStatesTensor, policyTargetsTensor, valueTargetsTensor]);
 	}
 
-	async learn(directoryName: string) {
+	// Train the model multiple times
+	async learn(directoryName: string, trainingMemoryArray?: TrainingMemory[]) {
 		console.log('=-=-=-=-=-=-=-= AlphaZero LEARNING =-=-=-=-=-=-=-=');
 
 		for (let i = 0; i < this.params.numIterations; i++) {
 			console.log(`ITERATION ${i + 1}/${this.params.numIterations}`);
-			const memory: TrainingMemory = [];
+			let memory;
+			if (
+				typeof trainingMemoryArray === 'undefined' ||
+				typeof trainingMemoryArray[i] === 'undefined'
+			)
+				memory = await this.buildTrainingMemory();
+			else memory = trainingMemoryArray[i];
 
-			// Construct the training memory from self-playing the game
-			for (let j = 0; j < this.params.numSelfPlayIterations; j++) {
-				const selfPlayMemory = await this.#selfPlay();
-				memory.push(...selfPlayMemory);
-			}
-			console.log(`Memory size: ${memory.length}`);
 			await this.#train(memory);
 
 			// Save the model architecture and optimizer weights
-			await this.model.save(`file://models/${directoryName}/alphazero_it${i}`);
+			await this.model.save(`file://models/${directoryName}/selfplay_${i}`);
 		}
 	}
 }
