@@ -151,6 +151,12 @@ function buildResNetModel(
 	numResBlocks: number, // Length of the backbone
 	numHiddenChannels: number, // Number of channels in the backbone
 ) {
+	// Define input tensor
+	const inputTensor = tf.input({
+		name: 'input',
+		shape: [game.rowCount, game.columnCount, INPUT_CHANNELS],
+	});
+
 	// Applies a convolutional layer to the input
 	const startBlock = tf.sequential({
 		name: 'startBlock',
@@ -165,6 +171,22 @@ function buildResNetModel(
 			tf.layers.activation({activation: 'relu'}),
 		],
 	});
+	const startBlockOutputTensor = startBlock.apply(
+		inputTensor,
+	) as tf.SymbolicTensor;
+
+	// Apply the residual blocks to the tensor
+	let backboneOutputTensor = startBlockOutputTensor;
+	for (let i = 0; i < numResBlocks; i++) {
+		backboneOutputTensor = applyResBlock(
+			i,
+			backboneOutputTensor,
+			startBlockOutputTensor,
+			game.rowCount,
+			game.columnCount,
+			numHiddenChannels,
+		);
+	}
 
 	// Block that predicts the probability of each action
 	const policyHead = tf.sequential({
@@ -202,85 +224,66 @@ function buildResNetModel(
 		],
 	});
 
-	// Connecting parts of the model
-	const inputLayer = tf.input({
-		name: 'input',
-		shape: [game.rowCount, game.columnCount, INPUT_CHANNELS],
-	});
-
-	const backbone = tf.sequential({
-		name: 'backbone',
-	});
-	for (let i = 0; i < numResBlocks; i++)
-		backbone.add(
-			getResBlock(
-				game.rowCount,
-				game.columnCount,
-				numHiddenChannels,
-				inputLayer,
-				i,
-			),
-		);
-
 	const policyOutput = policyHead.apply(
-		backbone.apply(startBlock.apply(inputLayer)),
+		backboneOutputTensor,
 	) as tf.SymbolicTensor;
 	const valueOutput = valueHead.apply(
-		backbone.apply(startBlock.apply(inputLayer)),
+		backboneOutputTensor,
 	) as tf.SymbolicTensor;
 
 	const model = tf.model({
 		name: 'ResNet',
-		inputs: inputLayer,
+		inputs: inputTensor,
 		outputs: [policyOutput, valueOutput],
 	});
 	return model;
 }
 
 // Build and return a residual block
-export function getResBlock(
+export function applyResBlock(
+	idNumber: number,
+	currentInputTensor: tf.SymbolicTensor,
+	originalInputTensor: tf.SymbolicTensor,
 	dim1Size: number,
 	dim2Size: number,
 	numHiddenChannels: number,
-	input: tf.SymbolicTensor,
-	idNumber: number,
 ) {
 	const convolution1 = tf.layers.conv2d({
+		name: `ResBlock_${idNumber}_convolution1`,
+		inputShape: [dim1Size, dim2Size, numHiddenChannels],
 		filters: numHiddenChannels,
 		kernelSize: 3,
 		padding: 'same',
 		activation: 'relu',
-		inputShape: [dim1Size, dim2Size, numHiddenChannels],
-		name: `ResBlock_${idNumber}_convolution1`,
 	});
 	const normalization1 = tf.layers.batchNormalization({
 		name: `ResBlock_${idNumber}_normalization1`,
 	});
 
 	const convolution2 = tf.layers.conv2d({
+		name: `ResBlock_${idNumber}_convolution2`,
 		filters: numHiddenChannels,
 		kernelSize: 3,
 		padding: 'same',
 		activation: 'relu',
-		name: `ResBlock_${idNumber}_convolution2`,
 	});
 	const normalization2 = tf.layers.batchNormalization({
 		name: `ResBlock_${idNumber}_normalization2`,
 	});
 
-	const residual = tf.layers.add({
-		name: `ResBlock_${idNumber}_residual`,
-	});
-
-	const output = residual.apply(
-		normalization2.apply(
-			convolution2.apply(normalization1.apply(convolution1.apply(input))),
+	// Apply the common layers
+	let outputTensor = normalization2.apply(
+		convolution2.apply(
+			normalization1.apply(convolution1.apply(currentInputTensor)),
 		),
 	) as tf.SymbolicTensor;
 
-	return tf.model({
-		name: `ResBlock_${idNumber}`,
-		inputs: [input],
-		outputs: [output],
-	});
+	// Sum the original input to the output of the current residual block
+	outputTensor = tf.layers
+		.add({
+			name: `ResBlock_${idNumber}_residualSum`,
+		})
+		.apply([outputTensor, originalInputTensor]) as tf.SymbolicTensor;
+
+	return outputTensor;
 }
