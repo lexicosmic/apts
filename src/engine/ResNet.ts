@@ -3,14 +3,14 @@ import TicTacToe from './TicTacToe.ts';
 
 const INPUT_CHANNELS = 3;
 
-interface ResNetLoadModelParams {
-	path: string;
+interface ResNetLoadedModelParams {
+	model: tf.LayersModel;
 }
 interface ResNetBuildModelParams {
 	numResBlocks: number; // Length of the backbone
 	numHiddenChannels: number; // Number of channels in each block
 }
-type ResNetParams = (ResNetLoadModelParams | ResNetBuildModelParams) & {
+type ResNetParams = (ResNetLoadedModelParams | ResNetBuildModelParams) & {
 	game: TicTacToe;
 };
 export default class ResNet {
@@ -19,18 +19,15 @@ export default class ResNet {
 
 	/// Constructor
 	constructor(params: ResNetParams) {
-		let model: tf.LayersModel;
-		if ('path' in params)
-			async () => {
-				model = await tf.loadLayersModel(params.path);
-			};
-		else
-			model = buildResNetModel(
+		if ('model' in params) {
+			this.#model = params.model;
+		} else {
+			this.#model = buildResNetModel(
 				params.game,
 				params.numResBlocks,
 				params.numHiddenChannels,
 			);
-		this.#model = model!;
+		}
 	}
 
 	/// Methods

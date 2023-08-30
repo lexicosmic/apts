@@ -12,6 +12,7 @@
 	"scripts": {
 		"play": "ts-node src/cli.tsx",
 		"train:structure": "ts-node src/train/structure.ts",
+		"train:loaded": "ts-node src/train/loaded.ts",
 		"train:blind": "ts-node src/train/blindTrain.ts",
 		"train:memory": "ts-node src/train/buildMemory.ts",
 		"train:selfplay": "ts-node src/train/selfPlayTrain.ts",

@@ -5,7 +5,8 @@ import fs from 'fs';
 
 const game = new TicTacToe();
 
-const params = {
+const resNetParams = {game, numResBlocks: 4, numHiddenChannels: 64};
+const alphaZeroParams = {
 	explorationConstant: 2,
 	numSearches: 60,
 	numIterations: 3,
@@ -14,8 +15,8 @@ const params = {
 	batchSize: 64,
 	learningRate: 0.001,
 };
-const resNet = new ResNet({game, numResBlocks: 4, numHiddenChannels: 64});
-const alphaZero = new AlphaZero(resNet, game, params);
+const resNet = new ResNet(resNetParams);
+const alphaZero = new AlphaZero(resNet, game, alphaZeroParams);
 
 const memory = await alphaZero.buildTrainingMemory(true, true);
 
