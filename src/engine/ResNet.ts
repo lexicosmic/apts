@@ -60,8 +60,9 @@ export default class ResNet {
 	}
 
 	// Prints the progress of the training
-	#logProgress(epoch: number, logs: tf.Logs) {
+	#logProgress(epoch: number, logs: tf.Logs, trainingLog: tf.Logs[]) {
 		console.log(logs);
+		trainingLog.push(logs);
 	}
 
 	// Trains the model on the given batch of data
@@ -74,6 +75,8 @@ export default class ResNet {
 		learningRate: number,
 		validationSplit: number = 0,
 	) {
+		const trainingLog: tf.Logs[] = [];
+
 		this.#compile(learningRate);
 
 		// Fit the model using the prepared training data
@@ -86,13 +89,16 @@ export default class ResNet {
 				batchSize: batchSize, // Update weights after every N examples.
 				epochs: numEpochs, // Go over the data N times!
 				callbacks: {
-					onEpochEnd: (epoch, logs) => this.#logProgress(epoch, logs!),
+					onEpochEnd: (epoch, logs) =>
+						this.#logProgress(epoch, logs!, trainingLog),
 				},
 			},
 		);
 
 		// // Dispose the tensors
 		// tf.dispose([inputsBatch, policyOutputsBatch, valueOutputsBatch]);
+
+		return trainingLog;
 
 		// // Test the model
 		// tf.tidy(() => {
@@ -221,10 +227,10 @@ function buildResNetModel(
 		],
 	});
 
-	const policyOutput = policyHead.apply(
+	const valueOutput = valueHead.apply(
 		backboneOutputTensor,
 	) as tf.SymbolicTensor;
-	const valueOutput = valueHead.apply(
+	const policyOutput = policyHead.apply(
 		backboneOutputTensor,
 	) as tf.SymbolicTensor;
 

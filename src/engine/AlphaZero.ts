@@ -1,4 +1,5 @@
 import * as tf from '@tensorflow/tfjs-node';
+import fs from 'fs';
 import ResNet from './ResNet.js';
 import Game, {
 	Action,
@@ -23,7 +24,7 @@ type TrainingMemoryBlock = {
 	actionProbabilities: number[];
 	outcomeValue: ActionOutcome['value'];
 };
-type TrainingMemory = TrainingMemoryBlock[];
+export type TrainingMemory = TrainingMemoryBlock[];
 
 interface AlphaZeroSearchParams extends MonteCarloTreeSearchParams {
 	numIterations: number;
@@ -150,7 +151,7 @@ export default class AlphaZero {
 			.reshape([-1, 1]) as tf.Tensor2D;
 
 		// Train the model
-		await this.model.train(
+		const trainingLog = await this.model.train(
 			encodedStatesTensor,
 			policyTargetsTensor,
 			valueTargetsTensor,
@@ -161,6 +162,8 @@ export default class AlphaZero {
 
 		// Dispose the tensors
 		tf.dispose([encodedStatesTensor, policyTargetsTensor, valueTargetsTensor]);
+
+		return trainingLog;
 	}
 
 	// Train the model multiple times
@@ -177,10 +180,18 @@ export default class AlphaZero {
 				memory = await this.buildTrainingMemory();
 			else memory = trainingMemoryArray[i];
 
-			await this.#train(memory);
+			const trainingLog = await this.#train(memory);
 
 			// Save the model architecture and optimizer weights
 			await this.model.save(`file://models/${directoryName}/selfplay_${i}`);
+			try {
+				fs.writeFileSync(
+					`./models/${directoryName}/selfplay_${i}/trainingLog.json`,
+					JSON.stringify(trainingLog),
+				);
+			} catch (e) {
+				console.error(e);
+			}
 		}
 	}
 }
