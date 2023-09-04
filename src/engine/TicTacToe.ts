@@ -10,6 +10,7 @@ export enum Outcome {
 }
 
 export type State = Array<Array<Player>>;
+export type EncodedState = Array<State>;
 export type Action = number;
 export type ValidAction = boolean;
 export type ActionOutcome = {
@@ -122,6 +123,26 @@ export default class TicTacToe {
 
 	// Return the state with the perspective changed, i.e. the opponent is now the player
 	changePerspective(state: State, player: Player): State {
-		return state.map(row => row.map(cell => cell * player));
+		return state.map(row =>
+			row.map(cell => (cell * player === -0 ? 0 : cell * player)),
+		);
+	}
+
+	// Return three 2D-arrays. Each one represents a player.
+	// The value is 1 if the cell is occupied by the player, or 0 otherwise
+	// The order of the matrices is: O, None, X
+	getEncodedState(state: State): EncodedState {
+		const encodedState = Array.from(Array(3), () =>
+			Array.from(Array(this.rowCount), () => Array(this.columnCount).fill(0)),
+		);
+		for (let i = 0; i < this.rowCount; i++) {
+			for (let j = 0; j < this.columnCount; j++) {
+				const cell = state[i]![j];
+				if (cell === Player.X) encodedState[2]![i]![j] = 1;
+				else if (cell === Player.O) encodedState[0]![i]![j] = 1;
+				else encodedState[1]![i]![j] = 1;
+			}
+		}
+		return encodedState;
 	}
 }

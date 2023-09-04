@@ -45,16 +45,15 @@ export default function CvCGame({
 		const action = actionProbabilities.indexOf(
 			Math.max(...actionProbabilities),
 		);
-		setGameOver(
-			performAction({
-				action,
-				game,
-				state,
-				player,
-				setOutcome,
-				setState,
-			}),
-		);
+		const currentGameOver = performAction({
+			action,
+			game,
+			state,
+			player,
+			setOutcome,
+			setState,
+		});
+		setGameOver(currentGameOver);
 		const historyFrame = (
 			<HistoryFrame
 				key={`history-${history.length + 1}`}
@@ -66,7 +65,7 @@ export default function CvCGame({
 		);
 		if (historyFrame !== null) setHistory([...history, historyFrame]);
 
-		setPlayer(game.getOpponent(player));
+		if (!currentGameOver) setPlayer(game.getOpponent(player));
 	}, [player]);
 
 	return null;

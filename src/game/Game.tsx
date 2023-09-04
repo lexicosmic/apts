@@ -1,6 +1,8 @@
+import * as tf from '@tensorflow/tfjs-node';
 import React from 'react';
 import {Box, Newline, Text} from 'ink';
 import {GameMode} from '../types.js';
+import ResNet from '../engine/ResNet.js';
 import MonteCarloTreeSearch from '../engine/MonteCarloTree.js';
 import TicTacToe, {
 	Action,
@@ -89,10 +91,25 @@ interface GameProps {
 }
 export default function Game({gameMode}: GameProps) {
 	const game = new TicTacToe();
-	const monteCarloTreeSearch = new MonteCarloTreeSearch(game, {
-		numSearches: 1000,
-		explorationConstant: 1.41,
-	});
+	const [monteCarloTreeSearch, setMonteCarloTreeSearch] =
+		React.useState<MonteCarloTreeSearch | null>(null);
+
+	// Load the model and create the Monte Carlo Tree Search object.
+	(async () => {
+		const model = await tf.loadLayersModel(
+			'file://models/main_model/model.json',
+		);
+
+		const resNet = new ResNet({game, model});
+
+		const monteCarloTreeSearch = new MonteCarloTreeSearch(game, resNet, {
+			numSearches: 1000,
+			explorationConstant: 2,
+		});
+
+		setMonteCarloTreeSearch(monteCarloTreeSearch);
+	})();
+
 	let gameScreen = null;
 	let formattedCellText: (player: Player) => string;
 	let formattedPlayerName: (player: Player) => string;
@@ -120,7 +137,7 @@ export default function Game({gameMode}: GameProps) {
 				setHistory={setHistory}
 			/>
 		);
-	} else if (gameMode === GameMode.PvC) {
+	} else if (gameMode === GameMode.PvC && monteCarloTreeSearch !== null) {
 		formattedCellText = PvCFormattedCellText;
 		formattedPlayerName = PvCFormattedPlayerName;
 		gameScreen = (
@@ -136,7 +153,7 @@ export default function Game({gameMode}: GameProps) {
 				setHistory={setHistory}
 			/>
 		);
-	} else {
+	} else if (gameMode === GameMode.CvC && monteCarloTreeSearch !== null) {
 		formattedCellText = CvCFormattedCellText;
 		formattedPlayerName = CvCFormattedPlayerName;
 		gameScreen = (
@@ -152,7 +169,7 @@ export default function Game({gameMode}: GameProps) {
 				setHistory={setHistory}
 			/>
 		);
-	}
+	} else return null;
 
 	return (
 		<Box flexDirection="column">
