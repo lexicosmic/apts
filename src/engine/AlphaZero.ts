@@ -1,5 +1,6 @@
 import * as tf from '@tensorflow/tfjs-node';
 import fs from 'fs';
+import {MonteCarloTreeSearchParams, TrainModelParams} from '../types.ts';
 import ResNet from './ResNet.js';
 import Game, {
 	Action,
@@ -8,9 +9,7 @@ import Game, {
 	State,
 	EncodedState,
 } from './TicTacToe.ts';
-import MonteCarloTreeSearch, {
-	MonteCarloTreeSearchParams,
-} from './MonteCarloTree.ts';
+import MonteCarloTreeSearch from './MonteCarloTree.ts';
 
 type GameMemoryBlock = {
 	state: State;
@@ -26,31 +25,21 @@ type TrainingMemoryBlock = {
 };
 export type TrainingMemory = TrainingMemoryBlock[];
 
-interface AlphaZeroSearchParams extends MonteCarloTreeSearchParams {
-	numIterations: number;
-	numSelfPlayIterations: number;
-	numEpochs: number;
-	batchSize: number;
-	learningRate: number;
-}
-
 export default class AlphaZero {
 	/// Attributes
 	readonly model: ResNet;
 	readonly game: Game;
-	readonly params: AlphaZeroSearchParams;
 
 	readonly mcts: MonteCarloTreeSearch;
 
 	/// Constructor
-	constructor(model: ResNet, game: Game, params: AlphaZeroSearchParams) {
+	constructor(model: ResNet, game: Game, params: MonteCarloTreeSearchParams) {
 		this.model = model;
 		this.game = game;
-		this.params = params;
 
 		this.mcts = new MonteCarloTreeSearch(this.game, this.model, {
-			explorationConstant: this.params.explorationConstant,
-			numSearches: this.params.numSearches,
+			explorationConstant: params.explorationConstant,
+			numSearches: params.numSearches,
 		});
 	}
 
@@ -122,14 +111,16 @@ export default class AlphaZero {
 	}
 
 	// Build the training memory by self-playing the game
-	async buildTrainingMemory(showProgress = false, showMemorySize = false) {
+	async buildTrainingMemory(
+		numSelfPlayIterations: number,
+		showProgress = false,
+		showMemorySize = false,
+	) {
 		const memory: TrainingMemory = [];
 		// Construct the training memory from self-playing the game
-		for (let j = 0; j < this.params.numSelfPlayIterations; j++) {
+		for (let j = 0; j < numSelfPlayIterations; j++) {
 			if (showProgress)
-				console.log(
-					`Self-play iteration ${j + 1}/${this.params.numSelfPlayIterations}`,
-				);
+				console.log(`Self-play iteration ${j + 1}/${numSelfPlayIterations}`);
 			const selfPlayMemory = await this.#selfPlay();
 			memory.push(...selfPlayMemory);
 		}
@@ -138,7 +129,12 @@ export default class AlphaZero {
 	}
 
 	// Train the model using the training memory
-	async #train(memory: TrainingMemory) {
+	async #train(
+		memory: TrainingMemory,
+		batchSize: number,
+		numEpochs: number,
+		learningRate: number,
+	) {
 		// Convert the memory to a format that can be used to train the model
 		const {encodedStates, policyTargets, valueTargets} =
 			this.#transposeMemory(memory);
@@ -155,9 +151,9 @@ export default class AlphaZero {
 			encodedStatesTensor,
 			policyTargetsTensor,
 			valueTargetsTensor,
-			this.params.batchSize,
-			this.params.numEpochs,
-			this.params.learningRate,
+			batchSize,
+			numEpochs,
+			learningRate,
 		);
 
 		// Dispose the tensors
@@ -167,20 +163,30 @@ export default class AlphaZero {
 	}
 
 	// Train the model multiple times
-	async learn(directoryName: string, trainingMemoryArray?: TrainingMemory[]) {
+	async learn(
+		directoryName: string,
+		numSelfPlayIterations: number,
+		trainModelParams: TrainModelParams,
+		trainingMemoryArray?: TrainingMemory[],
+	) {
 		console.log('=-=-=-=-=-=-=-= AlphaZero LEARNING =-=-=-=-=-=-=-=');
 
-		for (let i = 0; i < this.params.numIterations; i++) {
-			console.log(`ITERATION ${i + 1}/${this.params.numIterations}`);
+		for (let i = 0; i < trainModelParams.numIterations; i++) {
+			console.log(`ITERATION ${i + 1}/${trainModelParams.numIterations}`);
 			let memory;
 			if (
 				typeof trainingMemoryArray === 'undefined' ||
 				typeof trainingMemoryArray[i] === 'undefined'
 			)
-				memory = await this.buildTrainingMemory();
+				memory = await this.buildTrainingMemory(numSelfPlayIterations);
 			else memory = trainingMemoryArray[i];
 
-			const trainingLog = await this.#train(memory);
+			const trainingLog = await this.#train(
+				memory,
+				trainModelParams.batchSize,
+				trainModelParams.numEpochs,
+				trainModelParams.learningRate,
+			);
 
 			// Save the model architecture and optimizer weights
 			await this.model.save(`file://models/${directoryName}/selfplay_${i}`);

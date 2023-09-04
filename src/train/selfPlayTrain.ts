@@ -1,23 +1,41 @@
+import fs from 'fs';
+import {
+	ResNetBuildModelParams,
+	MonteCarloTreeSearchParams,
+	SelfPlayMemoryParams,
+	TrainModelParams,
+} from '../types.ts';
 import TicTacToe from '../engine/TicTacToe.ts';
 import ResNet from '../engine/ResNet.ts';
 import AlphaZero, {TrainingMemory} from '../engine/AlphaZero.ts';
-import fs from 'fs';
 
-const game = new TicTacToe();
-
-const resNetParams = {game, numResBlocks: 4, numHiddenChannels: 64};
-// const resNetParams = {game, path: 'file://models/main_model/model.json'};
-const alphaZeroParams = {
+const resNetBuildModelParams: ResNetBuildModelParams = {
+	numResBlocks: 4,
+	numHiddenChannels: 64,
+};
+const monteCarloTreeSearchParams: MonteCarloTreeSearchParams = {
 	explorationConstant: 2,
 	numSearches: 60,
+};
+const selfPlayMemoryParams: SelfPlayMemoryParams = {
+	...monteCarloTreeSearchParams,
+	numSelfPlayIterations: 1000,
+};
+const trainModelParams: TrainModelParams = {
 	numIterations: 3,
-	numSelfPlayIterations: 500,
 	numEpochs: 4,
 	batchSize: 64,
-	learningRate: 0.001,
+	learningRate: 0.0001,
 };
-const resNet = new ResNet(resNetParams);
-const alphaZero = new AlphaZero(resNet, game, alphaZeroParams);
+const paramsToExport = {
+	resNetParams: resNetBuildModelParams,
+	selfPlayMemoryParams: selfPlayMemoryParams,
+	trainModelParams: trainModelParams,
+};
+
+const game = new TicTacToe();
+const resNet = new ResNet(game, resNetBuildModelParams);
+const alphaZero = new AlphaZero(resNet, game, monteCarloTreeSearchParams);
 
 const trainingMemoryBatch: TrainingMemory[] = [];
 
@@ -26,23 +44,29 @@ const modelDirectory = `selfplay_${currentTime}`;
 try {
 	fs.mkdirSync(`./models/${modelDirectory}`);
 	const firstBlock = fs
-		.readFileSync('./trainingData/trainingData_1693374609309.json')
+		.readFileSync('./trainingData/trainingData_1693822474325/trainingData.json')
 		.toString();
 	const secondBlock = fs
-		.readFileSync('./trainingData/trainingData_1693374959753.json')
+		.readFileSync('./trainingData/trainingData_1693822676517/trainingData.json')
 		.toString();
 	const thirdBlock = fs
-		.readFileSync('./trainingData/trainingData_1693376930463.json')
-		.toString();
-	const fourthBlock = fs
-		.readFileSync('./trainingData/trainingData_1693729283658.json')
+		.readFileSync('./trainingData/trainingData_1693822689263/trainingData.json')
 		.toString();
 	trainingMemoryBatch.push(JSON.parse(firstBlock));
 	trainingMemoryBatch.push(JSON.parse(secondBlock));
 	trainingMemoryBatch.push(JSON.parse(thirdBlock));
-	trainingMemoryBatch.push(JSON.parse(fourthBlock));
+
+	fs.writeFileSync(
+		`./models/${modelDirectory}/parameters.json`,
+		JSON.stringify(paramsToExport),
+	);
 } catch (e) {
 	console.error(e);
 }
 
-await alphaZero.learn(modelDirectory, trainingMemoryBatch);
+await alphaZero.learn(
+	modelDirectory,
+	selfPlayMemoryParams.numSelfPlayIterations,
+	trainModelParams,
+	trainingMemoryBatch,
+);

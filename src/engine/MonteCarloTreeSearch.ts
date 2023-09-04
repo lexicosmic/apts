@@ -1,3 +1,4 @@
+import {MonteCarloTreeSearchParams} from '../types.js';
 import Game, {
 	Action,
 	ActionOutcome,
@@ -5,11 +6,6 @@ import Game, {
 	State,
 	ValidAction,
 } from './TicTacToe.js';
-
-export interface MonteCarloTreeSearchParams {
-	readonly numSearches: number;
-	readonly explorationConstant: number;
-}
 
 class MonteCarloNode {
 	// Attributes

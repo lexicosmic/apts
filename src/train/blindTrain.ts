@@ -11,7 +11,7 @@ state = game.getNextState(state, 5, Player.X);
 state = game.getNextState(state, 8, Player.O);
 game.printState(state);
 
-const resNet = new ResNet({game, numResBlocks: 4, numHiddenChannels: 64});
+const resNet = new ResNet(game, {numResBlocks: 4, numHiddenChannels: 64});
 
 const encodedState = game.getEncodedState(state);
 const outcome = game.getActionOutcome(state, 2);

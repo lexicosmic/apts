@@ -1,11 +1,7 @@
 import * as tf from '@tensorflow/tfjs';
+import {MonteCarloTreeSearchParams} from '../types.ts';
 import ResNet from './ResNet.ts';
 import Game, {Action, ActionOutcome, Player, State} from './TicTacToe.ts';
-
-export interface MonteCarloTreeSearchParams {
-	readonly numSearches: number;
-	readonly explorationConstant: number;
-}
 
 export class MonteCarloNode {
 	// Attributes

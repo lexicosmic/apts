@@ -113,7 +113,7 @@ export default function PvCGame({
 				{player === Player.X ? (
 					<TextInput
 						value={input}
-						onChange={value => setInput(value)}
+						onChange={(value: React.SetStateAction<string>) => setInput(value)}
 						onSubmit={() => handleSubmit(input)}
 					/>
 				) : null}

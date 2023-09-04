@@ -9,7 +9,7 @@ state = game.getNextState(state, 2, 1);
 state = game.getNextState(state, 7, -1);
 
 // Build model and save it
-const resNet = new ResNet({game, numResBlocks: 4, numHiddenChannels: 64});
+const resNet = new ResNet(game, {numResBlocks: 4, numHiddenChannels: 64});
 resNet.summary();
 await resNet.save('file://models/structure');
 

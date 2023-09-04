@@ -1,4 +1,5 @@
 import * as tf from '@tensorflow/tfjs-node';
+import {ResNetBuildModelParams} from '../types.ts';
 import TicTacToe from './TicTacToe.ts';
 
 const INPUT_CHANNELS = 3;
@@ -6,24 +7,20 @@ const INPUT_CHANNELS = 3;
 interface ResNetLoadedModelParams {
 	model: tf.LayersModel;
 }
-interface ResNetBuildModelParams {
-	numResBlocks: number; // Length of the backbone
-	numHiddenChannels: number; // Number of channels in each block
-}
-type ResNetParams = (ResNetLoadedModelParams | ResNetBuildModelParams) & {
-	game: TicTacToe;
-};
+
+export type ResNetParams = ResNetLoadedModelParams | ResNetBuildModelParams;
+
 export default class ResNet {
 	/// Attributes
 	#model: tf.LayersModel;
 
 	/// Constructor
-	constructor(params: ResNetParams) {
+	constructor(game: TicTacToe, params: ResNetParams) {
 		if ('model' in params) {
 			this.#model = params.model;
 		} else {
 			this.#model = buildResNetModel(
-				params.game,
+				game,
 				params.numResBlocks,
 				params.numHiddenChannels,
 			);
