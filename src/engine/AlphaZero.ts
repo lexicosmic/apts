@@ -119,7 +119,7 @@ export default class AlphaZero {
 		const memory: TrainingMemory = [];
 		// Construct the training memory from self-playing the game
 		for (let j = 0; j < numSelfPlayIterations; j++) {
-			if (showProgress)
+			if (showProgress && (j + 1) % 25 === 0)
 				console.log(`Self-play iteration ${j + 1}/${numSelfPlayIterations}`);
 			const selfPlayMemory = await this.#selfPlay();
 			memory.push(...selfPlayMemory);

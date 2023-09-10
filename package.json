@@ -14,8 +14,8 @@
 		"train:structure": "ts-node src/train/structure.ts",
 		"train:loaded": "ts-node src/train/loaded.ts",
 		"train:blind": "ts-node src/train/blindTrain.ts",
-		"train:memory": "ts-node src/train/buildMemory.ts",
-		"train:selfplay": "ts-node src/train/selfPlayTrain.ts",
+		"train:build-memory": "ts-node src/train/buildMemory.ts",
+		"train:create-model": "ts-node src/train/createModel.ts",
 		"test": "jest",
 		"test:ava": "prettier --check . && xo && ava",
 		"start": "npm run build && node dist/cli.js"
