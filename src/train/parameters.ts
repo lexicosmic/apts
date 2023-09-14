@@ -3,7 +3,7 @@ import {
 	MonteCarloTreeSearchParams,
 	SelfPlayMemoryParams,
 	TrainModelParams,
-} from '../types';
+} from '../types.ts';
 
 export const resNetBuildModelParams: ResNetBuildModelParams = {
 	numResBlocks: 4,
@@ -18,12 +18,16 @@ export const selfPlayMemoryParams: SelfPlayMemoryParams = {
 	numSelfPlayIterations: 500,
 };
 export const trainModelParams: TrainModelParams = {
-	numIterations: 1,
-	numEpochs: 4,
-	batchSize: 64,
-	learningRate: 0.001,
+	numIterations: 3,
+	numEpochs: 20,
+	batchSize: 32,
+	learningRate: 0.00005,
 };
 
 export const mainModelDirectory = `main_model`;
 
-export const trainingDataIds = ['1693823484363'];
+export const trainingDataIds = [
+	// '1694373039989',
+	// '1694373330714',
+	// '1694373607234',
+];

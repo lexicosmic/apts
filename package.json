@@ -11,8 +11,9 @@
 	},
 	"scripts": {
 		"play": "ts-node src/cli.tsx",
-		"train:structure": "ts-node src/train/structure.ts",
-		"train:loaded": "ts-node src/train/loaded.ts",
+		"playground:mcts-common": "ts-node src/playground/mctsCommon.ts",
+		"playground:structure": "ts-node src/playground/structure.ts",
+		"playground:loaded": "ts-node src/playground/loaded.ts",
 		"train:blind": "ts-node src/train/blindTrain.ts",
 		"train:build-memory": "ts-node src/train/buildMemory.ts",
 		"train:create-model": "ts-node src/train/createModel.ts",

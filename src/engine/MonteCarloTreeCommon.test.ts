@@ -1,7 +1,7 @@
 import MonteCarloTreeSearch, {
 	MonteCarloTreeSearchParams,
-} from './MonteCarloTreeSearch.ts';
-import Game, {Player, State} from './TicTacToe.ts';
+} from './MonteCarloTreeCommon.js';
+import Game, {Player, State} from './TicTacToe.js';
 
 describe('MonteCarloTreeSearch', () => {
 	let game: Game;

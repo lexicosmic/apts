@@ -1,7 +1,7 @@
 import * as tf from '@tensorflow/tfjs-node';
+import fs from 'fs';
 import TicTacToe, {Player} from '../engine/TicTacToe.ts';
 import ResNet from '../engine/ResNet.ts';
-import fs from 'fs';
 
 const game = new TicTacToe();
 let state = game.getInitialState();

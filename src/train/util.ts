@@ -5,8 +5,22 @@ import {
 	ResNetBuildModelParams,
 	SelfPlayMemoryParams,
 	TrainModelParams,
-} from '../types';
-import {TrainingMemory} from '../engine/AlphaZero';
+} from '../types.ts';
+import {TrainingMemory} from '../engine/AlphaZero.ts';
+import {selfPlayMemoryParams as defaultMemoryParams} from './parameters.ts';
+
+function getParamsToExport_TrainingData(
+	trainingDataId: string,
+	modelParams: ParamsToExport_BuildModel | null,
+	selfPlayMemoryParams: SelfPlayMemoryParams,
+) {
+	const paramsToExport: ParamsToExport_TrainingData = {
+		id: trainingDataId,
+		model: modelParams,
+		...selfPlayMemoryParams,
+	};
+	return paramsToExport;
+}
 
 function getParamsToExport_BuildModel(
 	trainingDataIds: string[],
@@ -14,9 +28,21 @@ function getParamsToExport_BuildModel(
 	trainModelParams: TrainModelParams,
 ) {
 	const listOfTrainingDataParemeters: (ParamsToExport_TrainingData | {})[] = [];
-	for (const trainingDataId of trainingDataIds) {
+	let i = 0;
+	while (i < trainingDataIds.length && i < trainModelParams.numIterations) {
+		const trainingDataId = trainingDataIds[i];
 		const trainingDataParameters = loadTrainingDataParameters(trainingDataId);
 		listOfTrainingDataParemeters.push(trainingDataParameters ?? {});
+		i++;
+	}
+	while (i < trainModelParams.numIterations) {
+		const trainingDataParameters = getParamsToExport_TrainingData(
+			'',
+			null,
+			defaultMemoryParams,
+		);
+		listOfTrainingDataParemeters.push(trainingDataParameters);
+		i++;
 	}
 
 	const paramsToExport: ParamsToExport_BuildModel = {
@@ -80,11 +106,12 @@ export function writeTrainingData(
 	const currentTime = new Date().valueOf();
 	const modelParams = loadModelParameters(modelDirectory);
 
-	const paramsToExport: ParamsToExport_TrainingData = {
-		id: currentTime.toString(),
-		model: modelParams ?? null,
-		...selfPlayMemoryParams,
-	};
+	const paramsToExport: ParamsToExport_TrainingData =
+		getParamsToExport_TrainingData(
+			currentTime.toString(),
+			modelParams ?? null,
+			selfPlayMemoryParams,
+		);
 
 	try {
 		fs.mkdirSync(`./trainingData/trainingData_${currentTime}`);

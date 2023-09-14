@@ -100,7 +100,7 @@ export default function Game({gameMode}: GameProps) {
 			'file://models/main_model/model.json',
 		);
 
-		const resNet = new ResNet({game, model});
+		const resNet = new ResNet(game, {model});
 
 		const monteCarloTreeSearch = new MonteCarloTreeSearch(game, resNet, {
 			numSearches: 1000,
