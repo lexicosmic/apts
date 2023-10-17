@@ -11,6 +11,7 @@ import TicTacToe, {
 	Player,
 	State,
 } from '../engine/TicTacToe.js';
+import HistoryFrame from './HistoryFrame.js';
 import PvPGame, {
 	formattedCellText as PvPFormattedCellText,
 	formattedPlayerName as PvPFormattedPlayerName,
@@ -19,7 +20,6 @@ import PvCGame, {
 	formattedCellText as PvCFormattedCellText,
 	formattedPlayerName as PvCFormattedPlayerName,
 } from './PvCGame.js';
-import HistoryFrame from './HistoryFrame.js';
 import CvCGame, {
 	formattedCellText as CvCFormattedCellText,
 	formattedPlayerName as CvCFormattedPlayerName,

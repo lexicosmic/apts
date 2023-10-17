@@ -1,10 +1,15 @@
 import React from 'react';
 import {Box, Text} from 'ink';
-import TextInput from 'ink-text-input';
-import TicTacToe, {ActionOutcome, Player, State} from '../engine/TicTacToe.js';
+import TicTacToe, {
+	Action,
+	ActionOutcome,
+	Player,
+	State,
+} from '../engine/TicTacToe.js';
 import MonteCarloTreeSearch from '../engine/MonteCarloTree.js';
 import HistoryFrame from './HistoryFrame.js';
-import {getValidAction, performAction} from './Game.js';
+import {performAction} from './Game.js';
+import ActionSelector from './ActionSelector.js';
 
 export const formattedCellText = (player: Player) => {
 	const cellText = player === Player.X ? 'X' : player === Player.O ? 'O' : ' ';
@@ -37,21 +42,12 @@ export default function PvCGame({
 	setOutcome,
 	setHistory,
 }: PvCGameProps) {
-	const [input, setInput] = React.useState<string>('');
-	const [invalidMove, setInvalidMove] = React.useState<boolean>(false);
-
 	let newHistory = [...history];
 	let userHistoryFrame: JSX.Element | null = null;
 	let computerHistoryFrame: JSX.Element | null = null;
 
-	function handleSubmit(input: string) {
+	function handleActionSelect(action: Action) {
 		// User turn
-		let action = getValidAction({
-			input,
-			game,
-			state,
-			setInvalidMove,
-		});
 		if (action !== null) {
 			let gameOver = performAction({
 				action,
@@ -103,22 +99,18 @@ export default function PvCGame({
 		}
 
 		setHistory(newHistory);
-		setInput('');
 	}
 
 	return (
 		<Box flexDirection="column">
-			<Box>
-				<Text>{formattedPlayerName(player)} move: </Text>
-				{player === Player.X ? (
-					<TextInput
-						value={input}
-						onChange={(value: React.SetStateAction<string>) => setInput(value)}
-						onSubmit={() => handleSubmit(input)}
-					/>
-				) : null}
-			</Box>
-			{invalidMove && <Text>Invalid move!</Text>}
+			<Text>{formattedPlayerName(player)} move: </Text>
+			{player === Player.X ? (
+				<ActionSelector
+					game={game}
+					state={state}
+					handleSelect={(action: Action) => handleActionSelect(action)}
+				/>
+			) : null}
 		</Box>
 	);
 }
