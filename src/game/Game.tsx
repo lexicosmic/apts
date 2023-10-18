@@ -102,18 +102,20 @@ async function loadModel(
 
 interface GameProps {
 	gameMode: GameMode;
+	gameOutcome: ActionOutcome;
+	setGameOutcome: React.Dispatch<React.SetStateAction<ActionOutcome>>;
 }
-export default function Game({gameMode}: GameProps) {
+export default function Game({
+	gameMode,
+	gameOutcome,
+	setGameOutcome,
+}: GameProps) {
 	const [game, setGame] = React.useState<TicTacToe>(new TicTacToe());
 	const [monteCarloTreeSearch, setMonteCarloTreeSearch] =
 		React.useState<MonteCarloTreeSearch | null>(null);
 	const [state, setState] = React.useState<State>(game.getInitialState());
 	const [player, setPlayer] = React.useState<Player>(Player.X);
 	const [history, setHistory] = React.useState<JSX.Element[]>([]);
-	const [gameOutcome, setOutcome] = React.useState<ActionOutcome>({
-		isTerminal: false,
-		value: Outcome.Loss,
-	});
 
 	useEffect(() => {
 		if (gameMode === GameMode.PvC || gameMode === GameMode.CvC) {
@@ -136,7 +138,7 @@ export default function Game({gameMode}: GameProps) {
 				history={history}
 				setState={setState}
 				setPlayer={setPlayer}
-				setOutcome={setOutcome}
+				setOutcome={setGameOutcome}
 				setHistory={setHistory}
 			/>
 		);
@@ -152,7 +154,7 @@ export default function Game({gameMode}: GameProps) {
 				monteCarloTreeSearch={monteCarloTreeSearch}
 				setState={setState}
 				setPlayer={setPlayer}
-				setOutcome={setOutcome}
+				setOutcome={setGameOutcome}
 				setHistory={setHistory}
 			/>
 		);
@@ -168,7 +170,7 @@ export default function Game({gameMode}: GameProps) {
 				monteCarloTreeSearch={monteCarloTreeSearch}
 				setState={setState}
 				setPlayer={setPlayer}
-				setOutcome={setOutcome}
+				setOutcome={setGameOutcome}
 				setHistory={setHistory}
 			/>
 		);
