@@ -1,6 +1,6 @@
-import ResNet, {getResBlock} from './ResNet.ts';
-import TicTacToe from './TicTacToe.ts';
 import * as tf from '@tensorflow/tfjs-node';
+import ResNet from './ResNet.ts';
+import TicTacToe from './TicTacToe.ts';
 
 describe('ResNet', () => {
 	let game: TicTacToe;
@@ -12,7 +12,7 @@ describe('ResNet', () => {
 		game = new TicTacToe();
 		numResBlocks = 3;
 		numHiddenChannels = 64;
-		resNet = new ResNet({game, numResBlocks, numHiddenChannels});
+		resNet = new ResNet(game, {numResBlocks, numHiddenChannels});
 	});
 
 	describe('call', () => {

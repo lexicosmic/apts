@@ -1,18 +1,18 @@
 import React from 'react';
 import {Box, Text} from 'ink';
 import SelectInput from 'ink-select-input';
-import {GameMode, SelectListItem} from './types.js';
+import {GameMode} from './types.js';
 import Game from './game/Game.tsx';
 
 export default function App() {
 	const [gameMode, setGameMode] = React.useState<GameMode | null>(null);
 
-	function handleSelect(item: SelectListItem) {
-		if (item.value === GameMode.PvP) {
+	function handleSelect(gameMode: GameMode) {
+		if (gameMode === GameMode.PvP) {
 			setGameMode(GameMode.PvP);
-		} else if (item.value === GameMode.PvC) {
+		} else if (gameMode === GameMode.PvC) {
 			setGameMode(GameMode.PvC);
-		} else if (item.value === GameMode.CvC) {
+		} else if (gameMode === GameMode.CvC) {
 			setGameMode(GameMode.CvC);
 		}
 	}
@@ -42,7 +42,8 @@ export default function App() {
 								value: GameMode.CvC,
 							},
 						]}
-						onSelect={handleSelect}
+						onSelect={(item: {value: GameMode}) =>
+						 handleSelect(item.value)}
 					/>
 				</>
 			) : (
