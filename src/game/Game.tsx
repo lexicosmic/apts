@@ -1,5 +1,5 @@
 import * as tf from '@tensorflow/tfjs-node';
-import React from 'react';
+import React, {useEffect} from 'react';
 import {Box, Newline, Text} from 'ink';
 import {GameMode} from '../types.js';
 import ResNet from '../engine/ResNet.js';
@@ -11,6 +11,7 @@ import TicTacToe, {
 	Player,
 	State,
 } from '../engine/TicTacToe.js';
+import HistoryFrame from './HistoryFrame.js';
 import PvPGame, {
 	formattedCellText as PvPFormattedCellText,
 	formattedPlayerName as PvPFormattedPlayerName,
@@ -19,7 +20,6 @@ import PvCGame, {
 	formattedCellText as PvCFormattedCellText,
 	formattedPlayerName as PvCFormattedPlayerName,
 } from './PvCGame.js';
-import HistoryFrame from './HistoryFrame.js';
 import CvCGame, {
 	formattedCellText as CvCFormattedCellText,
 	formattedPlayerName as CvCFormattedPlayerName,
@@ -86,34 +86,27 @@ export function performAction({
 	return actionOutcome.isTerminal;
 }
 
+// Load the model and create the Monte Carlo Tree Search object
+async function loadModel(
+	game: TicTacToe,
+	setMonteCarloTreeSearch: (monteCarloTreeSearch: MonteCarloTreeSearch) => void,
+) {
+	const model = await tf.loadLayersModel('file://models/main_model/model.json');
+	const resNet = new ResNet(game, {model});
+	const monteCarloTreeSearch = new MonteCarloTreeSearch(game, resNet, {
+		numSearches: 1000,
+		explorationConstant: 2,
+	});
+	setMonteCarloTreeSearch(monteCarloTreeSearch);
+}
+
 interface GameProps {
 	gameMode: GameMode;
 }
 export default function Game({gameMode}: GameProps) {
-	const game = new TicTacToe();
+	const [game, setGame] = React.useState<TicTacToe>(new TicTacToe());
 	const [monteCarloTreeSearch, setMonteCarloTreeSearch] =
 		React.useState<MonteCarloTreeSearch | null>(null);
-
-	// Load the model and create the Monte Carlo Tree Search object.
-	(async () => {
-		const model = await tf.loadLayersModel(
-			'file://models/main_model/model.json',
-		);
-
-		const resNet = new ResNet({game, model});
-
-		const monteCarloTreeSearch = new MonteCarloTreeSearch(game, resNet, {
-			numSearches: 1000,
-			explorationConstant: 2,
-		});
-
-		setMonteCarloTreeSearch(monteCarloTreeSearch);
-	})();
-
-	let gameScreen = null;
-	let formattedCellText: (player: Player) => string;
-	let formattedPlayerName: (player: Player) => string;
-
 	const [state, setState] = React.useState<State>(game.getInitialState());
 	const [player, setPlayer] = React.useState<Player>(Player.X);
 	const [history, setHistory] = React.useState<JSX.Element[]>([]);
@@ -121,6 +114,16 @@ export default function Game({gameMode}: GameProps) {
 		isTerminal: false,
 		value: Outcome.Loss,
 	});
+
+	useEffect(() => {
+		if (gameMode === GameMode.PvC || gameMode === GameMode.CvC) {
+			loadModel(game, setMonteCarloTreeSearch);
+		}
+	}, []);
+
+	let gameScreen = null;
+	let formattedCellText: (player: Player) => string;
+	let formattedPlayerName: (player: Player) => string;
 
 	if (gameMode === GameMode.PvP) {
 		formattedCellText = PvPFormattedCellText;

@@ -1,4 +1,4 @@
-import * as tf from '@tensorflow/tfjs';
+import * as tf from '@tensorflow/tfjs-node';
 import {MonteCarloTreeSearchParams} from '../types.ts';
 import ResNet from './ResNet.ts';
 import Game, {Action, ActionOutcome, Player, State} from './TicTacToe.ts';

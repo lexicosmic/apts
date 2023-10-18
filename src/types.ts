@@ -28,3 +28,14 @@ export interface TrainModelParams {
 	batchSize: number;
 	learningRate: number;
 }
+
+export type ParamsToExport_TrainingData = SelfPlayMemoryParams & {
+	id: string;
+	model: ParamsToExport_BuildModel | null;
+};
+
+export type ParamsToExport_BuildModel = {
+	resNet: ResNetBuildModelParams;
+	memory: (ParamsToExport_TrainingData | {})[];
+	training: TrainModelParams;
+};
