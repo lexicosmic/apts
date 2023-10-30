@@ -154,7 +154,7 @@ function buildResNetModel(
 	// Define input tensor
 	const inputTensor = tf.input({
 		name: 'input',
-		shape: [game.rowCount, game.columnCount, INPUT_CHANNELS],
+		shape: [game.getRowCount(), game.getColumnCount(), INPUT_CHANNELS],
 	});
 
 	// Applies a convolutional layer to the input
@@ -165,7 +165,7 @@ function buildResNetModel(
 				filters: numHiddenChannels, // Produce as channels as set by numHiddenChannels
 				kernelSize: 3, // 3x3 filter
 				padding: 'same',
-				inputShape: [game.rowCount, game.columnCount, INPUT_CHANNELS],
+				inputShape: [game.getRowCount(), game.getColumnCount(), INPUT_CHANNELS],
 			}),
 			tf.layers.batchNormalization(),
 			tf.layers.activation({activation: 'relu'}),
@@ -182,8 +182,8 @@ function buildResNetModel(
 			i,
 			backboneOutputTensor,
 			startBlockOutputTensor,
-			game.rowCount,
-			game.columnCount,
+			game.getRowCount(),
+			game.getColumnCount(),
 			numHiddenChannels,
 		);
 	}
@@ -196,13 +196,17 @@ function buildResNetModel(
 				filters: 32, // Produce 32 channels
 				kernelSize: 3, // 3x3 filter
 				padding: 'same',
-				inputShape: [game.rowCount, game.columnCount, numHiddenChannels], // Output of the backbone
+				inputShape: [
+					game.getRowCount(),
+					game.getColumnCount(),
+					numHiddenChannels,
+				], // Output of the backbone
 			}),
 			tf.layers.batchNormalization(),
 			tf.layers.activation({activation: 'relu'}),
 			tf.layers.flatten(),
-			tf.layers.dense({units: game.rowCount * game.columnCount * 32}),
-			tf.layers.dense({units: game.actionSize}), // Output of the policy head, i.e. the probability of each action
+			tf.layers.dense({units: game.getRowCount() * game.getColumnCount() * 32}),
+			tf.layers.dense({units: game.getRowCount() * game.getColumnCount()}), // Output of the policy head, i.e. the probability of each action
 		],
 	});
 
@@ -214,12 +218,16 @@ function buildResNetModel(
 				filters: 3, // Produce 3 channels
 				kernelSize: 3, // 3x3 filter
 				padding: 'same',
-				inputShape: [game.rowCount, game.columnCount, numHiddenChannels], // Output of the backbone
+				inputShape: [
+					game.getRowCount(),
+					game.getColumnCount(),
+					numHiddenChannels,
+				], // Output of the backbone
 			}),
 			tf.layers.batchNormalization(),
 			tf.layers.activation({activation: 'relu'}),
 			tf.layers.flatten(),
-			tf.layers.dense({units: game.rowCount * game.columnCount * 3}),
+			tf.layers.dense({units: game.getRowCount() * game.getColumnCount() * 3}),
 			tf.layers.dense({units: 1, activation: 'tanh'}), // Output of the value head, i.e. the probability of winning
 		],
 	});

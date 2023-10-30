@@ -29,14 +29,12 @@ export class TicTacToeState extends State {
 	}
 
 	/// Getters
-	public getValidActions(): Action[] {
-		let aux = 0;
-		const validActions: Array<Action> = [];
-		for (let i = 0; i < this.table.length; i++) {
-			for (let j = 0; j < this.table[i].length; j++) {
+	public getValidActions(): Array<boolean> {
+		const validActions: Array<boolean> = [];
+		for (let i = 0; i < this.rowCount; i++) {
+			for (let j = 0; j < this.columnCount; j++) {
 				const cell = this.table[i]![j];
-				if (cell === Player.None) validActions.push(aux);
-				aux++;
+				validActions.push(cell === Player.None);
 			}
 		}
 		return validActions;

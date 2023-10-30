@@ -42,6 +42,14 @@ export default abstract class Game {
 		return this.state;
 	}
 
+	public getRowCount(): number {
+		return this.rowCount;
+	}
+
+	public getColumnCount(): number {
+		return this.columnCount;
+	}
+
 	// Return if the game is over and if the player has won
 	public getActionOutcome(action: Action | null): ActionOutcome {
 		// Check if the player has won
@@ -83,7 +91,7 @@ export abstract class State {
 	}
 
 	/// Getters
-	public abstract getValidActions(): Array<Action>;
+	public abstract getValidActions(): Array<boolean>;
 
 	public getPlayerAt(line: number, column: number): Player | null {
 		const player = this.table[line][column];
