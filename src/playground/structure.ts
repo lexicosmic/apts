@@ -11,10 +11,10 @@ state.print();
 state.performAction(7, -1);
 state.print();
 
-// // Build model and save it
-// const resNet = new ResNet(game, {numResBlocks: 4, numHiddenChannels: 64});
-// resNet.summary();
-// await resNet.save('file://models/structure');
+// Build model and save it
+const resNet = new ResNet(game, {numResBlocks: 4, numHiddenChannels: 64});
+resNet.summary();
+await resNet.save('file://models/structure');
 
 // // Calculate the policy and value from the neural network
 // const tensorState = tf

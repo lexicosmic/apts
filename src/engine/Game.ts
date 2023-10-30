@@ -25,13 +25,11 @@ export default abstract class Game {
 	constructor(rowCount?: number, columnCount?: number) {
 		this.rowCount = rowCount || 3;
 		this.columnCount = columnCount || 3;
-		this.state = new State(this.rowCount, this.columnCount);
+		this.state = this.getInitialState();
 	}
 
 	/// Getters
-	public getState(): State {
-		return this.state;
-	}
+	protected abstract getInitialState(): State;
 
 	public abstract getOpponent(player: Player): Player;
 
@@ -39,6 +37,10 @@ export default abstract class Game {
 	public abstract getOpponentValue(
 		value: ActionOutcome['value'],
 	): ActionOutcome['value'];
+
+	public getState(): State {
+		return this.state;
+	}
 
 	// Return if the game is over and if the player has won
 	public getActionOutcome(action: Action | null): ActionOutcome {
@@ -51,13 +53,26 @@ export default abstract class Game {
 		// No terminal state
 		return {isTerminal: false, value: Outcome.Loss};
 	}
+
+	/// Methods
+	// Return the state with the perspective changed, i.e. the opponent is now the player
+	public changePerspective(state: State): State {
+		for (let i = 0; i < this.rowCount; i++) {
+			for (let j = 0; j < this.columnCount; j++) {
+				const cell = state.getPlayerAt(i, j);
+				if (cell === null) break;
+				this.state.setPlayerAt(this.getOpponent(cell), i, j);
+			}
+		}
+		return state;
+	}
 }
 
-export class State {
+export abstract class State {
 	/// Attributes
-	private rowCount: number;
-	private columnCount: number;
-	private table: Array<Array<Player>>;
+	protected rowCount: number;
+	protected columnCount: number;
+	protected table: Array<Array<Player>>;
 
 	constructor(rowCount: number, columnCount: number) {
 		this.rowCount = rowCount;
@@ -68,23 +83,12 @@ export class State {
 	}
 
 	/// Getters
+	public abstract getValidActions(): Array<Action>;
+
 	public getPlayerAt(line: number, column: number): Player | null {
 		const player = this.table[line][column];
 		if (player === undefined) return null;
 		return player;
-	}
-
-	public getValidActions(): Array<Action> {
-		let aux = 0;
-		const validActions: Array<Action> = [];
-		for (let i = 0; i < this.table.length; i++) {
-			for (let j = 0; j < this.table[i].length; j++) {
-				const cell = this.table[i]![j];
-				if (cell === Player.None) validActions.push(aux);
-				aux++;
-			}
-		}
-		return validActions;
 	}
 
 	// Return three 2D-arrays. Each one represents a player.
@@ -111,51 +115,9 @@ export class State {
 	}
 
 	/// Methods
-	public changePerspective(player: Player): void {
-		this.table = this.table.map(row =>
-			row.map(cell => (cell * player === -0 ? 0 : cell * player)),
-		);
-	}
+	public abstract print(): void;
 
-	public print(): void {
-		let boardString = '';
-		for (let i = 0; i < this.table.length; i++) {
-			boardString += '|';
-			for (let j = 0; j < this.table[i].length; j++) {
-				const cell = this.table[i][j];
-				boardString += ' ';
-				if (cell === Player.X) boardString += 'X';
-				else if (cell === Player.O) boardString += 'O';
-				else boardString += '-';
-				boardString += ' |';
-			}
-			boardString += '\n';
-		}
-		console.log(boardString);
-	}
+	public abstract checkWin(action: Action): boolean;
 
-	public checkWin(action: Action): boolean {
-		const row = Math.floor(action / this.columnCount);
-		const column = action % this.columnCount;
-		const player = this.table[row]![column];
-
-		// Won on the row
-		if (this.table[row]!.every(cell => cell === player)) return true;
-		// Won on the column
-		if (this.table.every(row => row[column] === player)) return true;
-		// Won on the primary diagonal
-		if (this.table.every((row, i) => row[i] === player)) return true;
-		// Won on the secondary diagonal
-		if (this.table.every((row, i) => row[this.columnCount - 1 - i] === player))
-			return true;
-		// No win
-		return false;
-	}
-
-	public performAction(action: Action, player: Player): void {
-		const row = Math.floor(action / this.columnCount);
-		const column = action % this.columnCount;
-		// Play the action on the given state
-		this.table[row][column] = player;
-	}
+	public abstract performAction(action: Action, player: Player): void;
 }
