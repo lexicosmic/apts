@@ -7,7 +7,7 @@ import TicTacToe, {
 	State,
 } from '../engine/TicTacToe.js';
 import ActionSelector from './ActionSelector.js';
-import {performAction} from './Game.js';
+import {performAction} from './PlayGame.js';
 import HistoryFrame from './HistoryFrame.js';
 
 export const formattedCellText = (player: Player) => {

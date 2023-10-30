@@ -2,7 +2,7 @@ import React, {useEffect} from 'react';
 import TicTacToe, {ActionOutcome, Player, State} from '../engine/TicTacToe.js';
 import MonteCarloTreeSearch from '../engine/MonteCarloTree.js';
 import HistoryFrame from './HistoryFrame.js';
-import {performAction} from './Game.js';
+import {performAction} from './PlayGame.js';
 
 export const formattedCellText = (player: Player) => {
 	const cellText = player === Player.X ? 'X' : player === Player.O ? 'O' : ' ';

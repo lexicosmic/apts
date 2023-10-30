@@ -100,10 +100,10 @@ async function loadModel(
 	setMonteCarloTreeSearch(monteCarloTreeSearch);
 }
 
-interface GameProps {
+interface PlayGameProps {
 	gameMode: GameMode;
 }
-export default function Game({gameMode}: GameProps) {
+export default function PlayGame({gameMode}: PlayGameProps) {
 	const [game, setGame] = React.useState<TicTacToe>(new TicTacToe());
 	const [monteCarloTreeSearch, setMonteCarloTreeSearch] =
 		React.useState<MonteCarloTreeSearch | null>(null);

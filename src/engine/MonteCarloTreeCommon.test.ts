@@ -1,6 +1,5 @@
-import MonteCarloTreeSearch, {
-	MonteCarloTreeSearchParams,
-} from './MonteCarloTreeCommon.js';
+import {MonteCarloTreeSearchParams} from '../types.js';
+import MonteCarloTreeSearch from './MonteCarloTreeCommon.js';
 import Game, {Player, State} from './TicTacToe.js';
 
 describe('MonteCarloTreeSearch', () => {

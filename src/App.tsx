@@ -2,7 +2,7 @@ import React from 'react';
 import {Box, Text} from 'ink';
 import SelectInput from 'ink-select-input';
 import {GameMode} from './types.js';
-import Game from './game/Game.tsx';
+import PlayGame from './interface/PlayGame.tsx';
 
 export default function App() {
 	const [gameMode, setGameMode] = React.useState<GameMode | null>(null);
@@ -42,12 +42,11 @@ export default function App() {
 								value: GameMode.CvC,
 							},
 						]}
-						onSelect={(item: {value: GameMode}) =>
-						 handleSelect(item.value)}
+						onSelect={(item: {value: GameMode}) => handleSelect(item.value)}
 					/>
 				</>
 			) : (
-				<Game gameMode={gameMode} />
+				<PlayGame gameMode={gameMode} />
 			)}
 		</Box>
 	);

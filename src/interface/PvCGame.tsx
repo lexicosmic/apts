@@ -8,7 +8,7 @@ import TicTacToe, {
 } from '../engine/TicTacToe.js';
 import MonteCarloTreeSearch from '../engine/MonteCarloTree.js';
 import HistoryFrame from './HistoryFrame.js';
-import {performAction} from './Game.js';
+import {performAction} from './PlayGame.js';
 import ActionSelector from './ActionSelector.js';
 
 export const formattedCellText = (player: Player) => {

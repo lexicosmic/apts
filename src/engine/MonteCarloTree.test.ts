@@ -1,6 +1,5 @@
-import MonteCarloTreeSearch, {
-	MonteCarloTreeSearchParams,
-} from './MonteCarloTree.ts';
+import {MonteCarloTreeSearchParams} from '../types.ts';
+import MonteCarloTreeSearch from './MonteCarloTree.ts';
 import ResNet from './ResNet.ts';
 import Game, {Player, State} from './TicTacToe.ts';
 
@@ -12,7 +11,7 @@ describe('MonteCarloTreeSearch', () => {
 
 	beforeEach(() => {
 		game = new Game();
-		model = new ResNet({game, numResBlocks: 4, numHiddenChannels: 64});
+		model = new ResNet(game, {numResBlocks: 4, numHiddenChannels: 64});
 		params = {
 			numSearches: 100,
 			explorationConstant: 1.0,
