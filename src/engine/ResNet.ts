@@ -205,8 +205,8 @@ function buildResNetModel(
 			tf.layers.batchNormalization(),
 			tf.layers.activation({activation: 'relu'}),
 			tf.layers.flatten(),
-			tf.layers.dense({units: game.getRowCount() * game.getColumnCount() * 32}),
-			tf.layers.dense({units: game.getRowCount() * game.getColumnCount()}), // Output of the policy head, i.e. the probability of each action
+			tf.layers.dense({units: game.getActionSize() * 32}),
+			tf.layers.dense({units: game.getActionSize()}), // Output of the policy head, i.e. the probability of each action
 		],
 	});
 
@@ -227,7 +227,7 @@ function buildResNetModel(
 			tf.layers.batchNormalization(),
 			tf.layers.activation({activation: 'relu'}),
 			tf.layers.flatten(),
-			tf.layers.dense({units: game.getRowCount() * game.getColumnCount() * 3}),
+			tf.layers.dense({units: game.getActionSize() * 3}),
 			tf.layers.dense({units: 1, activation: 'tanh'}), // Output of the value head, i.e. the probability of winning
 		],
 	});

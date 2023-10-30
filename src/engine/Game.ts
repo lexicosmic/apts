@@ -11,6 +11,7 @@ export enum Outcome {
 
 export type EncodedState = Array<State>;
 export type Action = number;
+export type ValidAction = boolean;
 export type ActionOutcome = {
 	isTerminal: boolean;
 	value: number;
@@ -50,29 +51,23 @@ export default abstract class Game {
 		return this.columnCount;
 	}
 
+	public getActionSize(): number {
+		return this.rowCount * this.columnCount;
+	}
+
 	// Return if the game is over and if the player has won
-	public getActionOutcome(action: Action | null): ActionOutcome {
+	public static getActionOutcome(
+		state: State,
+		action: Action | null,
+	): ActionOutcome {
 		// Check if the player has won
-		if (action === null ? false : this.state.checkWin(action))
+		if (action === null ? false : state.checkWin(action))
 			return {isTerminal: true, value: Outcome.Win};
 		// Check if the board is full
-		if (this.state.getValidActions().length === 0)
+		if (state.getValidActions().length === 0)
 			return {isTerminal: true, value: Outcome.Loss};
 		// No terminal state
 		return {isTerminal: false, value: Outcome.Loss};
-	}
-
-	/// Methods
-	// Return the state with the perspective changed, i.e. the opponent is now the player
-	public changePerspective(state: State): State {
-		for (let i = 0; i < this.rowCount; i++) {
-			for (let j = 0; j < this.columnCount; j++) {
-				const cell = state.getPlayerAt(i, j);
-				if (cell === null) break;
-				this.state.setPlayerAt(this.getOpponent(cell), i, j);
-			}
-		}
-		return state;
 	}
 }
 
@@ -91,7 +86,7 @@ export abstract class State {
 	}
 
 	/// Getters
-	public abstract getValidActions(): Array<boolean>;
+	public abstract getValidActions(): Array<ValidAction>;
 
 	public getPlayerAt(line: number, column: number): Player | null {
 		const player = this.table[line][column];
@@ -128,4 +123,25 @@ export abstract class State {
 	public abstract checkWin(action: Action): boolean;
 
 	public abstract performAction(action: Action, player: Player): void;
+
+	public clone(): State {
+		const clone = Object.create(this);
+		clone.table = this.table.map(row => row.slice());
+		return clone;
+	}
+
+	// Return the state with the perspective changed, i.e. the opponent is now the player
+	public changePerspective(
+		currentPlayer: Player,
+		opponentPlayer: Player,
+	): void {
+		for (let i = 0; i < this.rowCount; i++) {
+			for (let j = 0; j < this.columnCount; j++) {
+				const cell = this.getPlayerAt(i, j);
+				if (cell === null) break;
+				if (cell === currentPlayer) this.setPlayerAt(opponentPlayer, i, j);
+				else if (cell === opponentPlayer) this.setPlayerAt(currentPlayer, i, j);
+			}
+		}
+	}
 }

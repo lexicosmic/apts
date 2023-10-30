@@ -1,4 +1,4 @@
-import Game, {Action, ActionOutcome, Player, State} from './Game.ts';
+import Game, {ActionOutcome, Player, State, ValidAction} from './Game.js';
 
 export default class TicTacToeGame extends Game {
 	constructor(rowCount?: number, columnCount?: number) {
@@ -29,8 +29,8 @@ export class TicTacToeState extends State {
 	}
 
 	/// Getters
-	public getValidActions(): Array<boolean> {
-		const validActions: Array<boolean> = [];
+	public getValidActions(): Array<ValidAction> {
+		const validActions: Array<ValidAction> = [];
 		for (let i = 0; i < this.rowCount; i++) {
 			for (let j = 0; j < this.columnCount; j++) {
 				const cell = this.table[i]![j];

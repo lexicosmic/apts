@@ -5,12 +5,12 @@ import Game, {
 	Player,
 	State,
 	ValidAction,
-} from './TicTacToe.js';
+} from './Game.js';
 
 class MonteCarloNode {
-	// Attributes
-	readonly game: Game;
+	/// Attributes
 	readonly params: MonteCarloTreeSearchParams;
+	readonly game: Game;
 	readonly state: State;
 	readonly parent: MonteCarloNode | null;
 	readonly actionTaken: Action | null;
@@ -22,19 +22,19 @@ class MonteCarloNode {
 	valueSum: number = 0;
 
 	constructor(
-		game: Game,
 		params: MonteCarloTreeSearchParams,
+		game: Game,
 		state: State,
 		parent?: MonteCarloNode,
 		actionTaken?: Action,
 	) {
-		this.game = game;
 		this.params = params;
+		this.game = game;
 		this.state = state;
 		this.parent = parent ? parent : null;
 		this.actionTaken = typeof actionTaken === 'number' ? actionTaken : null;
 
-		this.expandableActions = this.game.getValidActions(this.state);
+		this.expandableActions = this.state.getValidActions();
 	}
 
 	/// Methods
@@ -97,13 +97,13 @@ class MonteCarloNode {
 		this.expandableActions[selectedAction] = false;
 
 		// Copy the state and play the action on the copy
-		let childState = this.state.map(row => row.slice());
-		childState = this.game.getNextState(childState, selectedAction, Player.X);
-		childState = this.game.changePerspective(childState, Player.O);
+		let childState = this.state.clone();
+		childState.performAction(selectedAction, Player.X);
+		childState.changePerspective(Player.X, Player.O);
 
 		const child = new MonteCarloNode(
-			this.game,
 			this.params,
+			this.game,
 			childState,
 			this,
 			selectedAction,
@@ -114,27 +114,17 @@ class MonteCarloNode {
 
 	// Simulate a game from the current state, returning the outcome value
 	simulate(): ActionOutcome['value'] {
-		const actionOutcome = this.game.getActionOutcome(
-			this.state,
-			this.actionTaken,
-		);
+		const actionOutcome = Game.getActionOutcome(this.state, this.actionTaken);
 		let outcomeValue = this.game.getOpponentValue(actionOutcome.value);
 		if (actionOutcome.isTerminal) return outcomeValue;
 
 		// Copy the state and play random actions, with alternate players, until the game is over
-		let rolloutState = this.state.map(row => row.slice());
+		let rolloutState = this.state.clone();
 		let rolloutPlayer = Player.X;
 		while (true) {
 			const selectedAction = this.#pickRandomAction();
-			rolloutState = this.game.getNextState(
-				rolloutState,
-				selectedAction,
-				rolloutPlayer,
-			);
-			const actionOutcome = this.game.getActionOutcome(
-				rolloutState,
-				selectedAction,
-			);
+			rolloutState.performAction(selectedAction, rolloutPlayer);
+			const actionOutcome = Game.getActionOutcome(rolloutState, selectedAction);
 			if (actionOutcome.isTerminal) {
 				if (rolloutPlayer === Player.O)
 					outcomeValue = this.game.getOpponentValue(actionOutcome.value);
@@ -168,7 +158,7 @@ export default class MonteCarloTreeSearch {
 
 	// Search for the best action to take
 	search(state: State): number[] {
-		const root = new MonteCarloNode(this.game, this.params, state);
+		const root = new MonteCarloNode(this.params, this.game, state);
 
 		for (let i = 0; i < this.params.numSearches; i++) {
 			let node = root;
@@ -176,10 +166,7 @@ export default class MonteCarloTreeSearch {
 			// Selection phase
 			while (node.isFullyExpanded()) node = node.selectBestChild();
 
-			const actionOutcome = this.game.getActionOutcome(
-				node.state,
-				node.actionTaken,
-			);
+			const actionOutcome = Game.getActionOutcome(node.state, node.actionTaken);
 			// Flip the value, as the action was taken by the opponent
 			let outcomeValue = this.game.getOpponentValue(actionOutcome.value);
 
@@ -196,7 +183,9 @@ export default class MonteCarloTreeSearch {
 		}
 
 		// Get the action probabilities from the root node
-		let actionProbabilities: number[] = new Array(this.game.actionSize).fill(0);
+		let actionProbabilities: number[] = new Array(
+			this.game.getActionSize(),
+		).fill(0);
 		for (const child of root.children)
 			actionProbabilities[child.actionTaken as number] = child.visitCount;
 		const sum = actionProbabilities.reduce((sum, value) => sum + value, 0);
