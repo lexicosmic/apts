@@ -1,15 +1,18 @@
 import * as tf from '@tensorflow/tfjs-node';
-import TicTacToe from '../engine/TicTacToe.ts';
-import ResNet from '../engine/ResNet.ts';
+import TicTacToe from '../engine/TicTacToe.js';
+import ResNet from '../engine/ResNet.js';
+
+// Load model
+const path = 'file://models/main_model/model.json';
+const model = await tf.loadLayersModel(path);
 
 // Set game and state data
 const game = new TicTacToe();
 const state = game.getInitialState();
 
-// Build model and save it
-const resNet = new ResNet(game, {numResBlocks: 4, numHiddenChannels: 64});
+// Set up the model
+const resNet = new ResNet(game, {model});
 resNet.summary();
-await resNet.save('file://models/structure');
 
 // Play a few moves
 state.print();
