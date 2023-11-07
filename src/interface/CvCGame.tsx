@@ -1,5 +1,5 @@
 import React, {useEffect} from 'react';
-import TicTacToe, {ActionOutcome, Player, State} from '../engine/TicTacToe.js';
+import Game, {ActionOutcome, Player, State} from '../engine/Game.js';
 import MonteCarloTreeSearch from '../engine/MonteCarloTree.js';
 import HistoryFrame from './HistoryFrame.js';
 import {performAction} from './PlayGame.js';
@@ -14,7 +14,7 @@ export const formattedPlayerName = (player: Player) => {
 };
 
 interface CvCGameProps {
-	game: TicTacToe;
+	game: Game;
 	state: State;
 	player: Player;
 	history: JSX.Element[];
@@ -40,32 +40,32 @@ export default function CvCGame({
 	useEffect(() => {
 		if (gameOver) return;
 
-		const neutralState = game.changePerspective(state, player);
+		const neutralState = state.clone();
+		neutralState.changePerspective(player, game.getOpponent(player));
 		const actionProbabilities = monteCarloTreeSearch.search(neutralState);
-		const action = actionProbabilities.indexOf(
+		const computerAction = actionProbabilities.indexOf(
 			Math.max(...actionProbabilities),
 		);
-		const currentGameOver = performAction({
-			action,
-			game,
+		const [nextState, outcome] = performAction({
+			action: computerAction,
 			state,
-			player,
+			player: player,
 			setOutcome,
 			setState,
 		});
-		setGameOver(currentGameOver);
+		setGameOver(outcome.isTerminal);
 		const historyFrame = (
 			<HistoryFrame
 				key={`history-${history.length + 1}`}
 				game={game}
-				state={JSON.parse(JSON.stringify(state))}
-				text={`${formattedPlayerName(player)} move: ${action}`}
+				state={JSON.parse(JSON.stringify(nextState))}
+				text={`${formattedPlayerName(player)} move: ${computerAction}`}
 				formattedCellText={formattedCellText}
 			/>
 		);
 		if (historyFrame !== null) setHistory([...history, historyFrame]);
 
-		if (!currentGameOver) setPlayer(game.getOpponent(player));
+		if (!outcome.isTerminal) setPlayer(game.getOpponent(player));
 	}, [player]);
 
 	return null;

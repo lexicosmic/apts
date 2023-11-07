@@ -1,11 +1,6 @@
 import React from 'react';
 import {Box, Text} from 'ink';
-import TicTacToe, {
-	Action,
-	ActionOutcome,
-	Player,
-	State,
-} from '../engine/TicTacToe.js';
+import Game, {Action, ActionOutcome, Player, State} from '../engine/Game.js';
 import ActionSelector from './ActionSelector.js';
 import {performAction} from './PlayGame.js';
 import HistoryFrame from './HistoryFrame.js';
@@ -20,7 +15,7 @@ export const formattedPlayerName = (player: Player) => {
 };
 
 interface PvPGameProps {
-	game: TicTacToe;
+	game: Game;
 	state: State;
 	player: Player;
 	history: JSX.Element[];
@@ -39,15 +34,19 @@ export default function PvPGame({
 	setOutcome,
 	setHistory,
 }: PvPGameProps) {
-	let newHistory = [...history];
+	// Interface
+	let nextHistory = [...history];
 	let userHistoryFrame: JSX.Element | null = null;
 
-	function handleActionSelect(action: Action) {
-		let gameOver = performAction({
+	function handleActionSelect(state: State, player: Player, action: Action) {
+		if (state === null || player === null || action === null) return;
+		let currentState = state.clone();
+		let currentPlayer = player;
+
+		let [nextState, outcome] = performAction({
 			action,
-			game,
-			state,
-			player,
+			state: currentState,
+			player: currentPlayer,
 			setOutcome,
 			setState,
 		});
@@ -55,14 +54,14 @@ export default function PvPGame({
 			<HistoryFrame
 				key={`history-${history.length}`}
 				game={game}
-				state={state}
-				text={`${formattedPlayerName(player)} move: ${action}`}
+				state={nextState}
+				text={`${formattedPlayerName(currentPlayer)} move: ${action}`}
 				formattedCellText={formattedCellText}
 			/>
 		);
-		if (userHistoryFrame !== null) newHistory.push(userHistoryFrame);
-		if (!gameOver) setPlayer(game.getOpponent(player));
-		setHistory(newHistory);
+		if (userHistoryFrame !== null) nextHistory.push(userHistoryFrame);
+		if (!outcome.isTerminal) setPlayer(game.getOpponent(currentPlayer));
+		setHistory(nextHistory);
 	}
 
 	return (
@@ -71,7 +70,9 @@ export default function PvPGame({
 			<ActionSelector
 				game={game}
 				state={state}
-				handleSelect={(action: Action) => handleActionSelect(action)}
+				handleSelect={(action: Action) =>
+					handleActionSelect(state, player, action)
+				}
 			/>
 		</Box>
 	);

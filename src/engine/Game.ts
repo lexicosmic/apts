@@ -9,7 +9,7 @@ export enum Outcome {
 	Loss = 0,
 }
 
-export type EncodedState = Array<State>;
+export type EncodedState = Array<Array<Array<number>>>;
 export type Action = number;
 export type ValidAction = boolean;
 export type ActionOutcome = {
@@ -21,16 +21,14 @@ export default abstract class Game {
 	/// Attributes
 	protected rowCount: number;
 	protected columnCount: number;
-	protected state: State;
 
 	constructor(rowCount?: number, columnCount?: number) {
 		this.rowCount = rowCount || 3;
 		this.columnCount = columnCount || 3;
-		this.state = this.getInitialState();
 	}
 
 	/// Getters
-	protected abstract getInitialState(): State;
+	public abstract getInitialState(): State;
 
 	public abstract getOpponent(player: Player): Player;
 
@@ -38,10 +36,6 @@ export default abstract class Game {
 	public abstract getOpponentValue(
 		value: ActionOutcome['value'],
 	): ActionOutcome['value'];
-
-	public getState(): State {
-		return this.state;
-	}
 
 	public getRowCount(): number {
 		return this.rowCount;
@@ -64,7 +58,7 @@ export default abstract class Game {
 		if (action === null ? false : state.checkWin(action))
 			return {isTerminal: true, value: Outcome.Win};
 		// Check if the board is full
-		if (state.getValidActions().length === 0)
+		if (state.getValidActions().some(validAction => validAction) === false)
 			return {isTerminal: true, value: Outcome.Loss};
 		// No terminal state
 		return {isTerminal: false, value: Outcome.Loss};
@@ -89,6 +83,8 @@ export abstract class State {
 	public abstract getValidActions(): Array<ValidAction>;
 
 	public getPlayerAt(line: number, column: number): Player | null {
+		if (line < 0 || line >= this.rowCount) return null;
+		if (column < 0 || column >= this.columnCount) return null;
 		const player = this.table[line][column];
 		if (player === undefined) return null;
 		return player;
@@ -97,8 +93,8 @@ export abstract class State {
 	// Return three 2D-arrays. Each one represents a player.
 	// The value is 1 if the cell is occupied by the player, or 0 otherwise
 	// The order of the matrices is: O, None, X
-	public getEncodedState() {
-		const encodedState = Array.from(Array(3), () =>
+	public getEncodedState(): EncodedState {
+		const encodedState: EncodedState = Array.from(Array(3), () =>
 			Array.from(Array(this.rowCount), () => Array(this.columnCount).fill(0)),
 		);
 		for (let i = 0; i < this.rowCount; i++) {

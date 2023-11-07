@@ -1,14 +1,14 @@
 import * as tf from '@tensorflow/tfjs-node';
 import fs from 'fs';
 import {MonteCarloTreeSearchParams, TrainModelParams} from '../types.ts';
-import ResNet from './ResNet.js';
 import Game, {
 	Action,
 	ActionOutcome,
+	EncodedState,
 	Player,
 	State,
-	EncodedState,
-} from './TicTacToe.ts';
+} from './Game.ts';
+import ResNet from './ResNet.js';
 import MonteCarloTreeSearch from './MonteCarloTree.ts';
 
 type GameMemoryBlock = {
@@ -19,7 +19,7 @@ type GameMemoryBlock = {
 type GameMemory = GameMemoryBlock[];
 
 type TrainingMemoryBlock = {
-	encodedState: State[];
+	encodedState: EncodedState;
 	actionProbabilities: number[];
 	outcomeValue: ActionOutcome['value'];
 };
@@ -52,7 +52,8 @@ export default class AlphaZero {
 
 		while (true) {
 			// Get the state from the perspective of the current player and save it in the game memory
-			const neutralState = this.game.changePerspective(state, player);
+			const neutralState = state.clone();
+			neutralState.changePerspective(player, this.game.getOpponent(player));
 			const actionProbabilities = this.mcts.search(neutralState);
 			gameMemory.push({state: neutralState, actionProbabilities, player});
 
@@ -67,8 +68,8 @@ export default class AlphaZero {
 			});
 
 			// Perform the action and check if the game is over
-			state = this.game.getNextState(state, pickedAction, player);
-			const actionOutcome = this.game.getActionOutcome(state, pickedAction);
+			state.performAction(pickedAction, player);
+			const actionOutcome = Game.getActionOutcome(state, pickedAction);
 
 			if (actionOutcome.isTerminal) {
 				// When the game is over, construct the training memory from the perspective of the current player
@@ -80,7 +81,7 @@ export default class AlphaZero {
 							? actionOutcome.value
 							: this.game.getOpponentValue(actionOutcome.value);
 					trainingMemory.push({
-						encodedState: this.game.getEncodedState(memoryBlock.state),
+						encodedState: memoryBlock.state.getEncodedState(),
 						actionProbabilities: memoryBlock.actionProbabilities,
 						outcomeValue: memoryOutcomeValue,
 					});

@@ -1,9 +1,9 @@
 import React from 'react';
 import SelectInput from 'ink-select-input';
-import TicTacToe, {Action, State} from '../engine/TicTacToe.js';
+import Game, {Action, State} from '../engine/Game.js';
 
 interface ActionSelectorProps {
-	game: TicTacToe;
+	game: Game;
 	state: State;
 	handleSelect: (action: Action) => void;
 }
@@ -12,7 +12,7 @@ export default function ActionSelector({
 	state,
 	handleSelect,
 }: ActionSelectorProps) {
-	const validActions = game.getValidActions(state);
+	const validActions = state.getValidActions();
 	const items = [];
 	for (let i = 0; i < validActions.length; i++) {
 		const actionIsValid = validActions[i];

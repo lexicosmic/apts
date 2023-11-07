@@ -1,20 +1,21 @@
 import * as tf from '@tensorflow/tfjs-node';
 import fs from 'fs';
-import TicTacToe, {Player} from '../engine/TicTacToe.ts';
+import TicTacToe from '../engine/TicTacToe.ts';
 import ResNet from '../engine/ResNet.ts';
+import {Player} from '../engine/Game.ts';
 
 const game = new TicTacToe();
 let state = game.getInitialState();
-state = game.getNextState(state, 0, Player.X);
-state = game.getNextState(state, 4, Player.O);
-state = game.getNextState(state, 5, Player.X);
-state = game.getNextState(state, 8, Player.O);
-game.printState(state);
+state.performAction(0, Player.X);
+state.performAction(4, Player.O);
+state.performAction(5, Player.X);
+state.performAction(8, Player.O);
+state.print();
 
 const resNet = new ResNet(game, {numResBlocks: 4, numHiddenChannels: 64});
 
-const encodedState = game.getEncodedState(state);
-const outcome = game.getActionOutcome(state, 2);
+const encodedState = state.getEncodedState();
+const outcome = TicTacToe.getActionOutcome(state, 2);
 const inputsTensor = tf.tensor4d([encodedState]); // Nx3x3x3 - Batch of encoded states
 const outputPolicyTensor = tf.tensor2d([[0, 0, 0, 0, 0, 0, 0, 0, 0]]); // N - Batch of outcomes
 const outputValueTensor = tf.tensor2d([[outcome.value]]); // N - Batch of outcomes

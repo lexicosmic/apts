@@ -4,7 +4,7 @@ import ResNet from '../engine/ResNet.ts';
 
 // Set game and state data
 const game = new TicTacToe();
-const state = game.getState();
+const state = game.getInitialState();
 state.print();
 state.performAction(2, 1);
 state.print();
@@ -18,13 +18,13 @@ await resNet.save('file://models/structure');
 
 // Calculate the policy and value from the neural network
 const tensorState = tf
-	.tensor(game.getState().getEncodedState())
+	.tensor(state.getEncodedState())
 	.expandDims(0) as tf.Tensor4D;
 const [policy, value] = resNet.predict(tensorState);
 const softMaxPolicy = tf.softmax(policy, 1).squeeze([0]);
 
 // Mask the policy to only allow valid actions
-const validActions = game.getState().getValidActions();
+const validActions = state.getValidActions();
 const maskedPolicy = softMaxPolicy.mul(tf.tensor(validActions).expandDims(0));
 const sum = maskedPolicy.sum().arraySync() as number;
 const actionProbabilities = maskedPolicy

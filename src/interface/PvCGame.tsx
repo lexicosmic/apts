@@ -1,11 +1,6 @@
 import React from 'react';
 import {Box, Text} from 'ink';
-import TicTacToe, {
-	Action,
-	ActionOutcome,
-	Player,
-	State,
-} from '../engine/TicTacToe.js';
+import Game, {Action, ActionOutcome, Player, State} from '../engine/Game.js';
 import MonteCarloTreeSearch from '../engine/MonteCarloTree.js';
 import HistoryFrame from './HistoryFrame.js';
 import {performAction} from './PlayGame.js';
@@ -21,7 +16,7 @@ export const formattedPlayerName = (player: Player) => {
 };
 
 interface PvCGameProps {
-	game: TicTacToe;
+	game: Game;
 	state: State;
 	player: Player;
 	history: JSX.Element[];
@@ -42,63 +37,69 @@ export default function PvCGame({
 	setOutcome,
 	setHistory,
 }: PvCGameProps) {
-	let newHistory = [...history];
+	// Interface
+	let nextHistory: JSX.Element[] = [...history];
 	let userHistoryFrame: JSX.Element | null = null;
 	let computerHistoryFrame: JSX.Element | null = null;
 
-	function handleActionSelect(action: Action) {
+	function handleActionSelect(state: State, player: Player, action: Action) {
+		if (state === null || player === null || action === null) return;
+		let currentState = state.clone();
+		let currentPlayer = player;
+
 		// User turn
-		if (action !== null) {
-			let gameOver = performAction({
-				action,
-				game,
-				state,
-				player,
+		let [nextState, outcome] = performAction({
+			action,
+			state: currentState,
+			player: currentPlayer,
+			setOutcome,
+			setState,
+		});
+		userHistoryFrame = (
+			<HistoryFrame
+				key={`history-${history.length}`}
+				game={game}
+				state={JSON.parse(JSON.stringify(nextState))}
+				text={`${formattedPlayerName(currentPlayer)} move: ${action}`}
+				formattedCellText={formattedCellText}
+			/>
+		);
+		if (userHistoryFrame !== null) nextHistory.push(userHistoryFrame);
+		currentState = nextState;
+
+		if (!outcome.isTerminal) {
+			currentPlayer = game.getOpponent(currentPlayer);
+			// Computer turn
+			let neutralState = currentState.clone();
+			neutralState.changePerspective(
+				currentPlayer,
+				game.getOpponent(currentPlayer),
+			);
+			const actionProbabilities = monteCarloTreeSearch.search(neutralState);
+			let computerAction = actionProbabilities.indexOf(
+				Math.max(...actionProbabilities),
+			);
+			let [nextState, outcome] = performAction({
+				action: computerAction,
+				state: currentState,
+				player: currentPlayer,
 				setOutcome,
 				setState,
 			});
-			userHistoryFrame = (
+			computerHistoryFrame = (
 				<HistoryFrame
-					key={`history-${history.length}`}
+					key={`history-${history.length + 1}`}
 					game={game}
-					state={JSON.parse(JSON.stringify(state))}
-					text={`${formattedPlayerName(player)} move: ${action}`}
+					state={JSON.parse(JSON.stringify(nextState))}
+					text={`${formattedPlayerName(currentPlayer)} move: ${computerAction}`}
 					formattedCellText={formattedCellText}
 				/>
 			);
-			if (userHistoryFrame !== null) newHistory.push(userHistoryFrame);
-
-			if (!gameOver) {
-				player = game.getOpponent(player);
-
-				// Computer turn
-				const neutralState = game.changePerspective(state, player);
-				const actionProbabilities = monteCarloTreeSearch.search(neutralState);
-				action = actionProbabilities.indexOf(Math.max(...actionProbabilities));
-				gameOver = performAction({
-					action,
-					game,
-					state,
-					player,
-					setOutcome,
-					setState,
-				});
-				computerHistoryFrame = (
-					<HistoryFrame
-						key={`history-${history.length + 1}`}
-						game={game}
-						state={JSON.parse(JSON.stringify(state))}
-						text={`${formattedPlayerName(player)} move: ${action}`}
-						formattedCellText={formattedCellText}
-					/>
-				);
-				if (computerHistoryFrame !== null)
-					newHistory.push(computerHistoryFrame);
-				if (gameOver) setPlayer(player);
-			}
+			if (computerHistoryFrame !== null) nextHistory.push(computerHistoryFrame);
+			if (outcome.isTerminal) setPlayer(currentPlayer);
 		}
 
-		setHistory(newHistory);
+		setHistory(nextHistory);
 	}
 
 	return (
@@ -108,7 +109,9 @@ export default function PvCGame({
 				<ActionSelector
 					game={game}
 					state={state}
-					handleSelect={(action: Action) => handleActionSelect(action)}
+					handleSelect={(action: Action) =>
+						handleActionSelect(state, player, action)
+					}
 				/>
 			) : null}
 		</Box>

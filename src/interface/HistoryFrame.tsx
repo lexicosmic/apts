@@ -1,10 +1,10 @@
 import React from 'react';
 import {Box, Text} from 'ink';
-import TicTacToe, {Player, State} from '../engine/TicTacToe.js';
 import Board from './Board.js';
+import Game, {Player, State} from '../engine/Game.js';
 
 type HistoryFrameProps = {
-	game: TicTacToe;
+	game: Game;
 	state: State;
 	text: string;
 	formattedCellText: (player: Player) => string;

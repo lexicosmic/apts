@@ -15,7 +15,7 @@ export const monteCarloTreeSearchParams: MonteCarloTreeSearchParams = {
 };
 export const selfPlayMemoryParams: SelfPlayMemoryParams = {
 	...monteCarloTreeSearchParams,
-	numSelfPlayIterations: 500,
+	numSelfPlayIterations: 10,
 };
 export const trainModelParams: TrainModelParams = {
 	numIterations: 3,

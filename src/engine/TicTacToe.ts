@@ -6,7 +6,7 @@ export default class TicTacToeGame extends Game {
 	}
 
 	/// Getters
-	protected getInitialState(): State {
+	public getInitialState(): State {
 		return new TicTacToeState(this.rowCount, this.columnCount);
 	}
 
