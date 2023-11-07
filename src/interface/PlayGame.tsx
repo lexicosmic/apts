@@ -179,11 +179,11 @@ export default function PlayGame({gameMode}: PlayGameProps) {
 			<HistoryFrame
 				key={`history--1`}
 				game={game}
-				state={state}
+				state={game.getInitialState()}
 				formattedCellText={formattedCellText}
 				text="Good luck!"
 			/>
-			{/* {history} */}
+			{history}
 			{gameOutcome.isTerminal ? (
 				<>
 					<Text>

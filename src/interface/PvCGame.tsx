@@ -48,7 +48,7 @@ export default function PvCGame({
 		let currentPlayer = player;
 
 		// User turn
-		let [nextState, outcome] = performAction({
+		const [nextState, outcome] = performAction({
 			action,
 			state: currentState,
 			player: currentPlayer,
@@ -59,7 +59,7 @@ export default function PvCGame({
 			<HistoryFrame
 				key={`history-${history.length}`}
 				game={game}
-				state={JSON.parse(JSON.stringify(nextState))}
+				state={nextState}
 				text={`${formattedPlayerName(currentPlayer)} move: ${action}`}
 				formattedCellText={formattedCellText}
 			/>
@@ -79,7 +79,7 @@ export default function PvCGame({
 			let computerAction = actionProbabilities.indexOf(
 				Math.max(...actionProbabilities),
 			);
-			let [nextState, outcome] = performAction({
+			const [nextState, outcome] = performAction({
 				action: computerAction,
 				state: currentState,
 				player: currentPlayer,
@@ -90,7 +90,7 @@ export default function PvCGame({
 				<HistoryFrame
 					key={`history-${history.length + 1}`}
 					game={game}
-					state={JSON.parse(JSON.stringify(nextState))}
+					state={nextState}
 					text={`${formattedPlayerName(currentPlayer)} move: ${computerAction}`}
 					formattedCellText={formattedCellText}
 				/>

@@ -58,7 +58,7 @@ export default function CvCGame({
 			<HistoryFrame
 				key={`history-${history.length + 1}`}
 				game={game}
-				state={JSON.parse(JSON.stringify(nextState))}
+				state={nextState}
 				text={`${formattedPlayerName(player)} move: ${computerAction}`}
 				formattedCellText={formattedCellText}
 			/>
