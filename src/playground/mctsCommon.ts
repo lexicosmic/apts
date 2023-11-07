@@ -1,8 +1,8 @@
 import MonteCarloTreeSearch from '../engine/MonteCarloTreeCommon.ts';
-import TicTacToe from '../engine/TicTacToe.ts';
+import {gameParams} from '../train/parameters.ts';
 
 // Set game and state data
-const game = new TicTacToe();
+const game = gameParams.game;
 const state = game.getInitialState();
 state.performAction(0, 1);
 state.performAction(6, -1);

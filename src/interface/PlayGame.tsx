@@ -90,7 +90,7 @@ async function loadModel(
 	setMonteCarloTreeSearch: (monteCarloTreeSearch: MonteCarloTreeSearch) => void,
 ) {
 	const model = await tf.loadLayersModel(
-		'file://models/blind_1698680853804/blind_afterTrain/model.json',
+		'file://models/tictactoe/main_model/model.json',
 	);
 	const resNet = new ResNet(game, {model});
 	const monteCarloTreeSearch = new MonteCarloTreeSearch(game, resNet, {

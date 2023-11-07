@@ -1,13 +1,13 @@
 import * as tf from '@tensorflow/tfjs-node';
-import TicTacToe from '../engine/TicTacToe.js';
 import ResNet from '../engine/ResNet.js';
+import {gameParams} from '../train/parameters.js';
 
 // Load model
-const path = 'file://models/main_model/model.json';
+const path = `file://models/${gameParams.directoryName}/main_model/model.json`;
 const model = await tf.loadLayersModel(path);
 
 // Set game and state data
-const game = new TicTacToe();
+const game = gameParams.game;
 const state = game.getInitialState();
 
 // Set up the model

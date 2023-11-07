@@ -1,15 +1,15 @@
 import * as tf from '@tensorflow/tfjs-node';
+import ResNet from '../engine/ResNet.ts';
+import AlphaZero from '../engine/AlphaZero.ts';
 import {
+	gameParams,
 	mainModelDirectory,
 	monteCarloTreeSearchParams,
 	selfPlayMemoryParams,
 } from './parameters.ts';
 import {writeTrainingData} from './util.ts';
-import TicTacToe from '../engine/TicTacToe.ts';
-import ResNet from '../engine/ResNet.ts';
-import AlphaZero from '../engine/AlphaZero.ts';
 
-const game = new TicTacToe();
+const game = gameParams.game;
 const path = `file://models/${mainModelDirectory}/model.json`;
 const model = await tf.loadLayersModel(path); // Use model previously trained
 const resNet = new ResNet(game, {model});

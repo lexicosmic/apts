@@ -1,9 +1,15 @@
+import TicTacToeGame from '../engine/TicTacToe.ts';
 import {
 	ResNetBuildModelParams,
 	MonteCarloTreeSearchParams,
 	SelfPlayMemoryParams,
 	TrainModelParams,
 } from '../types.ts';
+
+export const gameParams = {
+	directoryName: 'tictactoe',
+	game: new TicTacToeGame(),
+};
 
 export const resNetBuildModelParams: ResNetBuildModelParams = {
 	numResBlocks: 4,
@@ -15,7 +21,7 @@ export const monteCarloTreeSearchParams: MonteCarloTreeSearchParams = {
 };
 export const selfPlayMemoryParams: SelfPlayMemoryParams = {
 	...monteCarloTreeSearchParams,
-	numSelfPlayIterations: 10,
+	numSelfPlayIterations: 500,
 };
 export const trainModelParams: TrainModelParams = {
 	numIterations: 3,
@@ -24,10 +30,10 @@ export const trainModelParams: TrainModelParams = {
 	learningRate: 0.00005,
 };
 
-export const mainModelDirectory = `main_model`;
+export const mainModelDirectory = `${gameParams.directoryName}/main_model`;
 
 export const trainingDataIds = [
-	// '1694373039989',
-	// '1694373330714',
-	// '1694373607234',
+	'1694373039989',
+	'1694373330714',
+	'1694373607234',
 ];

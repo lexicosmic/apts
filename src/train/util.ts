@@ -7,7 +7,10 @@ import {
 	TrainModelParams,
 } from '../types.ts';
 import {TrainingMemory} from '../engine/AlphaZero.ts';
-import {selfPlayMemoryParams as defaultMemoryParams} from './parameters.ts';
+import {
+	selfPlayMemoryParams as defaultMemoryParams,
+	gameParams,
+} from './parameters.ts';
 
 function getParamsToExport_TrainingData(
 	trainingDataId: string,
@@ -114,13 +117,16 @@ export function writeTrainingData(
 		);
 
 	try {
-		fs.mkdirSync(`./trainingData/trainingData_${currentTime}`);
+		fs.mkdirSync(
+			`./trainingData/${gameParams.directoryName}/trainingData_${currentTime}`,
+			{recursive: true},
+		);
 		fs.writeFileSync(
-			`./trainingData/trainingData_${currentTime}/trainingData.json`,
+			`./trainingData/${gameParams.directoryName}/trainingData_${currentTime}/trainingData.json`,
 			JSON.stringify(trainingMemory),
 		);
 		fs.writeFileSync(
-			`./trainingData/trainingData_${currentTime}/parameters.json`,
+			`./trainingData/${gameParams.directoryName}/trainingData_${currentTime}/parameters.json`,
 			JSON.stringify(paramsToExport),
 		);
 	} catch (e) {
@@ -142,7 +148,7 @@ export function writeModelParameters(
 		);
 
 	try {
-		fs.mkdirSync(`./models/${modelDirectory}`);
+		fs.mkdirSync(`./models/${modelDirectory}`, {recursive: true});
 		fs.writeFileSync(
 			`./models/${modelDirectory}/parameters.json`,
 			JSON.stringify(paramsToExport),
