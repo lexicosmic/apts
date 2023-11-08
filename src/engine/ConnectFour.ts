@@ -1,13 +1,13 @@
 import Game, {ActionOutcome, Player, State, ValidAction} from './Game.js';
 
-export default class TicTacToeGame extends Game {
-	constructor(rowCount: number, columnCount: number) {
-		super(rowCount, columnCount, rowCount * columnCount);
+export default class ConnectFourGame extends Game {
+	constructor(rowCount: number, columnCount: number, actionSize: number) {
+		super(rowCount, columnCount, actionSize);
 	}
 
 	/// Getters
 	public getInitialState(): State {
-		return new TicTacToeState(this.rowCount, this.columnCount);
+		return new ConnectFourState(this.rowCount, this.columnCount);
 	}
 
 	public getOpponent(player: Player): Player {
@@ -23,7 +23,7 @@ export default class TicTacToeGame extends Game {
 	}
 }
 
-export class TicTacToeState extends State {
+export class ConnectFourState extends State {
 	constructor(rowCount: number, columnCount: number) {
 		super(rowCount, columnCount);
 	}
@@ -31,11 +31,9 @@ export class TicTacToeState extends State {
 	/// Getters
 	public getValidActions(): Array<ValidAction> {
 		const validActions: Array<ValidAction> = [];
-		for (let i = 0; i < this.rowCount; i++) {
-			for (let j = 0; j < this.columnCount; j++) {
-				const cell = this.table[i]![j];
-				validActions.push(cell === Player.None);
-			}
+		for (let i = 0; i < this.columnCount; i++) {
+			const cell = this.table[0]![i];
+			validActions.push(cell === Player.None);
 		}
 		return validActions;
 	}
@@ -77,9 +75,15 @@ export class TicTacToeState extends State {
 	}
 
 	public performAction(action: number, player: Player): void {
-		const row = Math.floor(action / this.columnCount);
-		const column = action % this.columnCount;
+		const column = action;
+		let row = -1;
+		for (let i = this.rowCount - 1; i >= 0; i--) {
+			if (this.table[i]![column] === Player.None) {
+				row = i;
+				break;
+			}
+		}
 		// Play the action on the given state
-		this.table[row][column] = player;
+		if (row !== -1) this.table[row][column] = player;
 	}
 }

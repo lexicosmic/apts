@@ -21,10 +21,12 @@ export default abstract class Game {
 	/// Attributes
 	protected rowCount: number;
 	protected columnCount: number;
+	protected actionSize: number;
 
-	constructor(rowCount?: number, columnCount?: number) {
-		this.rowCount = rowCount || 3;
-		this.columnCount = columnCount || 3;
+	constructor(rowCount: number, columnCount: number, actionSize: number) {
+		this.rowCount = rowCount;
+		this.columnCount = columnCount;
+		this.actionSize = actionSize;
 	}
 
 	/// Getters
@@ -46,7 +48,7 @@ export default abstract class Game {
 	}
 
 	public getActionSize(): number {
-		return this.rowCount * this.columnCount;
+		return this.actionSize;
 	}
 
 	// Return if the game is over and if the player has won
@@ -82,10 +84,10 @@ export abstract class State {
 	/// Getters
 	public abstract getValidActions(): Array<ValidAction>;
 
-	public getPlayerAt(line: number, column: number): Player | null {
-		if (line < 0 || line >= this.rowCount) return null;
+	public getPlayerAt(row: number, column: number): Player | null {
+		if (row < 0 || row >= this.rowCount) return null;
 		if (column < 0 || column >= this.columnCount) return null;
-		const player = this.table[line][column];
+		const player = this.table[row][column];
 		if (player === undefined) return null;
 		return player;
 	}

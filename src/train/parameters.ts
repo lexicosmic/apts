@@ -1,3 +1,4 @@
+import ConnectFourGame from '../engine/ConnectFour.ts';
 import TicTacToeGame from '../engine/TicTacToe.ts';
 import {
 	ResNetBuildModelParams,
@@ -6,9 +7,14 @@ import {
 	TrainModelParams,
 } from '../types.ts';
 
+enum GameNames {
+	TicTacToe = 'tictactoe',
+	ConnectFour = 'connectfour',
+}
+
 export const gameParams = {
-	directoryName: 'tictactoe',
-	game: new TicTacToeGame(),
+	directoryName: GameNames.ConnectFour,
+	game: new ConnectFourGame(6, 7, 7),
 };
 
 export const resNetBuildModelParams: ResNetBuildModelParams = {

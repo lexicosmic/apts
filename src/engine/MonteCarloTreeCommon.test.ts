@@ -32,7 +32,7 @@ describe('MonteCarloTreeSearch', () => {
 				monteCarloTreeSearch.search(testState);
 
 			// Make assertions on the returned action probabilities
-			expect(actionProbabilities).toHaveLength(game.actionSize);
+			expect(actionProbabilities).toHaveLength(game.getActionSize());
 			expect(actionProbabilities.every(probability => probability >= 0)).toBe(
 				true,
 			);

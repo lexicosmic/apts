@@ -33,7 +33,6 @@ class MonteCarloNode {
 		this.state = state;
 		this.parent = parent ? parent : null;
 		this.actionTaken = typeof actionTaken === 'number' ? actionTaken : null;
-
 		this.expandableActions = this.state.getValidActions();
 	}
 

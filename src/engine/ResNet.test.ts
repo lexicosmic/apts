@@ -31,7 +31,7 @@ describe('ResNet', () => {
 			// Make assertions on the returned tensors
 			expect(policyHead instanceof tf.Tensor).toBe(true);
 			expect(valueHead instanceof tf.Tensor).toBe(true);
-			expect(policyHead.shape).toEqual([1, game.actionSize]);
+			expect(policyHead.shape).toEqual([1, game.getActionSize()]);
 			expect(valueHead.shape).toEqual([1, 1]);
 		});
 	});
