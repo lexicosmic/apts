@@ -1,7 +1,16 @@
 import Game, {ActionOutcome, Player, State, ValidAction} from './Game.js';
 
 export default class ConnectFourGame extends Game {
+	public static WINDOW_SIZE = 4;
+
 	constructor(rowCount: number, columnCount: number, actionSize: number) {
+		if (
+			rowCount < ConnectFourGame.WINDOW_SIZE ||
+			columnCount < ConnectFourGame.WINDOW_SIZE
+		)
+			throw new Error(
+				`The board must be at least ${ConnectFourGame.WINDOW_SIZE}x${ConnectFourGame.WINDOW_SIZE}`,
+			);
 		super(rowCount, columnCount, actionSize);
 	}
 
@@ -57,12 +66,16 @@ export class ConnectFourState extends State {
 	}
 
 	private checkWinOnRow(row: number, column: number, player: Player): boolean {
-		for (let j = Math.max(0, column - 3); j <= Math.min(column, 3); j++) {
-			// For each window of 4 cells...
+		for (
+			let j = Math.max(0, column - ConnectFourGame.WINDOW_SIZE - 1);
+			j <= Math.min(column, ConnectFourGame.WINDOW_SIZE - 1);
+			j++
+		) {
+			// For each window of X cells...
 			if (this.table[row]![j] === player) {
 				let win = true;
 				// Check if all the cells in the window are from the same player
-				for (let k = 1; k < 4; k++) {
+				for (let k = 1; k < ConnectFourGame.WINDOW_SIZE; k++) {
 					if (this.table[row]![j + k] !== player) {
 						win = false;
 						break;
@@ -74,29 +87,39 @@ export class ConnectFourState extends State {
 		return false;
 	}
 
+	private checkWinOnColumn(
+		row: number,
+		column: number,
+		player: Player,
+	): boolean {
+		if (row > this.rowCount - ConnectFourGame.WINDOW_SIZE) return false;
+		// Check if all the cells in the window are from the same player
+		for (let i = row; i < row + ConnectFourGame.WINDOW_SIZE; i++) {
+			if (this.table[i]![column] !== player) return false;
+		}
+		return true;
+	}
+
 	public checkWin(action: number): boolean {
 		// Get who played the action, and its position
 		const column = action;
 		let row = -1;
 		for (let i = this.rowCount - 1; i >= 0; i--) {
 			if (this.table[i]![column] === Player.None) {
-				row = i + 1; // The row where the action was played
+				row = i;
 				break;
 			}
 		}
-		if (row === -1) return false;
+		row = row + 1; // The row where the action was played
 		const player = this.table[row]![column];
 
-		// Won on the row
+		if (this.checkWinOnColumn(row, column, player)) return true;
 		if (this.checkWinOnRow(row, column, player)) return true;
-
-		// Won on the column
-		if (this.table.every(row => row[column] === player)) return true;
 		// Won on the primary diagonal
-		if (this.table.every((row, i) => row[i] === player)) return true;
-		// Won on the secondary diagonal
-		if (this.table.every((row, i) => row[this.columnCount - 1 - i] === player))
-			return true;
+		// if (this.table.every((row, i) => row[i] === player)) return true;
+		// // Won on the secondary diagonal
+		// if (this.table.every((row, i) => row[this.columnCount - 1 - i] === player))
+		// return true;
 		// No win
 		return false;
 	}

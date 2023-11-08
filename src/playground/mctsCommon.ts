@@ -1,4 +1,3 @@
-import Game from '../engine/Game.ts';
 import MonteCarloTreeSearch from '../engine/MonteCarloTreeCommon.ts';
 import {gameParams} from '../train/parameters.ts';
 
@@ -11,11 +10,16 @@ state.performAction(3, 1);
 state.performAction(1, 1);
 state.performAction(0, 1);
 state.performAction(4, 1);
-state.performAction(6, 1);
+state.performAction(4, 1);
+state.performAction(4, 1);
+// state.performAction(4, 1);
+// state.performAction(4, -1);
+state.performAction(4, 1);
+state.performAction(5, 1);
 state.performAction(5, 1);
 
 state.print();
-console.log(state.checkWin(3));
+console.log(state.checkWin(4));
 // state.performAction(6, -1);
 // state.performAction(1, 1);
 // state.performAction(6, -1);
