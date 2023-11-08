@@ -56,13 +56,40 @@ export class ConnectFourState extends State {
 		console.log(boardString);
 	}
 
+	private checkWinOnRow(row: number, column: number, player: Player): boolean {
+		for (let j = Math.max(0, column - 3); j <= Math.min(column, 3); j++) {
+			// For each window of 4 cells...
+			if (this.table[row]![j] === player) {
+				let win = true;
+				// Check if all the cells in the window are from the same player
+				for (let k = 1; k < 4; k++) {
+					if (this.table[row]![j + k] !== player) {
+						win = false;
+						break;
+					}
+				}
+				if (win) return true;
+			}
+		}
+		return false;
+	}
+
 	public checkWin(action: number): boolean {
-		const row = Math.floor(action / this.columnCount);
-		const column = action % this.columnCount;
+		// Get who played the action, and its position
+		const column = action;
+		let row = -1;
+		for (let i = this.rowCount - 1; i >= 0; i--) {
+			if (this.table[i]![column] === Player.None) {
+				row = i + 1; // The row where the action was played
+				break;
+			}
+		}
+		if (row === -1) return false;
 		const player = this.table[row]![column];
 
 		// Won on the row
-		if (this.table[row]!.every(cell => cell === player)) return true;
+		if (this.checkWinOnRow(row, column, player)) return true;
+
 		// Won on the column
 		if (this.table.every(row => row[column] === player)) return true;
 		// Won on the primary diagonal
@@ -79,7 +106,7 @@ export class ConnectFourState extends State {
 		let row = -1;
 		for (let i = this.rowCount - 1; i >= 0; i--) {
 			if (this.table[i]![column] === Player.None) {
-				row = i;
+				row = i; // The row where the action will be played
 				break;
 			}
 		}
