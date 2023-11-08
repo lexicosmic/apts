@@ -3,7 +3,7 @@ import Game, {ActionOutcome, Player, State, ValidAction} from './Game.js';
 export default class ConnectFourGame extends Game {
 	public static WINDOW_SIZE = 4;
 
-	constructor(rowCount: number, columnCount: number, actionSize: number) {
+	constructor(rowCount: number, columnCount: number) {
 		if (
 			rowCount < ConnectFourGame.WINDOW_SIZE ||
 			columnCount < ConnectFourGame.WINDOW_SIZE
@@ -11,7 +11,7 @@ export default class ConnectFourGame extends Game {
 			throw new Error(
 				`The board must be at least ${ConnectFourGame.WINDOW_SIZE}x${ConnectFourGame.WINDOW_SIZE}`,
 			);
-		super(rowCount, columnCount, actionSize);
+		super(rowCount, columnCount, columnCount);
 	}
 
 	/// Getters
@@ -28,7 +28,7 @@ export default class ConnectFourGame extends Game {
 	public getOpponentValue(
 		value: ActionOutcome['value'],
 	): ActionOutcome['value'] {
-		return Math.abs(-value);
+		return -value + 0;
 	}
 }
 
@@ -226,6 +226,7 @@ export class ConnectFourState extends State {
 			}
 		}
 		row = row + 1; // The row where the action was played
+		if (row > this.rowCount - 1) return false;
 		const player = this.table[row]![column];
 
 		if (this.checkWinOnColumn(row, column, player)) return true;

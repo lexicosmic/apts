@@ -113,9 +113,12 @@ class MonteCarloNode {
 
 	// Simulate a game from the current state, returning the outcome value
 	simulate(): ActionOutcome['value'] {
-		const actionOutcome = Game.getActionOutcome(this.state, this.actionTaken);
-		let outcomeValue = this.game.getOpponentValue(actionOutcome.value);
-		if (actionOutcome.isTerminal) return outcomeValue;
+		let {isTerminal, value} = Game.getActionOutcome(
+			this.state,
+			this.actionTaken,
+		);
+		value = this.game.getOpponentValue(value);
+		if (isTerminal) return value;
 
 		// Copy the state and play random actions, with alternate players, until the game is over
 		let rolloutState = this.state.clone();
@@ -124,10 +127,12 @@ class MonteCarloNode {
 			const selectedAction = this.#pickRandomAction();
 			rolloutState.performAction(selectedAction, rolloutPlayer);
 			const actionOutcome = Game.getActionOutcome(rolloutState, selectedAction);
-			if (actionOutcome.isTerminal) {
+			isTerminal = actionOutcome.isTerminal;
+			value = actionOutcome.value;
+			if (isTerminal) {
 				if (rolloutPlayer === Player.O)
-					outcomeValue = this.game.getOpponentValue(actionOutcome.value);
-				return outcomeValue;
+					value = this.game.getOpponentValue(value);
+				return value;
 			}
 			rolloutPlayer = this.game.getOpponent(rolloutPlayer);
 		}

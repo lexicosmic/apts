@@ -19,7 +19,7 @@ export default class TicTacToeGame extends Game {
 	public getOpponentValue(
 		value: ActionOutcome['value'],
 	): ActionOutcome['value'] {
-		return Math.abs(-value);
+		return -value + 0;
 	}
 }
 

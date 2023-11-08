@@ -14,7 +14,7 @@ enum GameNames {
 
 export const gameParams = {
 	directoryName: GameNames.ConnectFour,
-	game: new ConnectFourGame(6, 7, 7),
+	game: new ConnectFourGame(9, 9),
 };
 
 export const resNetBuildModelParams: ResNetBuildModelParams = {

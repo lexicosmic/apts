@@ -59,7 +59,7 @@ export default abstract class Game {
 		// Check if the player has won
 		if (action === null ? false : state.checkWin(action))
 			return {isTerminal: true, value: Outcome.Win};
-		// Check if the board is full
+		// Check if the game is a draw
 		if (state.getValidActions().some(validAction => validAction) === false)
 			return {isTerminal: true, value: Outcome.Loss};
 		// No terminal state
