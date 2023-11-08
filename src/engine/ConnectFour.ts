@@ -66,9 +66,18 @@ export class ConnectFourState extends State {
 	}
 
 	private checkWinOnRow(row: number, column: number, player: Player): boolean {
+		const firstWindowColumn = Math.max(
+			0,
+			column - ConnectFourGame.WINDOW_SIZE + 1,
+		);
+		const lastWindowColumn = Math.min(
+			this.columnCount - 1,
+			column + ConnectFourGame.WINDOW_SIZE - 1,
+		);
+
 		for (
-			let j = Math.max(0, column - ConnectFourGame.WINDOW_SIZE - 1);
-			j <= Math.min(column, ConnectFourGame.WINDOW_SIZE - 1);
+			let j = firstWindowColumn;
+			j <= lastWindowColumn - ConnectFourGame.WINDOW_SIZE + 1;
 			j++
 		) {
 			// For each window of X cells...
@@ -107,7 +116,7 @@ export class ConnectFourState extends State {
 	): boolean {
 		let firstWindowColumn = Math.max(
 			0,
-			column - ConnectFourGame.WINDOW_SIZE - 1,
+			column - ConnectFourGame.WINDOW_SIZE + 1,
 		);
 		const xInitialOffset = column - firstWindowColumn;
 		let correspondingInitialRow = row - xInitialOffset;
@@ -153,6 +162,59 @@ export class ConnectFourState extends State {
 		return false;
 	}
 
+	private checkWinOnSecondaryDiagonal(
+		row: number,
+		column: number,
+		player: Player,
+	): boolean {
+		let firstWindowColumn = Math.max(
+			0,
+			column - ConnectFourGame.WINDOW_SIZE + 1,
+		);
+		const xInitialOffset = column - firstWindowColumn;
+		let correspondingInitialRow = row + xInitialOffset;
+		if (correspondingInitialRow >= this.rowCount) {
+			firstWindowColumn += correspondingInitialRow - this.rowCount + 1;
+			correspondingInitialRow = this.rowCount - 1;
+		}
+		let lastWindowColumn = Math.min(
+			this.columnCount - 1,
+			column + ConnectFourGame.WINDOW_SIZE - 1,
+		);
+		const xFinalOffset = lastWindowColumn - column;
+		let correspondingFinalRow = row - xFinalOffset;
+		if (correspondingFinalRow < 0) {
+			lastWindowColumn += correspondingFinalRow;
+			correspondingFinalRow = 0;
+		}
+
+		if (
+			correspondingInitialRow - correspondingFinalRow <
+			ConnectFourGame.WINDOW_SIZE - 1
+		)
+			return false;
+		for (
+			let j = firstWindowColumn;
+			j <= lastWindowColumn - ConnectFourGame.WINDOW_SIZE + 1;
+			j++
+		) {
+			// For each window of X cells...
+			if (this.table[correspondingInitialRow]![j] === player) {
+				let win = true;
+				// Check if all the cells in the window are from the same player
+				for (let k = 1; k < ConnectFourGame.WINDOW_SIZE; k++) {
+					if (this.table[correspondingInitialRow - k]![j + k] !== player) {
+						win = false;
+						break;
+					}
+				}
+				if (win) return true;
+			}
+			correspondingInitialRow--;
+		}
+		return false;
+	}
+
 	public checkWin(action: number): boolean {
 		// Get who played the action, and its position
 		const column = action;
@@ -166,12 +228,10 @@ export class ConnectFourState extends State {
 		row = row + 1; // The row where the action was played
 		const player = this.table[row]![column];
 
-		// if (this.checkWinOnColumn(row, column, player)) return true;
-		// if (this.checkWinOnRow(row, column, player)) return true;
+		if (this.checkWinOnColumn(row, column, player)) return true;
+		if (this.checkWinOnRow(row, column, player)) return true;
 		if (this.checkWinOnPrimaryDiagonal(row, column, player)) return true;
-		// // Won on the secondary diagonal
-		// if (this.table.every((row, i) => row[this.columnCount - 1 - i] === player))
-		// return true;
+		if (this.checkWinOnSecondaryDiagonal(row, column, player)) return true;
 		// No win
 		return false;
 	}
