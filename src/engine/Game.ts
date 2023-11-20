@@ -96,15 +96,15 @@ export abstract class State {
 	// The value is 1 if the cell is occupied by the player, or 0 otherwise
 	// The order of the matrices is: O, None, X
 	public getEncodedState(): EncodedState {
-		const encodedState: EncodedState = Array.from(Array(3), () =>
-			Array.from(Array(this.rowCount), () => Array(this.columnCount).fill(0)),
+		const encodedState: EncodedState = Array.from(Array(this.rowCount), () =>
+			Array.from(Array(this.columnCount), () => Array(3).fill(0)),
 		);
 		for (let i = 0; i < this.rowCount; i++) {
 			for (let j = 0; j < this.columnCount; j++) {
 				const cell = this.table[i]![j];
-				if (cell === Player.X) encodedState[2]![i]![j] = 1;
-				else if (cell === Player.O) encodedState[0]![i]![j] = 1;
-				else encodedState[1]![i]![j] = 1;
+				if (cell === Player.X) encodedState[i]![j]![2] = 1;
+				else if (cell === Player.O) encodedState[i]![j]![0] = 1;
+				else encodedState[i]![j]![1] = 1;
 			}
 		}
 		return encodedState;
