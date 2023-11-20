@@ -15,13 +15,12 @@ await resNet.save(`file://models/${gameParams.directoryName}/structure`);
 state.print();
 state.performAction(2, 1);
 state.print();
-state.performAction(7, -1);
+state.performAction(6, -1);
 state.print();
 
 // Calculate the policy and value from the neural network
-const tensorState = tf
-	.tensor(state.getEncodedState())
-	.expandDims(0) as tf.Tensor4D;
+const encodedState = state.getEncodedState();
+const tensorState = tf.tensor(encodedState).expandDims(0) as tf.Tensor4D;
 const [policy, value] = resNet.predict(tensorState);
 const softMaxPolicy = tf.softmax(policy, 1).squeeze([0]);
 

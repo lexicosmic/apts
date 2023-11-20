@@ -1,6 +1,6 @@
 import * as tf from '@tensorflow/tfjs-node';
 import ResNet from './ResNet.ts';
-import TicTacToe from './TicTacToe.ts';
+import TicTacToe from './games/TicTacToe.ts';
 
 describe('ResNet', () => {
 	let game: TicTacToe;

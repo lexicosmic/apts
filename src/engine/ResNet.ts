@@ -1,6 +1,6 @@
 import * as tf from '@tensorflow/tfjs-node';
 import {ResNetBuildModelParams} from '../types.ts';
-import TicTacToe from './TicTacToe.ts';
+import TicTacToe from './games/TicTacToe.ts';
 
 const INPUT_CHANNELS = 3;
 
@@ -12,14 +12,14 @@ export type ResNetParams = ResNetLoadedModelParams | ResNetBuildModelParams;
 
 export default class ResNet {
 	/// Attributes
-	#model: tf.LayersModel;
+	private model: tf.LayersModel;
 
 	/// Constructor
 	constructor(game: TicTacToe, params: ResNetParams) {
 		if ('model' in params) {
-			this.#model = params.model;
+			this.model = params.model;
 		} else {
-			this.#model = buildResNetModel(
+			this.model = buildResNetModel(
 				game,
 				params.numResBlocks,
 				params.numHiddenChannels,
@@ -30,23 +30,23 @@ export default class ResNet {
 	/// Methods
 
 	// Saves the model to the given path, and returns a promise
-	save(path: string) {
-		return this.#model.save(path);
+	public save(path: string) {
+		return this.model.save(path);
 	}
 
 	// Prints a summary of the model
-	summary() {
-		this.#model.summary();
+	public summary() {
+		this.model.summary();
 	}
 
 	// Disposes the model
-	dispose() {
-		this.#model.dispose();
+	public dispose() {
+		this.model.dispose();
 	}
 
 	// Compiles the model with the most proper optimizer and loss functions
-	#compile(learningRate: number = 0.001) {
-		this.#model.compile({
+	private compile(learningRate: number = 0.001) {
+		this.model.compile({
 			optimizer: tf.train.adam(learningRate),
 			loss: {
 				policyHead: 'categoricalCrossentropy',
@@ -57,13 +57,13 @@ export default class ResNet {
 	}
 
 	// Prints the progress of the training
-	#logProgress(epoch: number, logs: tf.Logs, trainingLog: tf.Logs[]) {
+	private logProgress(epoch: number, logs: tf.Logs, trainingLog: tf.Logs[]) {
 		console.log(logs);
 		trainingLog.push(logs);
 	}
 
 	// Trains the model on the given batch of data
-	async train(
+	public async train(
 		inputsBatch: tf.Tensor4D,
 		policyOutputsBatch: tf.Tensor2D,
 		valueOutputsBatch: tf.Tensor2D,
@@ -74,23 +74,19 @@ export default class ResNet {
 	) {
 		const trainingLog: tf.Logs[] = [];
 
-		this.#compile(learningRate);
+		this.compile(learningRate);
 
 		// Fit the model using the prepared training data
-		await this.#model.fit(
-			inputsBatch,
-			[policyOutputsBatch, valueOutputsBatch],
-			{
-				shuffle: true, // Ensure data is shuffled again before using each time.
-				validationSplit: validationSplit, // Use N% of the data for validation.
-				batchSize: batchSize, // Update weights after every N examples.
-				epochs: numEpochs, // Go over the data N times!
-				callbacks: {
-					onEpochEnd: (epoch, logs) =>
-						this.#logProgress(epoch, logs!, trainingLog),
-				},
+		await this.model.fit(inputsBatch, [policyOutputsBatch, valueOutputsBatch], {
+			shuffle: true, // Ensure data is shuffled again before using each time.
+			validationSplit: validationSplit, // Use N% of the data for validation.
+			batchSize: batchSize, // Update weights after every N examples.
+			epochs: numEpochs, // Go over the data N times!
+			callbacks: {
+				onEpochEnd: (epoch, logs) =>
+					this.logProgress(epoch, logs!, trainingLog),
 			},
-		);
+		});
 
 		// // Dispose the tensors
 		// tf.dispose([inputsBatch, policyOutputsBatch, valueOutputsBatch]);
@@ -99,7 +95,7 @@ export default class ResNet {
 
 		// // Test the model
 		// tf.tidy(() => {
-		// 	this.#evaluate(
+		// 	this.evaluate(
 		// 		tf.tensor4d(
 		// 			[
 		// 				[
@@ -127,7 +123,7 @@ export default class ResNet {
 	}
 
 	// Evaluates the model on the given batch of data
-	#evaluate(inputsBatch: tf.Tensor4D) {
+	private evaluate(inputsBatch: tf.Tensor4D) {
 		let answer = tf.tidy(() => {
 			const [policy, value] = this.predict(inputsBatch);
 			const softMaxPolicy = tf.softmax(policy, 1).squeeze([0]);
@@ -137,9 +133,12 @@ export default class ResNet {
 	}
 
 	// Makes a prediction on the given state, and returns the policy and value
-	predict(state: tf.Tensor4D): [tf.Tensor2D, tf.Tensor2D] {
+	public predict(encodedState: tf.Tensor4D): [tf.Tensor2D, tf.Tensor2D] {
 		return tf.tidy(() => {
-			const outputs = this.#model.predict(state) as [tf.Tensor2D, tf.Tensor2D];
+			const outputs = this.model.predict(encodedState) as [
+				tf.Tensor2D,
+				tf.Tensor2D,
+			];
 			return outputs;
 		});
 	}
@@ -248,7 +247,7 @@ function buildResNetModel(
 }
 
 // Build and return a residual block
-export function applyResBlock(
+function applyResBlock(
 	idNumber: number,
 	currentInputTensor: tf.SymbolicTensor,
 	originalInputTensor: tf.SymbolicTensor,

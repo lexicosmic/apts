@@ -3,7 +3,7 @@ import ResNet from '../engine/ResNet.js';
 import {gameParams} from '../train/parameters.js';
 
 // Load model
-const path = `file://models/${gameParams.directoryName}/main_model/model.json`;
+const path = `file://models/${gameParams.mainModelDirectory}/model.json`;
 const model = await tf.loadLayersModel(path);
 
 // Set game and state data
@@ -16,10 +16,10 @@ resNet.summary();
 
 // Play a few moves
 state.print();
-state.performAction(2, 1);
-state.print();
-state.performAction(7, -1);
-state.print();
+// state.performAction(2, 1);
+// state.print();
+// state.performAction(7, -1);
+// state.print();
 
 // Calculate the policy and value from the neural network
 const tensorState = tf

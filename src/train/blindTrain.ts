@@ -27,6 +27,6 @@ try {
 } catch (e) {
 	console.error(e);
 }
-await resNet.save(`file://models/${modelDirectory}/blind_beforeTrain`);
+await resNet.save(`file://models/${modelDirectory}/beforeTrain`);
 resNet.train(inputsTensor, outputPolicyTensor, outputValueTensor, 1, 30, 0.001);
-await resNet.save(`file://models/${modelDirectory}/blind_afterTrain`);
+await resNet.save(`file://models/${modelDirectory}/afterTrain`);

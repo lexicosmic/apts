@@ -62,7 +62,7 @@ export function loadTrainingDataParameters(trainingDataId: string) {
 		trainingDataParameters = JSON.parse(
 			fs
 				.readFileSync(
-					`./trainingData/trainingData_${trainingDataId}/parameters.json`,
+					`./trainingData/${gameParams.directoryName}/trainingData_${trainingDataId}/parameters.json`,
 				)
 				.toString(),
 		);
@@ -78,7 +78,7 @@ export function loadTrainingData(trainingDataIds: string[]) {
 		for (const trainingDataId of trainingDataIds) {
 			const trainingData = fs
 				.readFileSync(
-					`./trainingData/trainingData_${trainingDataId}/trainingData.json`,
+					`./trainingData/${gameParams.directoryName}/trainingData_${trainingDataId}/trainingData.json`,
 				)
 				.toString();
 			trainingMemoryBatch.push(JSON.parse(trainingData));
@@ -93,7 +93,9 @@ export function loadModelParameters(modelDirectory: string) {
 	let modelParameters: ParamsToExport_BuildModel;
 	try {
 		modelParameters = JSON.parse(
-			fs.readFileSync(`./models/${modelDirectory}/parameters.json`).toString(),
+			fs
+				.readFileSync(`./models/${modelDirectory}/../parameters.json`)
+				.toString(),
 		);
 		return modelParameters;
 	} catch (e) {

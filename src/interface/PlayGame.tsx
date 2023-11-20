@@ -24,7 +24,7 @@ import CvCGame, {
 	formattedCellText as CvCFormattedCellText,
 	formattedPlayerName as CvCFormattedPlayerName,
 } from './CvCGame.js';
-import TicTacToe from '../engine/TicTacToe.js';
+import TicTacToeGame from '../engine/games/TicTacToe.ts';
 
 type ParsedActionParams = {
 	input: string;
@@ -104,7 +104,7 @@ interface PlayGameProps {
 	gameMode: GameMode;
 }
 export default function PlayGame({gameMode}: PlayGameProps) {
-	const [game, setGame] = React.useState<Game>(new TicTacToe());
+	const [game, setGame] = React.useState<Game>(new TicTacToeGame(3, 3));
 	const [monteCarloTreeSearch, setMonteCarloTreeSearch] =
 		React.useState<MonteCarloTreeSearch | null>(null);
 	const [state, setState] = React.useState<State>(game.getInitialState());

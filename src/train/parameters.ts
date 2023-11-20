@@ -1,5 +1,5 @@
-import ConnectFourGame from '../engine/ConnectFour.ts';
-import TicTacToeGame from '../engine/TicTacToe.ts';
+import ConnectFourGame from '../engine/games/ConnectFour.ts';
+import TicTacToeGame from '../engine/games/TicTacToe.ts';
 import {
 	ResNetBuildModelParams,
 	MonteCarloTreeSearchParams,
@@ -9,12 +9,19 @@ import {
 
 enum GameNames {
 	TicTacToe = 'tictactoe',
-	ConnectFour = 'connectfour',
+	ConnectFour = 'connect4',
 }
 
+// export const gameParams = {
+// 	directoryName: GameNames.ConnectFour,
+// 	game: new ConnectFourGame(6, 7),
+// };
+
 export const gameParams = {
-	directoryName: GameNames.ConnectFour,
-	game: new ConnectFourGame(9, 9),
+	directoryName: GameNames.TicTacToe,
+	game: new TicTacToeGame(3, 3),
+	mainModelDirectory: `${GameNames.TicTacToe}/selfplay_1700439885953/iteration_0`,
+	trainingDataIds: ['1700442540627'],
 };
 
 export const resNetBuildModelParams: ResNetBuildModelParams = {
@@ -35,11 +42,3 @@ export const trainModelParams: TrainModelParams = {
 	batchSize: 32,
 	learningRate: 0.00005,
 };
-
-export const mainModelDirectory = `${gameParams.directoryName}/main_model`;
-
-export const trainingDataIds = [
-	'1694373039989',
-	'1694373330714',
-	'1694373607234',
-];

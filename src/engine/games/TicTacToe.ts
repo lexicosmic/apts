@@ -1,4 +1,4 @@
-import Game, {ActionOutcome, Player, State, ValidAction} from './Game.js';
+import Game, {ActionOutcome, Player, State, ValidAction} from '../Game.js';
 
 export default class TicTacToeGame extends Game {
 	constructor(rowCount: number, columnCount: number) {

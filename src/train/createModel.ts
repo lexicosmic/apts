@@ -4,7 +4,6 @@ import {
 	monteCarloTreeSearchParams,
 	selfPlayMemoryParams,
 	trainModelParams,
-	trainingDataIds,
 } from './parameters.ts';
 import {loadTrainingData, writeModelParameters} from './util.ts';
 import ResNet from '../engine/ResNet.ts';
@@ -12,15 +11,15 @@ import AlphaZero from '../engine/AlphaZero.ts';
 
 const game = gameParams.game;
 const resNet = new ResNet(game, resNetBuildModelParams);
-const alphaZero = new AlphaZero(resNet, game, monteCarloTreeSearchParams);
-const trainingMemoryBatch = loadTrainingData(trainingDataIds);
+const alphaZero = new AlphaZero(game, resNet, monteCarloTreeSearchParams);
+const trainingMemoryBatch = loadTrainingData(gameParams.trainingDataIds);
 
 const currentTime = new Date().valueOf();
-const modelDirectory = `${gameParams.directoryName}/model_${currentTime}`;
+const modelDirectory = `${gameParams.directoryName}/selfplay_${currentTime}`;
 
 writeModelParameters(
 	modelDirectory,
-	trainingDataIds,
+	gameParams.trainingDataIds,
 	resNetBuildModelParams,
 	trainModelParams,
 );
