@@ -1,4 +1,4 @@
-import Game, {ActionOutcome, Player, State, ValidAction} from '../Game.ts';
+import Game, {ActionOutcome, Player, State, ValidAction} from '../Game.js';
 
 export default class ConnectFourGame extends Game {
 	public static WINDOW_SIZE = 4;
@@ -65,8 +65,7 @@ export class ConnectFourState extends State {
 		console.log(boardString);
 	}
 
-	private checkWinOnRow(row: number, column: number,
-		 player: Player): boolean {
+	private checkWinOnRow(row: number, column: number, player: Player): boolean {
 		const firstWindowColumn = Math.max(
 			0,
 			column - ConnectFourGame.WINDOW_SIZE + 1,

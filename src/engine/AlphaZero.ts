@@ -1,15 +1,15 @@
 import * as tf from '@tensorflow/tfjs-node';
 import fs from 'fs';
-import {MonteCarloTreeSearchParams, TrainModelParams} from '../types.ts';
+import {MonteCarloTreeSearchParams, TrainModelParams} from '../types.js';
 import Game, {
 	Action,
 	ActionOutcome,
 	EncodedState,
 	Player,
 	State,
-} from './Game.ts';
+} from './Game.js';
 import ResNet from './ResNet.js';
-import MonteCarloTreeSearch from './MonteCarloTree.ts';
+import MonteCarloTreeSearch from './MonteCarloTree.js';
 
 type GameMemoryBlock = {
 	state: State;
@@ -18,12 +18,12 @@ type GameMemoryBlock = {
 };
 type GameMemory = GameMemoryBlock[];
 
-type TrainingMemoryBlock = {
+type TrainMemoryBlock = {
 	encodedState: EncodedState;
 	actionProbabilities: number[];
 	outcomeValue: ActionOutcome['value'];
 };
-export type TrainingMemory = TrainingMemoryBlock[];
+export type TrainingMemory = TrainMemoryBlock[];
 
 export default class AlphaZero {
 	/// Attributes
@@ -42,7 +42,6 @@ export default class AlphaZero {
 	}
 
 	/// Methods
-
 	private async selfPlay(): Promise<TrainingMemory> {
 		let player = Player.X;
 		let state = this.game.getInitialState();
@@ -64,6 +63,8 @@ export default class AlphaZero {
 					.dataSync()[0] as Action;
 				return actionIndex;
 			});
+			if (!state.getValidActions()[pickedAction])
+				throw new Error('Invalid action picked');
 
 			// Perform the action and check if the game is over
 			state.performAction(pickedAction, player);
@@ -93,7 +94,11 @@ export default class AlphaZero {
 	}
 
 	// Transpose the training memory to a format that can be used to train the model
-	private transposeMemory(trainingMemory: TrainingMemory) {
+	private transposeMemory(trainingMemory: TrainingMemory): {
+		encodedStates: EncodedState[];
+		policyTargets: number[][];
+		valueTargets: ActionOutcome['value'][];
+	} {
 		const encodedStates: EncodedState[] = [];
 		const policyTargets: number[][] = [];
 		const valueTargets: ActionOutcome['value'][] = [];
@@ -114,7 +119,7 @@ export default class AlphaZero {
 		numSelfPlayIterations: number,
 		showProgress = false,
 		showMemorySize = false,
-	) {
+	): Promise<TrainingMemory> {
 		const memory: TrainingMemory = [];
 		// Construct the training memory from self-playing the game
 		for (let j = 0; j < numSelfPlayIterations; j++) {
@@ -133,7 +138,7 @@ export default class AlphaZero {
 		batchSize: number,
 		numEpochs: number,
 		learningRate: number,
-	) {
+	): Promise<tf.Logs[]> {
 		// Convert the memory to a format that can be used to train the model
 		const {encodedStates, policyTargets, valueTargets} =
 			this.transposeMemory(memory);
@@ -167,7 +172,7 @@ export default class AlphaZero {
 		numSelfPlayIterations: number,
 		trainModelParams: TrainModelParams,
 		trainingMemoryArray?: TrainingMemory[],
-	) {
+	): Promise<void> {
 		console.log('=-=-=-=-=-=-=-= AlphaZero LEARNING =-=-=-=-=-=-=-=');
 
 		for (let i = 0; i < trainModelParams.numIterations; i++) {

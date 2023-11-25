@@ -1,6 +1,6 @@
-import {State} from '../engine/Game.ts';
-import MonteCarloTreeSearch from '../engine/MonteCarloTreeCommon.ts';
-import {gameParams} from '../train/parameters.ts';
+import {State} from '../engine/Game.js';
+import MonteCarloTreeSearch from '../engine/MonteCarloTreeCommon.js';
+import {gameParams} from '../train/parameters.js';
 
 function playTurn(state: State, action: number, player: number) {
 	console.log(`Player ${player} plays action ${action}`);

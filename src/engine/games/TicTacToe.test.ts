@@ -5,7 +5,7 @@ import TicTacToe, {
 	Outcome,
 	ActionOutcome,
 	ValidAction,
-} from './TicTacToe.ts';
+} from './TicTacToe.js';
 
 describe('TicTacToe', () => {
 	let ticTacToe: TicTacToe;

@@ -1,8 +1,8 @@
 import * as tf from '@tensorflow/tfjs-node';
 import fs from 'fs';
-import Game from '../engine/Game.ts';
-import ResNet from '../engine/ResNet.ts';
-import {gameParams} from './parameters.ts';
+import Game from '../engine/Game.js';
+import ResNet from '../engine/ResNet.js';
+import {gameParams} from './parameters.js';
 
 const game = gameParams.game;
 let state = game.getInitialState();
@@ -17,7 +17,7 @@ const resNet = new ResNet(game, {numResBlocks: 4, numHiddenChannels: 64});
 const encodedState = state.getEncodedState();
 const outcome = Game.getActionOutcome(state, 2);
 const inputsTensor = tf.tensor4d([encodedState]); // Nx3x3x3 - Batch of encoded states
-const outputPolicyTensor = tf.tensor2d([[0, 0, 0, 0, 0, 0, 0, 0, 0]]); // N - Batch of outcomes
+const outputPolicyTensor = tf.tensor2d([Array(game.getActionSize()).fill(0)]); // N - Batch of outcomes
 const outputValueTensor = tf.tensor2d([[outcome.value]]); // N - Batch of outcomes
 
 const currentTime = new Date().valueOf();

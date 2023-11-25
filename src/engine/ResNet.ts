@@ -1,6 +1,6 @@
 import * as tf from '@tensorflow/tfjs-node';
-import {ResNetBuildModelParams} from '../types.ts';
-import TicTacToe from './games/TicTacToe.ts';
+import {ResNetBuildModelParams} from '../types.js';
+import TicTacToe from './games/TicTacToe.js';
 
 const INPUT_CHANNELS = 3;
 

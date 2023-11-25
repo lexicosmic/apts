@@ -4,10 +4,10 @@ import {
 	monteCarloTreeSearchParams,
 	selfPlayMemoryParams,
 	trainModelParams,
-} from './parameters.ts';
-import {loadTrainingData, writeModelParameters} from './util.ts';
-import ResNet from '../engine/ResNet.ts';
-import AlphaZero from '../engine/AlphaZero.ts';
+} from './parameters.js';
+import {loadTrainingData, writeModelParameters} from './util.js';
+import ResNet from '../engine/ResNet.js';
+import AlphaZero from '../engine/AlphaZero.js';
 
 const game = gameParams.game;
 const resNet = new ResNet(game, resNetBuildModelParams);

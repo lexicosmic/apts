@@ -24,7 +24,7 @@ import CvCGame, {
 	formattedCellText as CvCFormattedCellText,
 	formattedPlayerName as CvCFormattedPlayerName,
 } from './CvCGame.js';
-import TicTacToeGame from '../engine/games/TicTacToe.ts';
+import {gameDefinitions} from './definitions.js';
 
 type ParsedActionParams = {
 	input: string;
@@ -90,8 +90,9 @@ async function loadModel(
 	setMonteCarloTreeSearch: (monteCarloTreeSearch: MonteCarloTreeSearch) => void,
 ) {
 	const model = await tf.loadLayersModel(
-		'file://models/tictactoe/main_model/model.json',
+		`file://models/${gameDefinitions.modelDirectory}/model.json`,
 	);
+
 	const resNet = new ResNet(game, {model});
 	const monteCarloTreeSearch = new MonteCarloTreeSearch(game, resNet, {
 		numSearches: 1000,
@@ -104,7 +105,7 @@ interface PlayGameProps {
 	gameMode: GameMode;
 }
 export default function PlayGame({gameMode}: PlayGameProps) {
-	const [game, setGame] = React.useState<Game>(new TicTacToeGame(3, 3));
+	const [game, setGame] = React.useState<Game>(gameDefinitions.game);
 	const [monteCarloTreeSearch, setMonteCarloTreeSearch] =
 		React.useState<MonteCarloTreeSearch | null>(null);
 	const [state, setState] = React.useState<State>(game.getInitialState());

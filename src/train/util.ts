@@ -5,20 +5,22 @@ import {
 	ResNetBuildModelParams,
 	SelfPlayMemoryParams,
 	TrainModelParams,
-} from '../types.ts';
-import {TrainingMemory} from '../engine/AlphaZero.ts';
+} from '../types.js';
+import {TrainingMemory} from '../engine/AlphaZero.js';
 import {
 	selfPlayMemoryParams as defaultMemoryParams,
 	gameParams,
-} from './parameters.ts';
+} from './parameters.js';
 
 function getParamsToExport_TrainingData(
 	trainingDataId: string,
+	memoryLength: number,
 	modelParams: ParamsToExport_BuildModel | null,
 	selfPlayMemoryParams: SelfPlayMemoryParams,
 ) {
 	const paramsToExport: ParamsToExport_TrainingData = {
 		id: trainingDataId,
+		memoryLength: memoryLength ?? -1,
 		model: modelParams,
 		...selfPlayMemoryParams,
 	};
@@ -41,6 +43,7 @@ function getParamsToExport_BuildModel(
 	while (i < trainModelParams.numIterations) {
 		const trainingDataParameters = getParamsToExport_TrainingData(
 			'',
+			-1,
 			null,
 			defaultMemoryParams,
 		);
@@ -114,6 +117,7 @@ export function writeTrainingData(
 	const paramsToExport: ParamsToExport_TrainingData =
 		getParamsToExport_TrainingData(
 			currentTime.toString(),
+			trainingMemory.length,
 			modelParams ?? null,
 			selfPlayMemoryParams,
 		);

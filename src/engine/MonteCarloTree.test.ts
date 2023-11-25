@@ -1,7 +1,7 @@
-import {MonteCarloTreeSearchParams} from '../types.ts';
-import MonteCarloTreeSearch from './MonteCarloTree.ts';
-import ResNet from './ResNet.ts';
-import Game, {Player, State} from './games/TicTacToe.ts';
+import {MonteCarloTreeSearchParams} from '../types.js';
+import MonteCarloTreeSearch from './MonteCarloTree.js';
+import ResNet from './ResNet.js';
+import Game, {Player, State} from './games/TicTacToe.js';
 
 describe('MonteCarloTreeSearch', () => {
 	let game: Game;

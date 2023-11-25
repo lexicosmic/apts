@@ -1,6 +1,6 @@
 import * as tf from '@tensorflow/tfjs-node';
-import ResNet from '../engine/ResNet.ts';
-import {gameParams} from '../train/parameters.ts';
+import ResNet from '../engine/ResNet.js';
+import {gameParams} from '../train/parameters.js';
 
 // Set game and state data
 const game = gameParams.game;
@@ -12,8 +12,6 @@ resNet.summary();
 await resNet.save(`file://models/${gameParams.directoryName}/structure`);
 
 // Play a few moves
-state.print();
-state.performAction(2, 1);
 state.print();
 state.performAction(6, -1);
 state.print();

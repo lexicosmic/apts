@@ -1,7 +1,7 @@
 import * as tf from '@tensorflow/tfjs-node';
-import {MonteCarloTreeSearchParams} from '../types.ts';
-import ResNet from './ResNet.ts';
-import Game, {Action, ActionOutcome, Player, State} from './Game.ts';
+import {MonteCarloTreeSearchParams} from '../types.js';
+import ResNet from './ResNet.js';
+import Game, {Action, ActionOutcome, Player, State} from './Game.js';
 
 export class MonteCarloNode {
 	/// Attributes
