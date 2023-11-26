@@ -38,29 +38,18 @@
     }
 
     class MonteCarloTreeSearch {
-        -game : Game
-        -resNet : ResNet
         -params : MCTSParams
         +search(state: State) : number[]
     }
     MonteCarloTreeSearch "0..n" --> "1" Game : Is represented by
-    AlphaZero "0..n" --> "1" ResNet : Uses
     MonteCarloTreeSearch "0..n" --> "1" ResNet : Uses
 
     class MonteCarloNode {
-        -game : Game
         -params : MCTSParams
-        -state : State
         -actionTaken : Action | null
         -priorProbability : number
         -visitCount : number
         -valueSum : number
-        -parent : MonteCarloNode | null
-        -children : MonteCarloNode[]
-        +getState() : State
-        +getActionTaken() : Action | null
-        +getChildren() : MonteCarloNode[]
-        +getVisitCount() : number
         +isFullyExpanded() : boolean
         -getChildUcb(child: MonteCarloNode) : number
         +selectBestChild() : MonteCarloNode
@@ -72,16 +61,14 @@
     MonteCarloNode "1" --> "0..n" MonteCarloNode : Is parent
 
     class AlphaZero {
-        -game : Game
-        -resNet : ResNet
-        -mcts : MonteCarloTreeSearch
         -selfPlay() : TrainingMemory
-        -transposeMemory() : {encodedStates: EncodedState[], policyTargets: number[], valueTargets: number[]}
+        -transposeMemory() : {encodedStates: EncodedState[], \n  policyTargets: number[], valueTargets: number[]}
         +buildTrainingMemory(numSelfPlayIterations: number) : TrainingMemory
-        -train(memory: TrainingMemory, batchSize: number, numEpochs: number, learningRate: number) : tf.Logs[]
-        +learn(directoryName: string, numSelfPlayIterations: number, trainModelParams: TrainModelParams, trainingMemoryArray: TrainingMemory[]) : void
+        -train(memory: TrainingMemory, batchSize: number, \n  numEpochs: number, learningRate: number) : tf.Logs[]
+        +learn(directoryName: string, numSelfPlayIterations: number, \n  trainModelParams: TrainModelParams, trainingMemoryArray: TrainingMemory[]) : void
     }
     AlphaZero "0..n" --> "1" Game : Is represented by
+    AlphaZero "0..n" --> "1" ResNet : Uses
     AlphaZero "0..n" --> "1" MonteCarloTreeSearch : Uses
 
 
@@ -104,20 +91,20 @@
         outcomeValue : number
     }
     
-    struct TrainResNetParams <<Type>> {
-        inputsBatch : tf.Tensor4D
-		policyOutputsBatch : tf.Tensor2D
-		valueOutputsBatch : tf.Tensor2D
-		batchSize : number
-		numEpochs : number
-		learningRate : number
-		validationSplit : number
-    }
+    ' struct TrainResNetParams <<Type>> {
+    '     inputsBatch : tf.Tensor4D
+	' 	policyOutputsBatch : tf.Tensor2D
+	' 	valueOutputsBatch : tf.Tensor2D
+	' 	batchSize : number
+	' 	numEpochs : number
+	' 	learningRate : number
+	' 	validationSplit : number
+    ' }
 
-    struct MCTSParams <<Type>> {
-        numSearches : number
-        explorationConstant : number
-    }
+    ' struct MCTSParams <<Type>> {
+    '     numSearches : number
+    '     explorationConstant : number
+    ' }
 
     struct TrainMemoryBlock <<Type>> {
         encodedState : EncodedState
@@ -125,11 +112,15 @@
         outcomeValue : number
     }
 
-    struct TrainAlphaZeroParams <<Type>> {
-        numIterations : number
-		batchSize : number
-		numEpochs : number
-		learningRate : number
-    }
+    ' struct TrainAlphaZeroParams <<Type>> {
+    '     numIterations : number
+	' 	batchSize : number
+	' 	numEpochs : number
+	' 	learningRate : number
+    ' }
+
+    TypeDefinitions -[hidden] ActionOutcome
+    ActionOutcome -[hidden] Player
+    Player -[hidden] TrainMemoryBlock
 
 @enduml

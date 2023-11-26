@@ -44,7 +44,7 @@ export default function PvCGame({
 
 	function handleActionSelect(state: State, player: Player, action: Action) {
 		if (state === null || player === null || action === null) return;
-		let currentState = state.clone();
+		let currentState = State.clone(state);
 		let currentPlayer = player;
 
 		// User turn
@@ -70,7 +70,7 @@ export default function PvCGame({
 		if (!outcome.isTerminal) {
 			currentPlayer = game.getOpponent(currentPlayer);
 			// Computer turn
-			let neutralState = currentState.clone();
+			let neutralState = State.clone(currentState);
 			neutralState.changePerspective(
 				currentPlayer,
 				game.getOpponent(currentPlayer),

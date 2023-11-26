@@ -12,7 +12,7 @@ export default function Board({game, state, formattedCellText}: BoardProps) {
 	for (let i = 0; i < game.getRowCount(); i++) {
 		const row = [];
 		for (let j = 0; j < game.getColumnCount(); j++) {
-			const cell = state.getPlayerAt(i, j);
+			const cell = state.getPlayerAt(i * game.getColumnCount() + j);
 			row.push(
 				<Text key={`cell-${i + j}`}>
 					{formattedCellText(cell ?? Player.None)}

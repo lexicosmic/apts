@@ -1,11 +1,37 @@
-import Game, {ActionOutcome, Player, State, ValidAction} from '../Game.js';
+import Game, {
+	ActionOutcome,
+	EncodedState,
+	Player,
+	State,
+	ValidAction,
+} from '../Game.js';
 
 export default class TicTacToeGame extends Game {
+	/// Attributes
+	private readonly rowCount: number;
+	private readonly columnCount: number;
+	private readonly actionSize: number;
+
 	constructor(rowCount: number, columnCount: number) {
-		super(rowCount, columnCount, rowCount * columnCount);
+		super();
+		this.rowCount = rowCount;
+		this.columnCount = columnCount;
+		this.actionSize = rowCount * columnCount;
 	}
 
 	/// Getters
+	public getRowCount(): number {
+		return this.rowCount;
+	}
+
+	public getColumnCount(): number {
+		return this.columnCount;
+	}
+
+	public getActionSize(): number {
+		return this.actionSize;
+	}
+
 	public getInitialState(): State {
 		return new TicTacToeState(this.rowCount, this.columnCount);
 	}
@@ -24,8 +50,18 @@ export default class TicTacToeGame extends Game {
 }
 
 export class TicTacToeState extends State {
+	/// Attributes
+	private readonly rowCount: number;
+	private readonly columnCount: number;
+	private table: Array<Array<Player>>;
+
 	constructor(rowCount: number, columnCount: number) {
-		super(rowCount, columnCount);
+		super();
+		this.rowCount = rowCount;
+		this.columnCount = columnCount;
+		this.table = Array.from(Array(rowCount), () =>
+			Array.from(Array(columnCount), () => Player.None),
+		);
 	}
 
 	/// Getters
@@ -38,6 +74,34 @@ export class TicTacToeState extends State {
 			}
 		}
 		return validActions;
+	}
+
+	public getPlayerAt(position: number): Player | null {
+		const row = Math.floor(position / this.columnCount);
+		const column = position % this.columnCount;
+		return this.table[row]![column];
+	}
+
+	public getEncodedState(): Array<Array<Array<number>>> {
+		const encodedState: EncodedState = Array.from(Array(this.rowCount), () =>
+			Array.from(Array(this.columnCount), () => Array(3).fill(0)),
+		);
+		for (let i = 0; i < this.rowCount; i++) {
+			for (let j = 0; j < this.columnCount; j++) {
+				const cell = this.table[i]![j];
+				if (cell === Player.X) encodedState[i]![j]![2] = 1;
+				else if (cell === Player.O) encodedState[i]![j]![0] = 1;
+				else encodedState[i]![j]![1] = 1;
+			}
+		}
+		return encodedState;
+	}
+
+	/// Setters
+	public setPlayerAt(player: Player, position: number): void {
+		const row = Math.floor(position / this.columnCount);
+		const column = position % this.columnCount;
+		this.table[row][column] = player;
 	}
 
 	/// Methods
@@ -81,5 +145,19 @@ export class TicTacToeState extends State {
 		const column = action % this.columnCount;
 		// Play the action on the given state
 		this.table[row][column] = player;
+	}
+
+	/// Static methods
+	public changePerspective(
+		currentPlayer: Player,
+		opponentPlayer: Player,
+	): void {
+		for (let i = 0; i < this.rowCount; i++) {
+			for (let j = 0; j < this.columnCount; j++) {
+				const cell = this.table[i]![j];
+				if (cell === currentPlayer) this.table[i]![j] = opponentPlayer;
+				else if (cell === opponentPlayer) this.table[i]![j] = currentPlayer;
+			}
+		}
 	}
 }

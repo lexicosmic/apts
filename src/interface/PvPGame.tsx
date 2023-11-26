@@ -40,7 +40,7 @@ export default function PvPGame({
 
 	function handleActionSelect(state: State, player: Player, action: Action) {
 		if (state === null || player === null || action === null) return;
-		let currentState = state.clone();
+		let currentState = State.clone(state);
 		let currentPlayer = player;
 
 		let [nextState, outcome] = performAction({

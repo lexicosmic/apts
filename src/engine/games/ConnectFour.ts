@@ -1,7 +1,17 @@
-import Game, {ActionOutcome, Player, State, ValidAction} from '../Game.js';
+import Game, {
+	ActionOutcome,
+	EncodedState,
+	Player,
+	State,
+	ValidAction,
+} from '../Game.js';
 
 export default class ConnectFourGame extends Game {
+	/// Attributes
 	public static WINDOW_SIZE = 4;
+	private readonly rowCount: number;
+	private readonly columnCount: number;
+	private readonly actionSize: number;
 
 	constructor(rowCount: number, columnCount: number) {
 		if (
@@ -11,10 +21,25 @@ export default class ConnectFourGame extends Game {
 			throw new Error(
 				`The board must be at least ${ConnectFourGame.WINDOW_SIZE}x${ConnectFourGame.WINDOW_SIZE}`,
 			);
-		super(rowCount, columnCount, columnCount);
+		super();
+		this.rowCount = rowCount;
+		this.columnCount = columnCount;
+		this.actionSize = columnCount;
 	}
 
 	/// Getters
+	public getRowCount(): number {
+		return this.rowCount;
+	}
+
+	public getColumnCount(): number {
+		return this.columnCount;
+	}
+
+	public getActionSize(): number {
+		return this.actionSize;
+	}
+
 	public getInitialState(): State {
 		return new ConnectFourState(this.rowCount, this.columnCount);
 	}
@@ -33,8 +58,18 @@ export default class ConnectFourGame extends Game {
 }
 
 export class ConnectFourState extends State {
+	/// Attributes
+	private readonly rowCount: number;
+	private readonly columnCount: number;
+	private table: Array<Array<Player>>;
+
 	constructor(rowCount: number, columnCount: number) {
-		super(rowCount, columnCount);
+		super();
+		this.rowCount = rowCount;
+		this.columnCount = columnCount;
+		this.table = Array.from(Array(rowCount), () =>
+			Array.from(Array(columnCount), () => Player.None),
+		);
 	}
 
 	/// Getters
@@ -45,6 +80,34 @@ export class ConnectFourState extends State {
 			validActions.push(cell === Player.None);
 		}
 		return validActions;
+	}
+
+	public getPlayerAt(position: number): Player | null {
+		const row = Math.floor(position / this.columnCount);
+		const column = position % this.columnCount;
+		return this.table[row]![column];
+	}
+
+	public getEncodedState(): EncodedState {
+		const encodedState: EncodedState = Array.from(Array(this.rowCount), () =>
+			Array.from(Array(this.columnCount), () => Array(3).fill(0)),
+		);
+		for (let i = 0; i < this.rowCount; i++) {
+			for (let j = 0; j < this.columnCount; j++) {
+				const cell = this.table[i]![j];
+				if (cell === Player.X) encodedState[i]![j]![2] = 1;
+				else if (cell === Player.O) encodedState[i]![j]![0] = 1;
+				else encodedState[i]![j]![1] = 1;
+			}
+		}
+		return encodedState;
+	}
+
+	/// Setters
+	public setPlayerAt(player: Player, position: number): void {
+		const row = Math.floor(position / this.columnCount);
+		const column = position % this.columnCount;
+		this.table[row][column] = player;
 	}
 
 	/// Methods
@@ -248,5 +311,19 @@ export class ConnectFourState extends State {
 		}
 		// Play the action on the given state
 		if (row !== -1) this.table[row][column] = player;
+	}
+
+	/// Static methods
+	public changePerspective(
+		currentPlayer: Player,
+		opponentPlayer: Player,
+	): void {
+		for (let i = 0; i < this.rowCount; i++) {
+			for (let j = 0; j < this.columnCount; j++) {
+				const cell = this.table[i]![j];
+				if (cell === currentPlayer) this.table[i]![j] = opponentPlayer;
+				else if (cell === opponentPlayer) this.table[i]![j] = currentPlayer;
+			}
+		}
 	}
 }

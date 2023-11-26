@@ -76,7 +76,7 @@ export function performAction({
 	setOutcome,
 	setState,
 }: PerformActionParams): [State, ActionOutcome] {
-	const nextState = state.clone();
+	const nextState = State.clone(state);
 	nextState.performAction(action, player);
 	const actionOutcome = Game.getActionOutcome(nextState, action);
 	setOutcome(actionOutcome);

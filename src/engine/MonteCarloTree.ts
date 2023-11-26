@@ -92,7 +92,7 @@ export class MonteCarloNode {
 		policy.forEach((probability, action) => {
 			if (probability > 0) {
 				// Copy the state and play the action on the copy
-				let childState = this.state.clone();
+				let childState = State.clone(this.state);
 				childState.performAction(action, Player.X);
 				childState.changePerspective(Player.X, Player.O);
 

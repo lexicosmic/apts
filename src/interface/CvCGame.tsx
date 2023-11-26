@@ -40,7 +40,7 @@ export default function CvCGame({
 	useEffect(() => {
 		if (gameOver) return;
 
-		const neutralState = state.clone();
+		const neutralState = State.clone(state);
 		neutralState.changePerspective(player, game.getOpponent(player));
 		const actionProbabilities = monteCarloTreeSearch.search(neutralState);
 		const computerAction = actionProbabilities.indexOf(

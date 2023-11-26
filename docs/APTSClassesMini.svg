@@ -1,0 +1,262 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?><svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" contentStyleType="text/css" height="894px" preserveAspectRatio="none" style="width:1673px;height:894px;background:#FFFFFF;" version="1.1" viewBox="0 0 1673 894" width="1673px" zoomAndPan="magnify"><defs/><g><!--MD5=[60d6b92408f98aed8df94d5c6e04aa63]
+class State--><g id="elem_State"><rect codeLine="7" fill="#F1F1F1" height="211.6113" id="State" rx="2.5" ry="2.5" style="stroke:#181818;stroke-width:0.5;" width="431" x="137.5" y="675.5"/><ellipse cx="332.75" cy="691.5" fill="#B4A7E5" rx="11" ry="11" style="stroke:#181818;stroke-width:1.0;"/><path d="M334.8438,698 L329.9375,698 L329.9375,696.625 L331.3594,696.3125 L331.3594,687.0313 L329.9375,686.6875 L329.9375,685.3281 L334.8438,685.3281 L334.8438,686.6875 L333.4219,687.0313 L333.4219,696.3125 L334.8438,696.625 L334.8438,698 Z " fill="#000000"/><text fill="#000000" font-family="sans-serif" font-size="14" font-style="italic" lengthAdjust="spacing" textLength="32" x="353.25" y="696.932">State</text><line style="stroke:#181818;stroke-width:0.5;" x1="138.5" x2="567.5" y1="707.5" y2="707.5"/><ellipse cx="148.5" cy="722.534" fill="#84BE84" rx="3" ry="3" style="stroke:#038048;stroke-width:1.0;"/><text fill="#000000" font-family="sans-serif" font-size="14" font-style="italic" lengthAdjust="spacing" textLength="176" x="157.5" y="726.4659">getValidActions() : boolean[]</text><ellipse cx="148.5" cy="741.6019" fill="#84BE84" rx="3" ry="3" style="stroke:#038048;stroke-width:1.0;"/><text fill="#000000" font-family="sans-serif" font-size="14" font-style="italic" lengthAdjust="spacing" textLength="281" x="157.5" y="745.5339">getPlayerAt(position: number) : Player | null</text><ellipse cx="148.5" cy="760.6698" fill="#84BE84" rx="3" ry="3" style="stroke:#038048;stroke-width:1.0;"/><text fill="#000000" font-family="sans-serif" font-size="14" font-style="italic" lengthAdjust="spacing" textLength="208" x="157.5" y="764.6018">getEncodedState() : EncodedState</text><ellipse cx="148.5" cy="779.7377" fill="#84BE84" rx="3" ry="3" style="stroke:#038048;stroke-width:1.0;"/><text fill="#000000" font-family="sans-serif" font-size="14" font-style="italic" lengthAdjust="spacing" textLength="322" x="157.5" y="783.6697">setPlayerAt(player: Player, position: number) : void</text><ellipse cx="148.5" cy="798.8056" fill="#84BE84" rx="3" ry="3" style="stroke:#038048;stroke-width:1.0;"/><text fill="#000000" font-family="sans-serif" font-size="14" font-style="italic" lengthAdjust="spacing" textLength="78" x="157.5" y="802.7376">print() : void</text><ellipse cx="148.5" cy="817.8735" fill="#84BE84" rx="3" ry="3" style="stroke:#038048;stroke-width:1.0;"/><text fill="#000000" font-family="sans-serif" font-size="14" font-style="italic" lengthAdjust="spacing" textLength="215" x="157.5" y="821.8055">checkWin(action: Action) : boolean</text><ellipse cx="148.5" cy="836.9415" fill="#84BE84" rx="3" ry="3" style="stroke:#038048;stroke-width:1.0;"/><text fill="#000000" font-family="sans-serif" font-size="14" font-style="italic" lengthAdjust="spacing" textLength="319" x="157.5" y="840.8734">performAction(action: Action, player: Player) : void</text><ellipse cx="148.5" cy="856.0094" fill="#84BE84" rx="3" ry="3" style="stroke:#038048;stroke-width:1.0;"/><text fill="#000000" font-family="sans-serif" font-size="14" font-style="italic" lengthAdjust="spacing" textLength="405" x="157.5" y="859.9414">changePerspective(currentPlayer: Player, opponentPlayer) : void</text><ellipse cx="148.5" cy="875.0773" fill="#84BE84" rx="3" ry="3" style="stroke:#038048;stroke-width:1.0;"/><text fill="#000000" font-family="sans-serif" font-size="14" lengthAdjust="spacing" text-decoration="underline" textLength="165" x="157.5" y="879.0093">clone(state: State) : State</text></g><!--MD5=[b6dcce5e5ef3c84b0b048d11301373dd]
+class Game--><g id="elem_Game"><rect codeLine="19" fill="#F1F1F1" height="173.4754" id="Game" rx="2.5" ry="2.5" style="stroke:#181818;stroke-width:0.5;" width="486" x="651.5" y="694.5"/><ellipse cx="872.25" cy="710.5" fill="#B4A7E5" rx="11" ry="11" style="stroke:#181818;stroke-width:1.0;"/><path d="M874.3438,717 L869.4375,717 L869.4375,715.625 L870.8594,715.3125 L870.8594,706.0313 L869.4375,705.6875 L869.4375,704.3281 L874.3438,704.3281 L874.3438,705.6875 L872.9219,706.0313 L872.9219,715.3125 L874.3438,715.625 L874.3438,717 Z " fill="#000000"/><text fill="#000000" font-family="sans-serif" font-size="14" font-style="italic" lengthAdjust="spacing" textLength="36" x="892.75" y="715.932">Game</text><line style="stroke:#181818;stroke-width:0.5;" x1="652.5" x2="1136.5" y1="726.5" y2="726.5"/><ellipse cx="662.5" cy="741.534" fill="#84BE84" rx="3" ry="3" style="stroke:#038048;stroke-width:1.0;"/><text fill="#000000" font-family="sans-serif" font-size="14" font-style="italic" lengthAdjust="spacing" textLength="152" x="671.5" y="745.4659">getRowCount() : number</text><ellipse cx="662.5" cy="760.6019" fill="#84BE84" rx="3" ry="3" style="stroke:#038048;stroke-width:1.0;"/><text fill="#000000" font-family="sans-serif" font-size="14" font-style="italic" lengthAdjust="spacing" textLength="174" x="671.5" y="764.5339">getColumnCount() : number</text><ellipse cx="662.5" cy="779.6698" fill="#84BE84" rx="3" ry="3" style="stroke:#038048;stroke-width:1.0;"/><text fill="#000000" font-family="sans-serif" font-size="14" font-style="italic" lengthAdjust="spacing" textLength="152" x="671.5" y="783.6018">getActionSize() : number</text><ellipse cx="662.5" cy="798.7377" fill="#84BE84" rx="3" ry="3" style="stroke:#038048;stroke-width:1.0;"/><text fill="#000000" font-family="sans-serif" font-size="14" font-style="italic" lengthAdjust="spacing" textLength="142" x="671.5" y="802.6697">getInitialState() : State</text><ellipse cx="662.5" cy="817.8056" fill="#84BE84" rx="3" ry="3" style="stroke:#038048;stroke-width:1.0;"/><text fill="#000000" font-family="sans-serif" font-size="14" font-style="italic" lengthAdjust="spacing" textLength="226" x="671.5" y="821.7376">getOpponent(player: Player): Player</text><ellipse cx="662.5" cy="836.8735" fill="#84BE84" rx="3" ry="3" style="stroke:#038048;stroke-width:1.0;"/><text fill="#000000" font-family="sans-serif" font-size="14" font-style="italic" lengthAdjust="spacing" textLength="273" x="671.5" y="840.8055">getOpponentValue(value: number): number</text><ellipse cx="662.5" cy="855.9415" fill="#84BE84" rx="3" ry="3" style="stroke:#038048;stroke-width:1.0;"/><text fill="#000000" font-family="sans-serif" font-size="14" lengthAdjust="spacing" text-decoration="underline" textLength="460" x="671.5" y="859.8734">getActionOutcome(state: State, action: Action | null): ActionOutcome</text></g><!--MD5=[db57bbc7babbad0b035922935fd59e42]
+class ResNet--><g id="elem_ResNet"><rect codeLine="29" fill="#F1F1F1" height="181.4754" id="ResNet" rx="2.5" ry="2.5" style="stroke:#181818;stroke-width:0.5;" width="446" x="1220.5" y="690.5"/><ellipse cx="1415.25" cy="706.5" fill="#ADD1B2" rx="11" ry="11" style="stroke:#181818;stroke-width:1.0;"/><path d="M1415.3594,702.0313 Q1414.4375,702.0313 1413.7031,702.3438 Q1412.9844,702.6563 1412.4844,703.25 Q1411.9844,703.8281 1411.7031,704.7031 Q1411.4375,705.5781 1411.4375,706.6719 Q1411.4375,708.1094 1411.875,709.1563 Q1412.3281,710.2031 1413.1719,710.75 Q1414.0313,711.2969 1415.3438,711.2969 Q1416.125,711.2969 1416.8125,711.1719 Q1417.5156,711.0313 1418.5156,710.7188 L1418.5156,712.5938 Q1417.6563,712.9219 1416.8906,713.0469 Q1416.1406,713.1719 1415.125,713.1719 Q1413.2031,713.1719 1411.8906,712.375 Q1410.5938,711.5625 1409.9375,710.0938 Q1409.2813,708.6094 1409.2813,706.6406 Q1409.2813,705.2188 1409.6719,704.0469 Q1410.0781,702.8594 1410.8594,701.9844 Q1411.6406,701.1094 1412.7813,700.6406 Q1413.9219,700.1563 1415.3906,700.1563 Q1416.3438,700.1563 1417.2344,700.3594 Q1418.1406,700.5469 1419.0781,701.0156 L1418.25,702.7969 Q1417.4688,702.4219 1416.8125,702.2344 Q1416.1563,702.0313 1415.3594,702.0313 Z " fill="#000000"/><text fill="#000000" font-family="sans-serif" font-size="14" lengthAdjust="spacing" textLength="48" x="1435.75" y="711.932">ResNet</text><line style="stroke:#181818;stroke-width:0.5;" x1="1221.5" x2="1665.5" y1="722.5" y2="722.5"/><rect fill="none" height="6" style="stroke:#C82930;stroke-width:1.0;" width="6" x="1228.5" y="734.534"/><text fill="#000000" font-family="sans-serif" font-size="14" lengthAdjust="spacing" textLength="153" x="1240.5" y="741.4659">model : tf.LayersModel</text><line style="stroke:#181818;stroke-width:0.5;" x1="1221.5" x2="1665.5" y1="749.5679" y2="749.5679"/><ellipse cx="1231.5" cy="764.6019" fill="#84BE84" rx="3" ry="3" style="stroke:#038048;stroke-width:1.0;"/><text fill="#000000" font-family="sans-serif" font-size="14" lengthAdjust="spacing" textLength="157" x="1240.5" y="768.5339">save(path: string) : void</text><ellipse cx="1231.5" cy="783.6698" fill="#84BE84" rx="3" ry="3" style="stroke:#038048;stroke-width:1.0;"/><text fill="#000000" font-family="sans-serif" font-size="14" lengthAdjust="spacing" textLength="111" x="1240.5" y="787.6018">summary() : void</text><ellipse cx="1231.5" cy="802.7377" fill="#84BE84" rx="3" ry="3" style="stroke:#038048;stroke-width:1.0;"/><text fill="#000000" font-family="sans-serif" font-size="14" lengthAdjust="spacing" textLength="100" x="1240.5" y="806.6697">dispose() : void</text><rect fill="#F24D5C" height="6" style="stroke:#C82930;stroke-width:1.0;" width="6" x="1228.5" y="818.8056"/><text fill="#000000" font-family="sans-serif" font-size="14" lengthAdjust="spacing" textLength="250" x="1240.5" y="825.7376">compile(learningRate: number) : void</text><ellipse cx="1231.5" cy="840.8735" fill="#84BE84" rx="3" ry="3" style="stroke:#038048;stroke-width:1.0;"/><text fill="#000000" font-family="sans-serif" font-size="14" lengthAdjust="spacing" textLength="351" x="1240.5" y="844.8055">train(trainResNetParams: TrainResNetParams) : void</text><ellipse cx="1231.5" cy="859.9415" fill="#84BE84" rx="3" ry="3" style="stroke:#038048;stroke-width:1.0;"/><text fill="#000000" font-family="sans-serif" font-size="14" lengthAdjust="spacing" textLength="420" x="1240.5" y="863.8734">predict(encodedState: tf.Tensor4D) : [tf.Tensor2D, tf.Tensor2D]</text></g><!--MD5=[e32708419c7dccbd301426c945744615]
+class MonteCarloTreeSearch--><g id="elem_MonteCarloTreeSearch"><rect codeLine="39" fill="#F1F1F1" height="86.1358" id="MonteCarloTreeSearch" rx="2.5" ry="2.5" style="stroke:#181818;stroke-width:0.5;" width="230" x="1096.5" y="394"/><ellipse cx="1131.3" cy="410" fill="#ADD1B2" rx="11" ry="11" style="stroke:#181818;stroke-width:1.0;"/><path d="M1131.4094,405.5313 Q1130.4875,405.5313 1129.7531,405.8438 Q1129.0344,406.1563 1128.5344,406.75 Q1128.0344,407.3281 1127.7531,408.2031 Q1127.4875,409.0781 1127.4875,410.1719 Q1127.4875,411.6094 1127.925,412.6563 Q1128.3781,413.7031 1129.2219,414.25 Q1130.0813,414.7969 1131.3938,414.7969 Q1132.175,414.7969 1132.8625,414.6719 Q1133.5656,414.5313 1134.5656,414.2188 L1134.5656,416.0938 Q1133.7063,416.4219 1132.9406,416.5469 Q1132.1906,416.6719 1131.175,416.6719 Q1129.2531,416.6719 1127.9406,415.875 Q1126.6438,415.0625 1125.9875,413.5938 Q1125.3313,412.1094 1125.3313,410.1406 Q1125.3313,408.7188 1125.7219,407.5469 Q1126.1281,406.3594 1126.9094,405.4844 Q1127.6906,404.6094 1128.8313,404.1406 Q1129.9719,403.6563 1131.4406,403.6563 Q1132.3938,403.6563 1133.2844,403.8594 Q1134.1906,404.0469 1135.1281,404.5156 L1134.3,406.2969 Q1133.5188,405.9219 1132.8625,405.7344 Q1132.2063,405.5313 1131.4094,405.5313 Z " fill="#000000"/><text fill="#000000" font-family="sans-serif" font-size="14" lengthAdjust="spacing" textLength="154" x="1149.7" y="415.432">MonteCarloTreeSearch</text><line style="stroke:#181818;stroke-width:0.5;" x1="1097.5" x2="1325.5" y1="426" y2="426"/><rect fill="none" height="6" style="stroke:#C82930;stroke-width:1.0;" width="6" x="1104.5" y="438.034"/><text fill="#000000" font-family="sans-serif" font-size="14" lengthAdjust="spacing" textLength="151" x="1116.5" y="444.9659">params : MCTSParams</text><line style="stroke:#181818;stroke-width:0.5;" x1="1097.5" x2="1325.5" y1="453.0679" y2="453.0679"/><ellipse cx="1107.5" cy="468.1019" fill="#84BE84" rx="3" ry="3" style="stroke:#038048;stroke-width:1.0;"/><text fill="#000000" font-family="sans-serif" font-size="14" lengthAdjust="spacing" textLength="204" x="1116.5" y="472.0339">search(state: State) : number[]</text></g><!--MD5=[8f3aa74cb20ddceaeea09384729388c2]
+class MonteCarloNode--><g id="elem_MonteCarloNode"><rect codeLine="46" fill="#F1F1F1" height="238.6792" id="MonteCarloNode" rx="2.5" ry="2.5" style="stroke:#181818;stroke-width:0.5;" width="338" x="289.5" y="318"/><ellipse cx="397.25" cy="334" fill="#ADD1B2" rx="11" ry="11" style="stroke:#181818;stroke-width:1.0;"/><path d="M397.3594,329.5313 Q396.4375,329.5313 395.7031,329.8438 Q394.9844,330.1563 394.4844,330.75 Q393.9844,331.3281 393.7031,332.2031 Q393.4375,333.0781 393.4375,334.1719 Q393.4375,335.6094 393.875,336.6563 Q394.3281,337.7031 395.1719,338.25 Q396.0313,338.7969 397.3438,338.7969 Q398.125,338.7969 398.8125,338.6719 Q399.5156,338.5313 400.5156,338.2188 L400.5156,340.0938 Q399.6563,340.4219 398.8906,340.5469 Q398.1406,340.6719 397.125,340.6719 Q395.2031,340.6719 393.8906,339.875 Q392.5938,339.0625 391.9375,337.5938 Q391.2813,336.1094 391.2813,334.1406 Q391.2813,332.7188 391.6719,331.5469 Q392.0781,330.3594 392.8594,329.4844 Q393.6406,328.6094 394.7813,328.1406 Q395.9219,327.6563 397.3906,327.6563 Q398.3438,327.6563 399.2344,327.8594 Q400.1406,328.0469 401.0781,328.5156 L400.25,330.2969 Q399.4688,329.9219 398.8125,329.7344 Q398.1563,329.5313 397.3594,329.5313 Z " fill="#000000"/><text fill="#000000" font-family="sans-serif" font-size="14" lengthAdjust="spacing" textLength="114" x="417.75" y="339.432">MonteCarloNode</text><line style="stroke:#181818;stroke-width:0.5;" x1="290.5" x2="626.5" y1="350" y2="350"/><rect fill="none" height="6" style="stroke:#C82930;stroke-width:1.0;" width="6" x="297.5" y="362.034"/><text fill="#000000" font-family="sans-serif" font-size="14" lengthAdjust="spacing" textLength="151" x="309.5" y="368.9659">params : MCTSParams</text><rect fill="none" height="6" style="stroke:#C82930;stroke-width:1.0;" width="6" x="297.5" y="381.1019"/><text fill="#000000" font-family="sans-serif" font-size="14" lengthAdjust="spacing" textLength="177" x="309.5" y="388.0339">actionTaken : Action | null</text><rect fill="none" height="6" style="stroke:#C82930;stroke-width:1.0;" width="6" x="297.5" y="400.1698"/><text fill="#000000" font-family="sans-serif" font-size="14" lengthAdjust="spacing" textLength="171" x="309.5" y="407.1018">priorProbability : number</text><rect fill="none" height="6" style="stroke:#C82930;stroke-width:1.0;" width="6" x="297.5" y="419.2377"/><text fill="#000000" font-family="sans-serif" font-size="14" lengthAdjust="spacing" textLength="133" x="309.5" y="426.1697">visitCount : number</text><rect fill="none" height="6" style="stroke:#C82930;stroke-width:1.0;" width="6" x="297.5" y="438.3056"/><text fill="#000000" font-family="sans-serif" font-size="14" lengthAdjust="spacing" textLength="132" x="309.5" y="445.2376">valueSum : number</text><line style="stroke:#181818;stroke-width:0.5;" x1="290.5" x2="626.5" y1="453.3396" y2="453.3396"/><ellipse cx="300.5" cy="468.3735" fill="#84BE84" rx="3" ry="3" style="stroke:#038048;stroke-width:1.0;"/><text fill="#000000" font-family="sans-serif" font-size="14" lengthAdjust="spacing" textLength="183" x="309.5" y="472.3055">isFullyExpanded() : boolean</text><rect fill="#F24D5C" height="6" style="stroke:#C82930;stroke-width:1.0;" width="6" x="297.5" y="484.4415"/><text fill="#000000" font-family="sans-serif" font-size="14" lengthAdjust="spacing" textLength="312" x="309.5" y="491.3734">getChildUcb(child: MonteCarloNode) : number</text><ellipse cx="300.5" cy="506.5094" fill="#84BE84" rx="3" ry="3" style="stroke:#038048;stroke-width:1.0;"/><text fill="#000000" font-family="sans-serif" font-size="14" lengthAdjust="spacing" textLength="237" x="309.5" y="510.4414">selectBestChild() : MonteCarloNode</text><ellipse cx="300.5" cy="525.5773" fill="#84BE84" rx="3" ry="3" style="stroke:#038048;stroke-width:1.0;"/><text fill="#000000" font-family="sans-serif" font-size="14" lengthAdjust="spacing" textLength="209" x="309.5" y="529.5093">expand(policy: number[]) : void</text><ellipse cx="300.5" cy="544.6452" fill="#84BE84" rx="3" ry="3" style="stroke:#038048;stroke-width:1.0;"/><text fill="#000000" font-family="sans-serif" font-size="14" lengthAdjust="spacing" textLength="306" x="309.5" y="548.5772">backpropagate(outcomeValue: number) : void</text></g><!--MD5=[7ff613315badeed87e92485c9536b1fb]
+class AlphaZero--><g id="elem_AlphaZero"><rect codeLine="62" fill="#F1F1F1" height="192.5433" id="AlphaZero" rx="2.5" ry="2.5" style="stroke:#181818;stroke-width:0.5;" width="620" x="901.5" y="7"/><ellipse cx="1172.75" cy="23" fill="#ADD1B2" rx="11" ry="11" style="stroke:#181818;stroke-width:1.0;"/><path d="M1172.8594,18.5313 Q1171.9375,18.5313 1171.2031,18.8438 Q1170.4844,19.1563 1169.9844,19.75 Q1169.4844,20.3281 1169.2031,21.2031 Q1168.9375,22.0781 1168.9375,23.1719 Q1168.9375,24.6094 1169.375,25.6563 Q1169.8281,26.7031 1170.6719,27.25 Q1171.5313,27.7969 1172.8438,27.7969 Q1173.625,27.7969 1174.3125,27.6719 Q1175.0156,27.5313 1176.0156,27.2188 L1176.0156,29.0938 Q1175.1563,29.4219 1174.3906,29.5469 Q1173.6406,29.6719 1172.625,29.6719 Q1170.7031,29.6719 1169.3906,28.875 Q1168.0938,28.0625 1167.4375,26.5938 Q1166.7813,25.1094 1166.7813,23.1406 Q1166.7813,21.7188 1167.1719,20.5469 Q1167.5781,19.3594 1168.3594,18.4844 Q1169.1406,17.6094 1170.2813,17.1406 Q1171.4219,16.6563 1172.8906,16.6563 Q1173.8438,16.6563 1174.7344,16.8594 Q1175.6406,17.0469 1176.5781,17.5156 L1175.75,19.2969 Q1174.9688,18.9219 1174.3125,18.7344 Q1173.6563,18.5313 1172.8594,18.5313 Z " fill="#000000"/><text fill="#000000" font-family="sans-serif" font-size="14" lengthAdjust="spacing" textLength="69" x="1193.25" y="28.432">AlphaZero</text><line style="stroke:#181818;stroke-width:0.5;" x1="902.5" x2="1520.5" y1="39" y2="39"/><rect fill="#F24D5C" height="6" style="stroke:#C82930;stroke-width:1.0;" width="6" x="909.5" y="51.034"/><text fill="#000000" font-family="sans-serif" font-size="14" lengthAdjust="spacing" textLength="183" x="921.5" y="57.9659">selfPlay() : TrainingMemory</text><rect fill="#F24D5C" height="6" style="stroke:#C82930;stroke-width:1.0;" width="6" x="909.5" y="79.6358"/><text fill="#000000" font-family="sans-serif" font-size="14" lengthAdjust="spacing" textLength="360" x="921.5" y="77.0339">transposeMemory() : {encodedStates: EncodedState[],</text><text fill="#000000" font-family="sans-serif" font-size="14" lengthAdjust="spacing" textLength="334" x="929.5" y="96.1018">policyTargets: number[], valueTargets: number[]}</text><ellipse cx="912.5" cy="111.2377" fill="#84BE84" rx="3" ry="3" style="stroke:#038048;stroke-width:1.0;"/><text fill="#000000" font-family="sans-serif" font-size="14" lengthAdjust="spacing" textLength="489" x="921.5" y="115.1697">buildTrainingMemory(numSelfPlayIterations: number) : TrainingMemory</text><rect fill="#F24D5C" height="6" style="stroke:#C82930;stroke-width:1.0;" width="6" x="909.5" y="136.8396"/><text fill="#000000" font-family="sans-serif" font-size="14" lengthAdjust="spacing" textLength="350" x="921.5" y="134.2376">train(memory: TrainingMemory, batchSize: number,</text><text fill="#000000" font-family="sans-serif" font-size="14" lengthAdjust="spacing" textLength="369" x="929.5" y="153.3055">numEpochs: number, learningRate: number) : tf.Logs[]</text><ellipse cx="912.5" cy="177.9754" fill="#84BE84" rx="3" ry="3" style="stroke:#038048;stroke-width:1.0;"/><text fill="#000000" font-family="sans-serif" font-size="14" lengthAdjust="spacing" textLength="409" x="921.5" y="172.3734">learn(directoryName: string, numSelfPlayIterations: number,</text><text fill="#000000" font-family="sans-serif" font-size="14" lengthAdjust="spacing" textLength="586" x="929.5" y="191.4414">trainModelParams: TrainModelParams, trainingMemoryArray: TrainingMemory[]) : void</text></g><!--MD5=[d565684795d6bfea09a84e5c5a6a817f]
+class TypeDefinitions--><g id="elem_TypeDefinitions"><rect codeLine="75" fill="#F1F1F1" height="116.2717" id="TypeDefinitions" rx="2.5" ry="2.5" style="stroke:#181818;stroke-width:0.5;" width="271" x="7" y="45"/><ellipse cx="85.75" cy="61" fill="#E3664A" rx="11" ry="11" style="stroke:#181818;stroke-width:1.0;"/><path d="M92.8281,60.1719 Q92.8281,60.9844 92.6406,61.7656 Q92.4531,62.5469 92.0469,63.2031 Q91.6563,63.8438 91.0469,64.25 Q90.4531,64.6406 89.625,64.6406 Q88.7344,64.6406 88.2031,64.125 Q87.6875,63.6094 87.75,63.0156 L87.8438,63.0469 Q87.6563,63.7031 86.9844,64.1719 Q86.3281,64.6406 85.3594,64.6406 Q83.9375,64.6406 83.1563,63.6875 Q82.3906,62.7344 82.3906,61.2188 Q82.3906,60.0313 82.8594,59.1094 Q83.3281,58.1875 84.2031,57.6563 Q85.0781,57.125 86.25,57.125 Q87.0313,57.125 87.7656,57.2656 Q88.5156,57.4063 89.1406,57.6094 L88.9531,61.2656 Q88.9375,61.5625 88.9375,61.6875 Q88.9375,61.8125 88.9375,61.8594 Q88.9375,62.6406 89.1719,62.8594 Q89.4063,63.0625 89.7188,63.0625 Q90.125,63.0625 90.4375,62.7031 Q90.75,62.3281 90.9219,61.6563 Q91.1094,60.9844 91.1094,60.1406 Q91.1094,58.6406 90.5,57.6094 Q89.9063,56.5781 88.8594,56.0313 Q87.8125,55.4844 86.4531,55.4844 Q85.0625,55.4844 83.9844,55.9219 Q82.9219,56.3594 82.2031,57.1563 Q81.4844,57.9375 81.1094,59.0313 Q80.7344,60.1094 80.7344,61.4219 Q80.7344,63.0313 81.2969,64.125 Q81.875,65.2188 82.9375,65.7969 Q84.0156,66.3594 85.625,66.3594 Q86.625,66.3594 87.5469,66.1406 Q88.4688,65.9219 89.5469,65.5 L89.5469,67.2188 Q88.625,67.6094 87.6875,67.8125 Q86.7656,68.0156 85.625,68.0156 Q83.5625,68.0156 82.0625,67.2344 Q80.5781,66.4531 79.7813,64.9844 Q78.9844,63.5156 78.9844,61.4688 Q78.9844,59.8438 79.4844,58.4531 Q80,57.0469 80.9688,56.0156 Q81.9531,54.9844 83.3438,54.4063 Q84.7344,53.8281 86.4531,53.8281 Q87.8281,53.8281 88.9844,54.2656 Q90.1563,54.6875 91.0156,55.5313 Q91.875,56.3594 92.3438,57.5313 Q92.8281,58.7031 92.8281,60.1719 Z M84.25,61.25 Q84.25,62.25 84.6094,62.6563 Q84.9688,63.0625 85.5781,63.0625 Q86.375,63.0625 86.7344,62.4531 Q87.0938,61.8281 87.1563,60.75 L87.25,58.8281 Q87.25,58.8281 86.9219,58.7813 Q86.6094,58.7344 86.2656,58.7344 Q85.5313,58.7344 85.0781,59.0938 Q84.6406,59.4375 84.4375,60.0313 Q84.25,60.6094 84.25,61.25 Z " fill="#000000"/><text fill="#000000" font-family="sans-serif" font-size="14" lengthAdjust="spacing" textLength="105" x="106.25" y="66.432">TypeDefinitions</text><line style="stroke:#181818;stroke-width:0.5;" x1="8" x2="277" y1="77" y2="77"/><text fill="#000000" font-family="sans-serif" font-size="14" lengthAdjust="spacing" textLength="188" x="13" y="95.9659">EncodedState : number[][][]</text><text fill="#000000" font-family="sans-serif" font-size="14" lengthAdjust="spacing" textLength="108" x="13" y="115.0339">Action : number</text><text fill="#000000" font-family="sans-serif" font-size="14" lengthAdjust="spacing" textLength="141" x="13" y="134.1018">ValidAction : boolean</text><text fill="#000000" font-family="sans-serif" font-size="14" lengthAdjust="spacing" textLength="259" x="13" y="153.1697">TrainingMemory : TrainMemoryBlock[]</text></g><!--MD5=[2cb47ba637a0d19583e6199456f6ad0b]
+class Player--><g id="elem_Player"><rect codeLine="82" fill="#F1F1F1" height="97.2038" id="Player" rx="2.5" ry="2.5" style="stroke:#181818;stroke-width:0.5;" width="73" x="521" y="54.5"/><ellipse cx="536" cy="70.5" fill="#EB937F" rx="11" ry="11" style="stroke:#181818;stroke-width:1.0;"/><path d="M539.4688,77 L532.1563,77 L532.1563,64.3281 L539.4688,64.3281 L539.4688,66.2031 L534.2031,66.2031 L534.2031,69.4688 L539.1563,69.4688 L539.1563,71.3281 L534.2031,71.3281 L534.2031,75.125 L539.4688,75.125 L539.4688,77 Z " fill="#000000"/><text fill="#000000" font-family="sans-serif" font-size="14" lengthAdjust="spacing" textLength="41" x="550" y="75.932">Player</text><line style="stroke:#181818;stroke-width:0.5;" x1="522" x2="593" y1="86.5" y2="86.5"/><text fill="#000000" font-family="sans-serif" font-size="14" lengthAdjust="spacing" textLength="60" x="527" y="105.4659">None = 0</text><text fill="#000000" font-family="sans-serif" font-size="14" lengthAdjust="spacing" textLength="32" x="527" y="124.5339">X = 1</text><text fill="#000000" font-family="sans-serif" font-size="14" lengthAdjust="spacing" textLength="40" x="527" y="143.6018">O = -1</text></g><!--MD5=[c922ac116bade2f03a8918addb4c1321]
+class ActionOutcome--><g id="elem_ActionOutcome"><rect codeLine="88" fill="#F1F1F1" height="91.5479" id="ActionOutcome" rx="2.5" ry="2.5" style="stroke:#181818;stroke-width:0.5;" width="173" x="313" y="57"/><ellipse cx="345.1" cy="79.706" fill="#F1F1F1" rx="11" ry="11" style="stroke:#181818;stroke-width:1.0;"/><path d="M349.6625,82.6904 Q349.6625,83.8623 349.0844,84.6904 Q348.5219,85.5185 347.475,85.956 Q346.4438,86.3779 345.0688,86.3779 Q344.3656,86.3779 343.725,86.2998 Q343.1,86.2373 342.5688,86.1123 Q342.0375,85.9716 341.4594,85.706 L341.4594,83.6591 Q342.4438,84.0966 343.3188,84.3154 Q344.1938,84.5185 345.1313,84.5185 Q345.9906,84.5185 346.5375,84.3154 Q347.0844,84.0966 347.3344,83.7216 Q347.6,83.3466 347.6,82.831 Q347.6,82.3154 347.3813,81.9716 Q347.1781,81.6279 346.5844,81.2998 Q346.0063,80.9716 344.9125,80.581 Q344.1156,80.2685 343.4906,79.9404 Q342.8813,79.5966 342.4594,79.1435 Q342.0375,78.6748 341.8188,78.081 Q341.6156,77.4873 341.6156,76.7216 Q341.6156,75.6748 342.1469,74.9248 Q342.6938,74.1591 343.6313,73.7685 Q344.5688,73.3623 345.7563,73.3623 Q346.8031,73.3623 347.6469,73.5654 Q348.5063,73.7529 349.4438,74.1748 L348.7875,75.9873 Q347.9125,75.5966 347.1938,75.4248 Q346.4906,75.2373 345.725,75.2373 Q345.0219,75.2373 344.5688,75.4404 Q344.1313,75.6279 343.9125,75.9716 Q343.6938,76.2998 343.6938,76.7373 Q343.6938,77.2841 343.9125,77.6279 Q344.1313,77.9716 344.6625,78.2841 Q345.2094,78.581 346.1781,78.9404 Q347.2719,79.3466 348.0375,79.831 Q348.8188,80.2998 349.2406,80.9873 Q349.6625,81.6591 349.6625,82.6904 Z " fill="#000000"/><text fill="#000000" font-family="sans-serif" font-size="12" font-style="italic" lengthAdjust="spacing" textLength="37" x="395.9" y="74.8281">«Type»</text><text fill="#000000" font-family="sans-serif" font-size="14" lengthAdjust="spacing" textLength="103" x="362.9" y="93.31">ActionOutcome</text><line style="stroke:#181818;stroke-width:0.5;" x1="314" x2="485" y1="102.412" y2="102.412"/><text fill="#000000" font-family="sans-serif" font-size="14" lengthAdjust="spacing" textLength="137" x="319" y="121.378">isTerminal : boolean</text><text fill="#000000" font-family="sans-serif" font-size="14" lengthAdjust="spacing" textLength="161" x="319" y="140.4459">outcomeValue : number</text></g><!--MD5=[586e2e2f7500ef049f03706f6c2f1896]
+class TrainMemoryBlock--><g id="elem_TrainMemoryBlock"><rect codeLine="108" fill="#F1F1F1" height="110.6158" id="TrainMemoryBlock" rx="2.5" ry="2.5" style="stroke:#181818;stroke-width:0.5;" width="213" x="629" y="47.5"/><ellipse cx="669.2" cy="70.206" fill="#F1F1F1" rx="11" ry="11" style="stroke:#181818;stroke-width:1.0;"/><path d="M673.7625,73.1904 Q673.7625,74.3623 673.1844,75.1904 Q672.6219,76.0185 671.575,76.456 Q670.5438,76.8779 669.1688,76.8779 Q668.4656,76.8779 667.825,76.7998 Q667.2,76.7373 666.6688,76.6123 Q666.1375,76.4716 665.5594,76.206 L665.5594,74.1591 Q666.5438,74.5966 667.4188,74.8154 Q668.2938,75.0185 669.2313,75.0185 Q670.0906,75.0185 670.6375,74.8154 Q671.1844,74.5966 671.4344,74.2216 Q671.7,73.8466 671.7,73.331 Q671.7,72.8154 671.4813,72.4716 Q671.2781,72.1279 670.6844,71.7998 Q670.1063,71.4716 669.0125,71.081 Q668.2156,70.7685 667.5906,70.4404 Q666.9813,70.0966 666.5594,69.6435 Q666.1375,69.1748 665.9188,68.581 Q665.7156,67.9873 665.7156,67.2216 Q665.7156,66.1748 666.2469,65.4248 Q666.7938,64.6591 667.7313,64.2685 Q668.6688,63.8623 669.8563,63.8623 Q670.9031,63.8623 671.7469,64.0654 Q672.6063,64.2529 673.5438,64.6748 L672.8875,66.4873 Q672.0125,66.0966 671.2938,65.9248 Q670.5906,65.7373 669.825,65.7373 Q669.1219,65.7373 668.6688,65.9404 Q668.2313,66.1279 668.0125,66.4716 Q667.7938,66.7998 667.7938,67.2373 Q667.7938,67.7841 668.0125,68.1279 Q668.2313,68.4716 668.7625,68.7841 Q669.3094,69.081 670.2781,69.4404 Q671.3719,69.8466 672.1375,70.331 Q672.9188,70.7998 673.3406,71.4873 Q673.7625,72.1591 673.7625,73.1904 Z " fill="#000000"/><text fill="#000000" font-family="sans-serif" font-size="12" font-style="italic" lengthAdjust="spacing" textLength="37" x="732.8" y="65.3281">«Type»</text><text fill="#000000" font-family="sans-serif" font-size="14" lengthAdjust="spacing" textLength="125" x="688.8" y="83.81">TrainMemoryBlock</text><line style="stroke:#181818;stroke-width:0.5;" x1="630" x2="841" y1="92.912" y2="92.912"/><text fill="#000000" font-family="sans-serif" font-size="14" lengthAdjust="spacing" textLength="196" x="635" y="111.878">encodedState : EncodedState</text><text fill="#000000" font-family="sans-serif" font-size="14" lengthAdjust="spacing" textLength="201" x="635" y="130.9459">actionProbabilities : number[]</text><text fill="#000000" font-family="sans-serif" font-size="14" lengthAdjust="spacing" textLength="161" x="635" y="150.0138">outcomeValue : number</text></g><!--MD5=[5bc0a179d9ce7f83d81a7ada15ee6af5]
+link MonteCarloTreeSearch to Game--><g id="link_MonteCarloTreeSearch_Game"><path codeLine="43" d="M1172.63,480 C1124.42,532.08 1040.91,622.31 977.94,690.34 " fill="none" id="MonteCarloTreeSearch-to-Game" style="stroke:#181818;stroke-width:1.0;"/><polygon fill="#181818" points="974.86,693.68,983.91,689.7945,978.2573,690.0115,978.0404,684.3588,974.86,693.68" style="stroke:#181818;stroke-width:1.0;"/><text fill="#000000" font-family="sans-serif" font-size="13" lengthAdjust="spacing" textLength="104" x="1053.5" y="620.897">Is represented by</text><text fill="#000000" font-family="sans-serif" font-size="13" lengthAdjust="spacing" textLength="21" x="1116.4539" y="501.6814">0..n</text><text fill="#000000" font-family="sans-serif" font-size="13" lengthAdjust="spacing" textLength="7" x="974.0575" y="682.671">1</text></g><!--MD5=[d62e61f9ae25f21093d7501386a59dd1]
+link MonteCarloTreeSearch to ResNet--><g id="link_MonteCarloTreeSearch_ResNet"><path codeLine="44" d="M1239.95,480 C1274.38,530.83 1333.42,618 1379.08,685.4 " fill="none" id="MonteCarloTreeSearch-to-ResNet" style="stroke:#181818;stroke-width:1.0;"/><polygon fill="#181818" points="1381.77,689.37,1380.0444,679.6735,1378.9702,685.2274,1373.4163,684.1532,1381.77,689.37" style="stroke:#181818;stroke-width:1.0;"/><text fill="#000000" font-family="sans-serif" font-size="13" lengthAdjust="spacing" textLength="29" x="1334.5" y="620.897">Uses</text><text fill="#000000" font-family="sans-serif" font-size="13" lengthAdjust="spacing" textLength="21" x="1231.7394" y="501.6814">0..n</text><text fill="#000000" font-family="sans-serif" font-size="13" lengthAdjust="spacing" textLength="7" x="1369.8862" y="678.7208">1</text></g><!--MD5=[7ecba90e1eedbe5922fbc5e00558983c]
+link MonteCarloNode to Game--><g id="link_MonteCarloNode_Game"><path codeLine="58" d="M608.55,555.87 C664.74,600.01 727.63,649.42 780.1,690.63 " fill="none" id="MonteCarloNode-to-Game" style="stroke:#181818;stroke-width:1.0;"/><polygon fill="#181818" points="783.95,693.66,779.343,684.9551,780.0179,690.5715,774.4015,691.2464,783.95,693.66" style="stroke:#181818;stroke-width:1.0;"/><text fill="#000000" font-family="sans-serif" font-size="13" lengthAdjust="spacing" textLength="104" x="691.5" y="620.897">Is represented by</text><text fill="#000000" font-family="sans-serif" font-size="13" lengthAdjust="spacing" textLength="21" x="619.8209" y="578.2932">0..n</text><text fill="#000000" font-family="sans-serif" font-size="13" lengthAdjust="spacing" textLength="7" x="767.7357" y="682.7481">1</text></g><!--MD5=[fcc24f8d23be3327be997bb6cb0b55ed]
+link MonteCarloNode to State--><g id="link_MonteCarloNode_State"><path codeLine="59" d="M422.36,555.87 C411.05,592.79 398.6,633.38 387.44,669.79 " fill="none" id="MonteCarloNode-to-State" style="stroke:#181818;stroke-width:1.0;"/><polygon fill="#181818" points="386.1,674.15,392.5542,666.7107,387.5604,669.368,384.9031,664.3741,386.1,674.15" style="stroke:#181818;stroke-width:1.0;"/><text fill="#000000" font-family="sans-serif" font-size="13" lengthAdjust="spacing" textLength="36" x="407.5" y="620.897">Keeps</text><text fill="#000000" font-family="sans-serif" font-size="13" lengthAdjust="spacing" textLength="21" x="390.5745" y="578.2932">0..n</text><text fill="#000000" font-family="sans-serif" font-size="13" lengthAdjust="spacing" textLength="7" x="380.8926" y="663.7802">1</text></g><!--MD5=[18fe90f3d633603fbe97c7a7dca51d2a]
+link MonteCarloNode to MonteCarloNode--><g id="link_MonteCarloNode_MonteCarloNode"><path codeLine="60" d="M627.28,404.78 C661.77,408.26 686.5,419 686.5,437 C686.5,453.87 664.77,464.37 633.63,468.48 " fill="none" id="MonteCarloNode-to-MonteCarloNode" style="stroke:#181818;stroke-width:1.0;"/><polygon fill="#181818" points="628.79,469.04,638.1889,471.983,633.7571,468.4674,637.2727,464.0357,628.79,469.04" style="stroke:#181818;stroke-width:1.0;"/><text fill="#000000" font-family="sans-serif" font-size="13" lengthAdjust="spacing" textLength="53" x="692.5" y="442.397">Is parent</text><text fill="#000000" font-family="sans-serif" font-size="13" lengthAdjust="spacing" textLength="7" x="635.5168" y="397.9244">1</text><text fill="#000000" font-family="sans-serif" font-size="13" lengthAdjust="spacing" textLength="21" x="635.4629" y="470.4929">0..n</text></g><!--MD5=[3bb09308f63fe85ea29646f0f87e1c8d]
+link AlphaZero to Game--><g id="link_AlphaZero_Game"><path codeLine="69" d="M1040.33,198.96 C1004.93,226.4 971.71,259.52 949.5,298 C879.53,419.23 877.18,586.15 884.18,688.51 " fill="none" id="AlphaZero-to-Game" style="stroke:#181818;stroke-width:1.0;"/><polygon fill="#181818" points="884.52,693.35,887.8931,684.0968,884.177,688.3618,879.912,684.6456,884.52,693.35" style="stroke:#181818;stroke-width:1.0;"/><text fill="#000000" font-family="sans-serif" font-size="13" lengthAdjust="spacing" textLength="104" x="950.5" y="442.397">Is represented by</text><text fill="#000000" font-family="sans-serif" font-size="13" lengthAdjust="spacing" textLength="21" x="965.9644" y="221.5723">0..n</text><text fill="#000000" font-family="sans-serif" font-size="13" lengthAdjust="spacing" textLength="7" x="876.3557" y="682.7476">1</text></g><!--MD5=[f2baf05560c5df3e6b4089e96e65703e]
+link AlphaZero to ResNet--><g id="link_AlphaZero_ResNet"><path codeLine="70" d="M1304.81,198.95 C1329.13,228.56 1352.87,262.75 1368.5,298 C1424.28,423.82 1439.47,584.11 1443.13,684.55 " fill="none" id="AlphaZero-to-ResNet" style="stroke:#181818;stroke-width:1.0;"/><polygon fill="#181818" points="1443.29,689.26,1446.9793,680.1282,1443.1187,684.2629,1438.984,680.4023,1443.29,689.26" style="stroke:#181818;stroke-width:1.0;"/><text fill="#000000" font-family="sans-serif" font-size="13" lengthAdjust="spacing" textLength="29" x="1435.5" y="442.397">Uses</text><text fill="#000000" font-family="sans-serif" font-size="13" lengthAdjust="spacing" textLength="21" x="1308.1354" y="221.5593">0..n</text><text fill="#000000" font-family="sans-serif" font-size="13" lengthAdjust="spacing" textLength="7" x="1436.0026" y="678.5869">1</text></g><!--MD5=[893008df71a873e33deef98f8d21e968]
+link AlphaZero to MonteCarloTreeSearch--><g id="link_AlphaZero_MonteCarloTreeSearch"><path codeLine="71" d="M1211.5,198.69 C1211.5,260.51 1211.5,338.61 1211.5,387.95 " fill="none" id="AlphaZero-to-MonteCarloTreeSearch" style="stroke:#181818;stroke-width:1.0;"/><polygon fill="#181818" points="1211.5,392.9,1215.5,383.9,1211.5,387.9,1207.5,383.9,1211.5,392.9" style="stroke:#181818;stroke-width:1.0;"/><text fill="#000000" font-family="sans-serif" font-size="13" lengthAdjust="spacing" textLength="29" x="1212.5" y="263.897">Uses</text><text fill="#000000" font-family="sans-serif" font-size="13" lengthAdjust="spacing" textLength="21" x="1187.4156" y="221.223">0..n</text><text fill="#000000" font-family="sans-serif" font-size="13" lengthAdjust="spacing" textLength="7" x="1203.8766" y="382.2692">1</text></g><!--MD5=[a2934bf5dbe9bd87c1d6685196449d22]
+link TypeDefinitions to ActionOutcome--><!--MD5=[8d79f8f6964dab741047090aed479d8a]
+link ActionOutcome to Player--><!--MD5=[5fec0a6735ed37fa23cfcbb55fd54bd2]
+link Player to TrainMemoryBlock--><!--MD5=[78092c3113809fc0e30e91207feef0fe]
+@startuml
+
+    ' Config
+    hide empty members
+
+    ' Classes
+
+    interface State {
+        {abstract} +getValidActions() : boolean[]
+        {abstract} +getPlayerAt(position: number) : Player | null
+        {abstract} +getEncodedState() : EncodedState
+        {abstract} +setPlayerAt(player: Player, position: number) : void
+        {abstract} +print() : void
+        {abstract} +checkWin(action: Action) : boolean
+        {abstract} +performAction(action: Action, player: Player) : void
+        {abstract} +changePerspective(currentPlayer: Player, opponentPlayer) : void
+        {static} +clone(state: State) : State
+    }
+
+    interface Game {
+        {abstract} +getRowCount() : number
+        {abstract} +getColumnCount() : number
+        {abstract} +getActionSize() : number
+        {abstract} +getInitialState() : State
+        {abstract} +getOpponent(player: Player): Player
+        {abstract} +getOpponentValue(value: number): number
+        {static} +getActionOutcome(state: State, action: Action | null): ActionOutcome
+    }
+
+    class ResNet {
+        -model : tf.LayersModel
+        +save(path: string) : void
+        +summary() : void
+        +dispose() : void
+        -compile(learningRate: number) : void
+        +train(trainResNetParams: TrainResNetParams) : void
+        +predict(encodedState: tf.Tensor4D) : [tf.Tensor2D, tf.Tensor2D]
+    }
+
+    class MonteCarloTreeSearch {
+        -params : MCTSParams
+        +search(state: State) : number[]
+    }
+    MonteCarloTreeSearch "0..n" - -> "1" Game : Is represented by
+    MonteCarloTreeSearch "0..n" - -> "1" ResNet : Uses
+
+    class MonteCarloNode {
+        -params : MCTSParams
+        -actionTaken : Action | null
+        -priorProbability : number
+        -visitCount : number
+        -valueSum : number
+        +isFullyExpanded() : boolean
+        -getChildUcb(child: MonteCarloNode) : number
+        +selectBestChild() : MonteCarloNode
+        +expand(policy: number[]) : void
+        +backpropagate(outcomeValue: number) : void
+    }
+    MonteCarloNode "0..n" - -> "1" Game : Is represented by
+    MonteCarloNode "0..n" - -> "1" State : Keeps
+    MonteCarloNode "1" - -> "0..n" MonteCarloNode : Is parent
+
+    class AlphaZero {
+        -selfPlay() : TrainingMemory
+        -transposeMemory() : {encodedStates: EncodedState[], \n  policyTargets: number[], valueTargets: number[]}
+        +buildTrainingMemory(numSelfPlayIterations: number) : TrainingMemory
+        -train(memory: TrainingMemory, batchSize: number, \n  numEpochs: number, learningRate: number) : tf.Logs[]
+        +learn(directoryName: string, numSelfPlayIterations: number, \n  trainModelParams: TrainModelParams, trainingMemoryArray: TrainingMemory[]) : void
+    }
+    AlphaZero "0..n" - -> "1" Game : Is represented by
+    AlphaZero "0..n" - -> "1" ResNet : Uses
+    AlphaZero "0..n" - -> "1" MonteCarloTreeSearch : Uses
+
+
+    ' Definitions
+    annotation TypeDefinitions {
+        EncodedState : number[][][]
+        Action : number
+        ValidAction : boolean
+        TrainingMemory : TrainMemoryBlock[]
+    }
+
+    enum Player {
+        None = 0
+        X = 1
+        O = -1
+    }
+
+    struct ActionOutcome <<Type>> {
+        isTerminal : boolean
+        outcomeValue : number
+    }
+    
+    ' struct TrainResNetParams <<Type>> {
+    '     inputsBatch : tf.Tensor4D
+	' 	policyOutputsBatch : tf.Tensor2D
+	' 	valueOutputsBatch : tf.Tensor2D
+	' 	batchSize : number
+	' 	numEpochs : number
+	' 	learningRate : number
+	' 	validationSplit : number
+    ' }
+
+    ' struct MCTSParams <<Type>> {
+    '     numSearches : number
+    '     explorationConstant : number
+    ' }
+
+    struct TrainMemoryBlock <<Type>> {
+        encodedState : EncodedState
+        actionProbabilities : number[]
+        outcomeValue : number
+    }
+
+    ' struct TrainAlphaZeroParams <<Type>> {
+    '     numIterations : number
+	' 	batchSize : number
+	' 	numEpochs : number
+	' 	learningRate : number
+    ' }
+
+    TypeDefinitions -[hidden] ActionOutcome
+    ActionOutcome -[hidden] Player
+    Player -[hidden] TrainMemoryBlock
+
+@enduml
+
+@startuml
+
+    hide empty members
+
+
+    interface State {
+        {abstract} +getValidActions() : boolean[]
+        {abstract} +getPlayerAt(position: number) : Player | null
+        {abstract} +getEncodedState() : EncodedState
+        {abstract} +setPlayerAt(player: Player, position: number) : void
+        {abstract} +print() : void
+        {abstract} +checkWin(action: Action) : boolean
+        {abstract} +performAction(action: Action, player: Player) : void
+        {abstract} +changePerspective(currentPlayer: Player, opponentPlayer) : void
+        {static} +clone(state: State) : State
+    }
+
+    interface Game {
+        {abstract} +getRowCount() : number
+        {abstract} +getColumnCount() : number
+        {abstract} +getActionSize() : number
+        {abstract} +getInitialState() : State
+        {abstract} +getOpponent(player: Player): Player
+        {abstract} +getOpponentValue(value: number): number
+        {static} +getActionOutcome(state: State, action: Action | null): ActionOutcome
+    }
+
+    class ResNet {
+        -model : tf.LayersModel
+        +save(path: string) : void
+        +summary() : void
+        +dispose() : void
+        -compile(learningRate: number) : void
+        +train(trainResNetParams: TrainResNetParams) : void
+        +predict(encodedState: tf.Tensor4D) : [tf.Tensor2D, tf.Tensor2D]
+    }
+
+    class MonteCarloTreeSearch {
+        -params : MCTSParams
+        +search(state: State) : number[]
+    }
+    MonteCarloTreeSearch "0..n" - -> "1" Game : Is represented by
+    MonteCarloTreeSearch "0..n" - -> "1" ResNet : Uses
+
+    class MonteCarloNode {
+        -params : MCTSParams
+        -actionTaken : Action | null
+        -priorProbability : number
+        -visitCount : number
+        -valueSum : number
+        +isFullyExpanded() : boolean
+        -getChildUcb(child: MonteCarloNode) : number
+        +selectBestChild() : MonteCarloNode
+        +expand(policy: number[]) : void
+        +backpropagate(outcomeValue: number) : void
+    }
+    MonteCarloNode "0..n" - -> "1" Game : Is represented by
+    MonteCarloNode "0..n" - -> "1" State : Keeps
+    MonteCarloNode "1" - -> "0..n" MonteCarloNode : Is parent
+
+    class AlphaZero {
+        -selfPlay() : TrainingMemory
+        -transposeMemory() : {encodedStates: EncodedState[], \n  policyTargets: number[], valueTargets: number[]}
+        +buildTrainingMemory(numSelfPlayIterations: number) : TrainingMemory
+        -train(memory: TrainingMemory, batchSize: number, \n  numEpochs: number, learningRate: number) : tf.Logs[]
+        +learn(directoryName: string, numSelfPlayIterations: number, \n  trainModelParams: TrainModelParams, trainingMemoryArray: TrainingMemory[]) : void
+    }
+    AlphaZero "0..n" - -> "1" Game : Is represented by
+    AlphaZero "0..n" - -> "1" ResNet : Uses
+    AlphaZero "0..n" - -> "1" MonteCarloTreeSearch : Uses
+
+
+    annotation TypeDefinitions {
+        EncodedState : number[][][]
+        Action : number
+        ValidAction : boolean
+        TrainingMemory : TrainMemoryBlock[]
+    }
+
+    enum Player {
+        None = 0
+        X = 1
+        O = -1
+    }
+
+    struct ActionOutcome <<Type>> {
+        isTerminal : boolean
+        outcomeValue : number
+    }
+    
+
+
+    struct TrainMemoryBlock <<Type>> {
+        encodedState : EncodedState
+        actionProbabilities : number[]
+        outcomeValue : number
+    }
+
+
+    TypeDefinitions -[hidden] ActionOutcome
+    ActionOutcome -[hidden] Player
+    Player -[hidden] TrainMemoryBlock
+
+@enduml
+
+PlantUML version 1.2022.7(Mon Aug 22 14:01:30 BRT 2022)
+(GPL source distribution)
+Java Runtime: OpenJDK Runtime Environment
+JVM: OpenJDK 64-Bit Server VM
+Default Encoding: UTF-8
+Language: en
+Country: US
+--></g></svg>
