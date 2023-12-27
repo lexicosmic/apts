@@ -2,6 +2,8 @@
 
     ' Config
     hide empty members
+    skinparam nodesep 20
+    skinparam ranksep 1
 
     ' Classes
 
@@ -18,8 +20,8 @@
     }
 
     interface Game {
-        {abstract} +getRowCount() : number
-        {abstract} +getColumnCount() : number
+        ' {abstract} +getRowCount() : number
+        ' {abstract} +getColumnCount() : number
         {abstract} +getActionSize() : number
         {abstract} +getInitialState() : State
         {abstract} +getOpponent(player: Player): Player
@@ -131,5 +133,12 @@
 		numEpochs : number
 		learningRate : number
     }
+
+    TypeDefinitions -[hidden]> Player
+    Player -[hidden]> MCTSParams
+    MCTSParams -[hidden]> ActionOutcome
+    TrainResNetParams -[hidden]> TrainAlphaZeroParams
+    TypeDefinitions -down[hidden]-> TrainResNetParams
+    TrainResNetParams -down[hidden]-> TrainMemoryBlock
 
 @enduml

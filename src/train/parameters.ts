@@ -13,17 +13,17 @@ enum GameNames {
 }
 
 export const gameParams = {
-	directoryName: GameNames.ConnectFour,
-	game: new ConnectFourGame(6, 7),
-	mainModelDirectory: `${GameNames.ConnectFour}/blind_1700467050607/beforeTrain`,
-	trainingDataIds: [],
+	directoryName: GameNames.TicTacToe,
+	game: new TicTacToeGame(3, 3),
+	mainModelDirectory: `${GameNames.TicTacToe}/selfplay_1700439885953/iteration_0`,
+	trainingDataIds: ['1700442540627', '1700444129387', '1700444618455'],
 };
 
 // export const gameParams = {
-// 	directoryName: GameNames.TicTacToe,
-// 	game: new TicTacToeGame(3, 3),
-// 	mainModelDirectory: `${GameNames.TicTacToe}/selfplay_1700439885953/iteration_0`,
-// 	trainingDataIds: ['1700442540627', '1700444129387', '1700444618455'],
+// 	directoryName: GameNames.ConnectFour,
+// 	game: new ConnectFourGame(6, 7),
+// 	mainModelDirectory: `${GameNames.ConnectFour}/blind_1700467050607/beforeTrain`,
+// 	trainingDataIds: [],
 // };
 
 export const resNetBuildModelParams: ResNetBuildModelParams = {
