@@ -1,53 +1,71 @@
-import React from 'react';
-import {Box, Text} from 'ink';
-import SelectInput from 'ink-select-input';
-import {GameMode} from './types.js';
-import PlayGame from './interface/PlayGame.tsx';
+import "./App.css";
+import { useState } from "react";
+import { GameMode } from "./types";
 
 export default function App() {
-	const [gameMode, setGameMode] = React.useState<GameMode | null>(null);
+  const [gameMode, setGameMode] = useState<GameMode | null>(null);
 
-	function handleSelect(gameMode: GameMode) {
-		if (gameMode === GameMode.PvP) {
-			setGameMode(GameMode.PvP);
-		} else if (gameMode === GameMode.PvC) {
-			setGameMode(GameMode.PvC);
-		} else if (gameMode === GameMode.CvC) {
-			setGameMode(GameMode.CvC);
-		}
-	}
+  return (
+    <>
+      <header className="main-header">
+        <h1 className="display-text-1">Auto Playtest System</h1>
+      </header>
+      <main className="main">
+        {gameMode ? (
+          <PlayGame gameMode={gameMode}></PlayGame>
+        ) : (
+          <PickGameMode setGameMode={setGameMode}></PickGameMode>
+        )}
+      </main>
+      <footer></footer>
+    </>
+  );
+}
 
-	return (
-		<Box flexDirection="column">
-			<Box marginBottom={1}>
-				<Text bold inverse color={'magentaBright'}>
-					TicTacToe
-				</Text>
-			</Box>
-			{gameMode === null ? (
-				<>
-					<Text>Pick a game mode</Text>
-					<SelectInput
-						items={[
-							{
-								label: 'PvP',
-								value: GameMode.PvP,
-							},
-							{
-								label: 'PvC',
-								value: GameMode.PvC,
-							},
-							{
-								label: 'CvC',
-								value: GameMode.CvC,
-							},
-						]}
-						onSelect={(item: {value: GameMode}) => handleSelect(item.value)}
-					/>
-				</>
-			) : (
-				<PlayGame gameMode={gameMode} />
-			)}
-		</Box>
-	);
+interface PickGameModeProps {
+  setGameMode: (gameMode: GameMode) => void;
+}
+function PickGameMode(props: PickGameModeProps) {
+  return (
+    <article className="card">
+      <header>
+        <h1 className="">Pick a game mode</h1>
+      </header>
+      <section className="button-group-vertical">
+        <button
+          className="button"
+          onClick={() => props.setGameMode(GameMode.PvP)}
+        >
+          Player vs Player
+        </button>
+        <button
+          className="button"
+          onClick={() => props.setGameMode(GameMode.PvC)}
+        >
+          Player vs Computer
+        </button>
+        <button
+          className="button"
+          onClick={() => props.setGameMode(GameMode.CvC)}
+        >
+          Computer vs Computer
+        </button>
+      </section>
+    </article>
+  );
+}
+
+interface PlayGameProps {
+  gameMode: GameMode;
+}
+function PlayGame(props: PlayGameProps) {
+  return (
+    <article className="fluid-card">
+      <header>
+        <h1 className="">TicTacToe</h1>
+        <p className="display-text-3">{props.gameMode}</p>
+      </header>
+      <section className="screen"></section>
+    </article>
+  );
 }
