@@ -1,20 +1,20 @@
-import * as tf from '@tensorflow/tfjs-node';
-import ResNet from '../engine/ResNet.js';
-import {gameParams} from '../train/parameters.js';
+import * as tf from "@tensorflow/tfjs-node";
+import ResNet from "../engine/ResNet.js";
+import { gameParams } from "../train/parameters.js";
 
 // Set game and state data
 const game = gameParams.game;
 const state = game.getInitialState();
 
 // Build model and save it
-const resNet = new ResNet(game, {numResBlocks: 4, numHiddenChannels: 64});
+const resNet = new ResNet(game, { numResBlocks: 4, numHiddenChannels: 64 });
 resNet.summary();
-await resNet.save(`file://models/${gameParams.directoryName}/structure`);
+await resNet.save(`localstorage://models/${gameParams.directoryName}/structure`);
 
 // Play a few moves
-state.print();
+console.log(state.toString());
 state.performAction(6, -1);
-state.print();
+console.log(state.toString());
 
 // Calculate the policy and value from the neural network
 const encodedState = state.getEncodedState();
@@ -33,7 +33,7 @@ const actionProbabilities = maskedPolicy
 const valueData = value.dataSync()[0];
 
 // Convert raw probabilities to log probabilities
-const logActionProbabilities = actionProbabilities.map(p => Math.log(p));
+const logActionProbabilities = actionProbabilities.map((p) => Math.log(p));
 const action = tf.tidy(() => {
 	const actionTensor = tf.tensor(logActionProbabilities) as tf.Tensor1D;
 	const actionIndex = tf.multinomial(actionTensor, 1).dataSync()[0];
@@ -43,5 +43,5 @@ const action = tf.tidy(() => {
 // Log the results
 console.table(state.getEncodedState());
 console.log(actionProbabilities);
-console.log('action', action);
+console.log("action", action);
 console.log(valueData);

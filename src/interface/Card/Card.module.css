@@ -1,0 +1,16 @@
+.card {
+	display: flex;
+	flex-direction: column;
+	width: max-content;
+	height: max-content;
+}
+
+.header {
+	margin-bottom: 1rem;
+	text-align: center;
+}
+
+.footer {
+	margin-top: 1rem;
+	text-align: center;
+}

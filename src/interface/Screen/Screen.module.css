@@ -1,0 +1,21 @@
+.screen {
+	box-sizing: border-box;
+	aspect-ratio: 1;
+	color: black;
+	background: white;
+	border: 0.125rem solid #df3b5b;
+}
+
+@media screen and (orientation: landscape) {
+	.screen {
+		height: 100%;
+		width: min-content;
+	}
+}
+
+@media screen and (orientation: portrait) {
+	.screen {
+		height: min-content;
+		width: 100%;
+	}
+}
