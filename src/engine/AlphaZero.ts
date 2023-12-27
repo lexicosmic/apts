@@ -1,15 +1,15 @@
 import * as tf from '@tensorflow/tfjs-node';
 import fs from 'fs';
-import {MonteCarloTreeSearchParams, TrainModelParams} from '../types.ts';
-import ResNet from './ResNet.js';
+import {MonteCarloTreeSearchParams, TrainModelParams} from '../types.js';
 import Game, {
 	Action,
 	ActionOutcome,
+	EncodedState,
 	Player,
 	State,
-	EncodedState,
-} from './TicTacToe.ts';
-import MonteCarloTreeSearch from './MonteCarloTree.ts';
+} from './Game.js';
+import ResNet from './ResNet.js';
+import MonteCarloTreeSearch from './MonteCarloTree.js';
 
 type GameMemoryBlock = {
 	state: State;
@@ -18,41 +18,39 @@ type GameMemoryBlock = {
 };
 type GameMemory = GameMemoryBlock[];
 
-type TrainingMemoryBlock = {
-	encodedState: State[];
+type TrainMemoryBlock = {
+	encodedState: EncodedState;
 	actionProbabilities: number[];
 	outcomeValue: ActionOutcome['value'];
 };
-export type TrainingMemory = TrainingMemoryBlock[];
+export type TrainingMemory = TrainMemoryBlock[];
 
 export default class AlphaZero {
 	/// Attributes
-	readonly model: ResNet;
-	readonly game: Game;
-
-	readonly mcts: MonteCarloTreeSearch;
+	private game: Game;
+	private resNet: ResNet;
+	private mcts: MonteCarloTreeSearch;
 
 	/// Constructor
-	constructor(model: ResNet, game: Game, params: MonteCarloTreeSearchParams) {
-		this.model = model;
+	constructor(game: Game, resNet: ResNet, params: MonteCarloTreeSearchParams) {
 		this.game = game;
-
-		this.mcts = new MonteCarloTreeSearch(this.game, this.model, {
+		this.resNet = resNet;
+		this.mcts = new MonteCarloTreeSearch(this.game, this.resNet, {
 			explorationConstant: params.explorationConstant,
 			numSearches: params.numSearches,
 		});
 	}
 
 	/// Methods
-
-	async #selfPlay(): Promise<TrainingMemory> {
+	private async selfPlay(): Promise<TrainingMemory> {
 		let player = Player.X;
 		let state = this.game.getInitialState();
 		const gameMemory: GameMemory = [];
 
 		while (true) {
 			// Get the state from the perspective of the current player and save it in the game memory
-			const neutralState = this.game.changePerspective(state, player);
+			const neutralState = State.clone(state);
+			neutralState.changePerspective(player, this.game.getOpponent(player));
 			const actionProbabilities = this.mcts.search(neutralState);
 			gameMemory.push({state: neutralState, actionProbabilities, player});
 
@@ -65,10 +63,12 @@ export default class AlphaZero {
 					.dataSync()[0] as Action;
 				return actionIndex;
 			});
+			if (!state.getValidActions()[pickedAction])
+				throw new Error('Invalid action picked');
 
 			// Perform the action and check if the game is over
-			state = this.game.getNextState(state, pickedAction, player);
-			const actionOutcome = this.game.getActionOutcome(state, pickedAction);
+			state.performAction(pickedAction, player);
+			const actionOutcome = Game.getActionOutcome(state, pickedAction);
 
 			if (actionOutcome.isTerminal) {
 				// When the game is over, construct the training memory from the perspective of the current player
@@ -80,7 +80,7 @@ export default class AlphaZero {
 							? actionOutcome.value
 							: this.game.getOpponentValue(actionOutcome.value);
 					trainingMemory.push({
-						encodedState: this.game.getEncodedState(memoryBlock.state),
+						encodedState: memoryBlock.state.getEncodedState(),
 						actionProbabilities: memoryBlock.actionProbabilities,
 						outcomeValue: memoryOutcomeValue,
 					});
@@ -94,7 +94,11 @@ export default class AlphaZero {
 	}
 
 	// Transpose the training memory to a format that can be used to train the model
-	#transposeMemory(trainingMemory: TrainingMemory) {
+	private transposeMemory(trainingMemory: TrainingMemory): {
+		encodedStates: EncodedState[];
+		policyTargets: number[][];
+		valueTargets: ActionOutcome['value'][];
+	} {
 		const encodedStates: EncodedState[] = [];
 		const policyTargets: number[][] = [];
 		const valueTargets: ActionOutcome['value'][] = [];
@@ -111,17 +115,17 @@ export default class AlphaZero {
 	}
 
 	// Build the training memory by self-playing the game
-	async buildTrainingMemory(
+	public async buildTrainingMemory(
 		numSelfPlayIterations: number,
 		showProgress = false,
 		showMemorySize = false,
-	) {
+	): Promise<TrainingMemory> {
 		const memory: TrainingMemory = [];
 		// Construct the training memory from self-playing the game
 		for (let j = 0; j < numSelfPlayIterations; j++) {
 			if (showProgress && (j + 1) % 25 === 0)
 				console.log(`Self-play iteration ${j + 1}/${numSelfPlayIterations}`);
-			const selfPlayMemory = await this.#selfPlay();
+			const selfPlayMemory = await this.selfPlay();
 			memory.push(...selfPlayMemory);
 		}
 		if (showMemorySize) console.log(`Memory size: ${memory.length}`);
@@ -129,15 +133,15 @@ export default class AlphaZero {
 	}
 
 	// Train the model using the training memory
-	async #train(
+	private async train(
 		memory: TrainingMemory,
 		batchSize: number,
 		numEpochs: number,
 		learningRate: number,
-	) {
+	): Promise<tf.Logs[]> {
 		// Convert the memory to a format that can be used to train the model
 		const {encodedStates, policyTargets, valueTargets} =
-			this.#transposeMemory(memory);
+			this.transposeMemory(memory);
 
 		// Convert the memory into tensors
 		const encodedStatesTensor = tf.tensor(encodedStates) as tf.Tensor4D;
@@ -147,7 +151,7 @@ export default class AlphaZero {
 			.reshape([-1, 1]) as tf.Tensor2D;
 
 		// Train the model
-		const trainingLog = await this.model.train(
+		const trainingLog = await this.resNet.train(
 			encodedStatesTensor,
 			policyTargetsTensor,
 			valueTargetsTensor,
@@ -163,12 +167,12 @@ export default class AlphaZero {
 	}
 
 	// Train the model multiple times
-	async learn(
+	public async learn(
 		directoryName: string,
 		numSelfPlayIterations: number,
 		trainModelParams: TrainModelParams,
 		trainingMemoryArray?: TrainingMemory[],
-	) {
+	): Promise<void> {
 		console.log('=-=-=-=-=-=-=-= AlphaZero LEARNING =-=-=-=-=-=-=-=');
 
 		for (let i = 0; i < trainModelParams.numIterations; i++) {
@@ -178,10 +182,10 @@ export default class AlphaZero {
 				typeof trainingMemoryArray === 'undefined' ||
 				typeof trainingMemoryArray[i] === 'undefined'
 			)
-				memory = await this.buildTrainingMemory(numSelfPlayIterations);
+				memory = await this.buildTrainingMemory(numSelfPlayIterations, true);
 			else memory = trainingMemoryArray[i];
 
-			const trainingLog = await this.#train(
+			const trainingLog = await this.train(
 				memory,
 				trainModelParams.batchSize,
 				trainModelParams.numEpochs,
@@ -189,10 +193,10 @@ export default class AlphaZero {
 			);
 
 			// Save the model architecture and optimizer weights
-			await this.model.save(`file://models/${directoryName}/selfplay_${i}`);
+			await this.resNet.save(`file://models/${directoryName}/iteration_${i}`);
 			try {
 				fs.writeFileSync(
-					`./models/${directoryName}/selfplay_${i}/trainingLog.json`,
+					`./models/${directoryName}/iteration_${i}/trainingLog.json`,
 					JSON.stringify(trainingLog),
 				);
 			} catch (e) {

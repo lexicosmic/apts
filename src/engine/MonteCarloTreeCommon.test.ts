@@ -1,7 +1,8 @@
-import MonteCarloTreeSearch, {
-	MonteCarloTreeSearchParams,
-} from './MonteCarloTreeCommon.js';
-import Game, {Player, State} from './TicTacToe.js';
+import {MonteCarloTreeSearchParams} from '../types.js';
+import {Player, State} from './Game.js';
+import MonteCarloTreeSearch from './MonteCarloTreeCommon.js';
+import TicTacToeGame, {TicTacToeState} from './games/TicTacToe.js';
+import Game from './games/TicTacToe.js';
 
 describe('MonteCarloTreeSearch', () => {
 	let game: Game;
@@ -9,7 +10,7 @@ describe('MonteCarloTreeSearch', () => {
 	let monteCarloTreeSearch: MonteCarloTreeSearch;
 
 	beforeEach(() => {
-		game = new Game();
+		game = new TicTacToeGame(3, 3);
 		params = {
 			numSearches: 100,
 			explorationConstant: 1.0,
@@ -22,18 +23,14 @@ describe('MonteCarloTreeSearch', () => {
 	describe('search', () => {
 		it('should return an array of action probabilities', () => {
 			// Set up a test state
-			const testState: State = [
-				[Player.None, Player.None, Player.None],
-				[Player.None, Player.None, Player.None],
-				[Player.None, Player.None, Player.None],
-			];
+			const testState = new TicTacToeState(3, 3);
 
 			// Execute the search
 			const actionProbabilities: number[] =
 				monteCarloTreeSearch.search(testState);
 
 			// Make assertions on the returned action probabilities
-			expect(actionProbabilities).toHaveLength(game.actionSize);
+			expect(actionProbabilities).toHaveLength(game.getActionSize());
 			expect(actionProbabilities.every(probability => probability >= 0)).toBe(
 				true,
 			);

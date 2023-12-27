@@ -1,8 +1,7 @@
-import MonteCarloTreeSearch, {
-	MonteCarloTreeSearchParams,
-} from './MonteCarloTree.ts';
-import ResNet from './ResNet.ts';
-import Game, {Player, State} from './TicTacToe.ts';
+import {MonteCarloTreeSearchParams} from '../types.js';
+import MonteCarloTreeSearch from './MonteCarloTree.js';
+import ResNet from './ResNet.js';
+import Game, {Player, State} from './games/TicTacToe.js';
 
 describe('MonteCarloTreeSearch', () => {
 	let game: Game;
@@ -12,7 +11,7 @@ describe('MonteCarloTreeSearch', () => {
 
 	beforeEach(() => {
 		game = new Game();
-		model = new ResNet({game, numResBlocks: 4, numHiddenChannels: 64});
+		model = new ResNet(game, {numResBlocks: 4, numHiddenChannels: 64});
 		params = {
 			numSearches: 100,
 			explorationConstant: 1.0,
@@ -36,7 +35,7 @@ describe('MonteCarloTreeSearch', () => {
 				monteCarloTreeSearch.search(testState);
 
 			// Make assertions on the returned action probabilities
-			expect(actionProbabilities).toHaveLength(game.actionSize);
+			expect(actionProbabilities).toHaveLength(game.getActionSize());
 			expect(actionProbabilities.every(probability => probability >= 0)).toBe(
 				true,
 			);

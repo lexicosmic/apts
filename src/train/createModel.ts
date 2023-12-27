@@ -1,26 +1,25 @@
 import {
+	gameParams,
 	resNetBuildModelParams,
 	monteCarloTreeSearchParams,
 	selfPlayMemoryParams,
 	trainModelParams,
-	trainingDataIds,
-} from './parameters.ts';
-import {loadTrainingData, writeModelParameters} from './util.ts';
-import TicTacToe from '../engine/TicTacToe.ts';
-import ResNet from '../engine/ResNet.ts';
-import AlphaZero from '../engine/AlphaZero.ts';
+} from './parameters.js';
+import {loadTrainingData, writeModelParameters} from './util.js';
+import ResNet from '../engine/ResNet.js';
+import AlphaZero from '../engine/AlphaZero.js';
 
-const game = new TicTacToe();
+const game = gameParams.game;
 const resNet = new ResNet(game, resNetBuildModelParams);
-const alphaZero = new AlphaZero(resNet, game, monteCarloTreeSearchParams);
-const trainingMemoryBatch = loadTrainingData(trainingDataIds);
+const alphaZero = new AlphaZero(game, resNet, monteCarloTreeSearchParams);
+const trainingMemoryBatch = loadTrainingData(gameParams.trainingDataIds);
 
 const currentTime = new Date().valueOf();
-const modelDirectory = `model_${currentTime}`;
+const modelDirectory = `${gameParams.directoryName}/selfplay_${currentTime}`;
 
 writeModelParameters(
 	modelDirectory,
-	trainingDataIds,
+	gameParams.trainingDataIds,
 	resNetBuildModelParams,
 	trainModelParams,
 );

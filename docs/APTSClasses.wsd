@@ -1,0 +1,144 @@
+@startuml
+
+    ' Config
+    hide empty members
+    skinparam nodesep 20
+    skinparam ranksep 1
+
+    ' Classes
+
+    interface State {
+        {abstract} +getValidActions() : boolean[]
+        {abstract} +getPlayerAt(position: number) : Player | null
+        {abstract} +getEncodedState() : EncodedState
+        {abstract} +setPlayerAt(player: Player, position: number) : void
+        {abstract} +print() : void
+        {abstract} +checkWin(action: Action) : boolean
+        {abstract} +performAction(action: Action, player: Player) : void
+        {abstract} +changePerspective(currentPlayer: Player, opponentPlayer) : void
+        {static} +clone(state: State) : State
+    }
+
+    interface Game {
+        ' {abstract} +getRowCount() : number
+        ' {abstract} +getColumnCount() : number
+        {abstract} +getActionSize() : number
+        {abstract} +getInitialState() : State
+        {abstract} +getOpponent(player: Player): Player
+        {abstract} +getOpponentValue(value: number): number
+        {static} +getActionOutcome(state: State, action: Action | null): ActionOutcome
+    }
+
+    class ResNet {
+        -model : tf.LayersModel
+        +save(path: string) : void
+        +summary() : void
+        +dispose() : void
+        -compile(learningRate: number) : void
+        +train(trainResNetParams: TrainResNetParams) : void
+        +predict(encodedState: tf.Tensor4D) : [tf.Tensor2D, tf.Tensor2D]
+    }
+
+    class MonteCarloTreeSearch {
+        -game : Game
+        -resNet : ResNet
+        -params : MCTSParams
+        +search(state: State) : number[]
+    }
+    MonteCarloTreeSearch "0..n" --> "1" Game : Is represented by
+    AlphaZero "0..n" --> "1" ResNet : Uses
+    MonteCarloTreeSearch "0..n" --> "1" ResNet : Uses
+
+    class MonteCarloNode {
+        -game : Game
+        -params : MCTSParams
+        -state : State
+        -actionTaken : Action | null
+        -priorProbability : number
+        -visitCount : number
+        -valueSum : number
+        -parent : MonteCarloNode | null
+        -children : MonteCarloNode[]
+        +getState() : State
+        +getActionTaken() : Action | null
+        +getChildren() : MonteCarloNode[]
+        +getVisitCount() : number
+        +isFullyExpanded() : boolean
+        -getChildUcb(child: MonteCarloNode) : number
+        +selectBestChild() : MonteCarloNode
+        +expand(policy: number[]) : void
+        +backpropagate(outcomeValue: number) : void
+    }
+    MonteCarloNode "0..n" --> "1" Game : Is represented by
+    MonteCarloNode "0..n" --> "1" State : Keeps
+    MonteCarloNode "1" --> "0..n" MonteCarloNode : Is parent
+
+    class AlphaZero {
+        -game : Game
+        -resNet : ResNet
+        -mcts : MonteCarloTreeSearch
+        -selfPlay() : TrainingMemory
+        -transposeMemory() : {encodedStates: EncodedState[], policyTargets: number[], valueTargets: number[]}
+        +buildTrainingMemory(numSelfPlayIterations: number) : TrainingMemory
+        -train(memory: TrainingMemory, batchSize: number, numEpochs: number, learningRate: number) : tf.Logs[]
+        +learn(directoryName: string, numSelfPlayIterations: number, trainModelParams: TrainModelParams, trainingMemoryArray: TrainingMemory[]) : void
+    }
+    AlphaZero "0..n" --> "1" Game : Is represented by
+    AlphaZero "0..n" --> "1" MonteCarloTreeSearch : Uses
+
+
+    ' Definitions
+    annotation TypeDefinitions {
+        EncodedState : number[][][]
+        Action : number
+        ValidAction : boolean
+        TrainingMemory : TrainMemoryBlock[]
+    }
+
+    enum Player {
+        None = 0
+        X = 1
+        O = -1
+    }
+
+    struct ActionOutcome <<Type>> {
+        isTerminal : boolean
+        outcomeValue : number
+    }
+    
+    struct TrainResNetParams <<Type>> {
+        inputsBatch : tf.Tensor4D
+		policyOutputsBatch : tf.Tensor2D
+		valueOutputsBatch : tf.Tensor2D
+		batchSize : number
+		numEpochs : number
+		learningRate : number
+		validationSplit : number
+    }
+
+    struct MCTSParams <<Type>> {
+        numSearches : number
+        explorationConstant : number
+    }
+
+    struct TrainMemoryBlock <<Type>> {
+        encodedState : EncodedState
+        actionProbabilities : number[]
+        outcomeValue : number
+    }
+
+    struct TrainAlphaZeroParams <<Type>> {
+        numIterations : number
+		batchSize : number
+		numEpochs : number
+		learningRate : number
+    }
+
+    TypeDefinitions -[hidden]> Player
+    Player -[hidden]> MCTSParams
+    MCTSParams -[hidden]> ActionOutcome
+    TrainResNetParams -[hidden]> TrainAlphaZeroParams
+    TypeDefinitions -down[hidden]-> TrainResNetParams
+    TrainResNetParams -down[hidden]-> TrainMemoryBlock
+
+@enduml

@@ -5,17 +5,22 @@ import {
 	ResNetBuildModelParams,
 	SelfPlayMemoryParams,
 	TrainModelParams,
-} from '../types.ts';
-import {TrainingMemory} from '../engine/AlphaZero.ts';
-import {selfPlayMemoryParams as defaultMemoryParams} from './parameters.ts';
+} from '../types.js';
+import {TrainingMemory} from '../engine/AlphaZero.js';
+import {
+	selfPlayMemoryParams as defaultMemoryParams,
+	gameParams,
+} from './parameters.js';
 
 function getParamsToExport_TrainingData(
 	trainingDataId: string,
+	memoryLength: number,
 	modelParams: ParamsToExport_BuildModel | null,
 	selfPlayMemoryParams: SelfPlayMemoryParams,
 ) {
 	const paramsToExport: ParamsToExport_TrainingData = {
 		id: trainingDataId,
+		memoryLength: memoryLength ?? -1,
 		model: modelParams,
 		...selfPlayMemoryParams,
 	};
@@ -38,6 +43,7 @@ function getParamsToExport_BuildModel(
 	while (i < trainModelParams.numIterations) {
 		const trainingDataParameters = getParamsToExport_TrainingData(
 			'',
+			-1,
 			null,
 			defaultMemoryParams,
 		);
@@ -59,7 +65,7 @@ export function loadTrainingDataParameters(trainingDataId: string) {
 		trainingDataParameters = JSON.parse(
 			fs
 				.readFileSync(
-					`./trainingData/trainingData_${trainingDataId}/parameters.json`,
+					`./trainingData/${gameParams.directoryName}/trainingData_${trainingDataId}/parameters.json`,
 				)
 				.toString(),
 		);
@@ -75,7 +81,7 @@ export function loadTrainingData(trainingDataIds: string[]) {
 		for (const trainingDataId of trainingDataIds) {
 			const trainingData = fs
 				.readFileSync(
-					`./trainingData/trainingData_${trainingDataId}/trainingData.json`,
+					`./trainingData/${gameParams.directoryName}/trainingData_${trainingDataId}/trainingData.json`,
 				)
 				.toString();
 			trainingMemoryBatch.push(JSON.parse(trainingData));
@@ -90,7 +96,9 @@ export function loadModelParameters(modelDirectory: string) {
 	let modelParameters: ParamsToExport_BuildModel;
 	try {
 		modelParameters = JSON.parse(
-			fs.readFileSync(`./models/${modelDirectory}/parameters.json`).toString(),
+			fs
+				.readFileSync(`./models/${modelDirectory}/../parameters.json`)
+				.toString(),
 		);
 		return modelParameters;
 	} catch (e) {
@@ -109,18 +117,22 @@ export function writeTrainingData(
 	const paramsToExport: ParamsToExport_TrainingData =
 		getParamsToExport_TrainingData(
 			currentTime.toString(),
+			trainingMemory.length,
 			modelParams ?? null,
 			selfPlayMemoryParams,
 		);
 
 	try {
-		fs.mkdirSync(`./trainingData/trainingData_${currentTime}`);
+		fs.mkdirSync(
+			`./trainingData/${gameParams.directoryName}/trainingData_${currentTime}`,
+			{recursive: true},
+		);
 		fs.writeFileSync(
-			`./trainingData/trainingData_${currentTime}/trainingData.json`,
+			`./trainingData/${gameParams.directoryName}/trainingData_${currentTime}/trainingData.json`,
 			JSON.stringify(trainingMemory),
 		);
 		fs.writeFileSync(
-			`./trainingData/trainingData_${currentTime}/parameters.json`,
+			`./trainingData/${gameParams.directoryName}/trainingData_${currentTime}/parameters.json`,
 			JSON.stringify(paramsToExport),
 		);
 	} catch (e) {
@@ -142,7 +154,7 @@ export function writeModelParameters(
 		);
 
 	try {
-		fs.mkdirSync(`./models/${modelDirectory}`);
+		fs.mkdirSync(`./models/${modelDirectory}`, {recursive: true});
 		fs.writeFileSync(
 			`./models/${modelDirectory}/parameters.json`,
 			JSON.stringify(paramsToExport),

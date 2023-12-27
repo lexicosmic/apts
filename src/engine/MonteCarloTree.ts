@@ -1,24 +1,24 @@
 import * as tf from '@tensorflow/tfjs-node';
-import {MonteCarloTreeSearchParams} from '../types.ts';
-import ResNet from './ResNet.ts';
-import Game, {Action, ActionOutcome, Player, State} from './TicTacToe.ts';
+import {MonteCarloTreeSearchParams} from '../types.js';
+import ResNet from './ResNet.js';
+import Game, {Action, ActionOutcome, Player, State} from './Game.js';
 
 export class MonteCarloNode {
-	// Attributes
-	readonly game: Game;
-	readonly params: MonteCarloTreeSearchParams;
-	readonly state: State; // State of the game at this node
-	readonly parent: MonteCarloNode | null;
-	readonly actionTaken: Action | null; // Action that led to this node
-	readonly priorProbability: number; // Probability of taking the action that led to this node
+	/// Attributes
+	private game: Game;
+	private params: MonteCarloTreeSearchParams;
+	private state: State; // State of the game at this node
+	private parent: MonteCarloNode | null;
+	private actionTaken: Action | null; // Action that led to this node
+	private priorProbability: number; // Probability of taking the action that led to this node
 
-	readonly children: MonteCarloNode[] = [];
-	visitCount: number = 0;
-	valueSum: number = 0;
+	private children: MonteCarloNode[] = [];
+	private visitCount: number = 0;
+	private valueSum: number = 0;
 
 	constructor(
-		game: Game,
 		params: MonteCarloTreeSearchParams,
+		game: Game,
 		state: State,
 		parent?: MonteCarloNode,
 		actionTaken?: Action,
@@ -32,15 +32,31 @@ export class MonteCarloNode {
 		this.priorProbability = priorProbability ? priorProbability : 0;
 	}
 
-	/// Methods
+	/// Getters
+	public getState(): State {
+		return this.state;
+	}
 
+	public getActionTaken(): Action | null {
+		return this.actionTaken;
+	}
+
+	public getChildren(): MonteCarloNode[] {
+		return this.children;
+	}
+
+	public getVisitCount(): number {
+		return this.visitCount;
+	}
+
+	/// Methods
 	// Check if the node is fully expanded, i.e. all valid actions have been explored
-	isFullyExpanded(): boolean {
+	public isFullyExpanded(): boolean {
 		return this.children.length > 0;
 	}
 
 	// Get the UCB value of a given child
-	getChildUcb(child: MonteCarloNode): number {
+	private getChildUcb(child: MonteCarloNode): number {
 		let exploitation = 0;
 		if (this.visitCount > 0)
 			// Privileges the child with the lowest exploitation, as it means the opponent will have the lowest chance of winning
@@ -53,7 +69,7 @@ export class MonteCarloNode {
 	}
 
 	// Select the best node among children, i.e. the one with the highest UCB
-	selectBestChild(): MonteCarloNode {
+	public selectBestChild(): MonteCarloNode {
 		if (this.children.length === 0)
 			throw new Error('No children to select from!');
 
@@ -72,17 +88,17 @@ export class MonteCarloNode {
 	}
 
 	// Pick a random action and perform it, returning the outcome state as a child node
-	expand(policy: number[]) {
+	public expand(policy: number[]) {
 		policy.forEach((probability, action) => {
 			if (probability > 0) {
 				// Copy the state and play the action on the copy
-				let childState = this.state.map(row => row.slice());
-				childState = this.game.getNextState(childState, action, Player.X);
-				childState = this.game.changePerspective(childState, Player.O);
+				let childState = State.clone(this.state);
+				childState.performAction(action, Player.X);
+				childState.changePerspective(Player.X, Player.O);
 
 				const child = new MonteCarloNode(
-					this.game,
 					this.params,
+					this.game,
 					childState,
 					this,
 					action,
@@ -94,7 +110,7 @@ export class MonteCarloNode {
 	}
 
 	// Backpropagate the outcome value to the root node
-	backpropagate(outcomeValue: ActionOutcome['value']) {
+	public backpropagate(outcomeValue: ActionOutcome['value']) {
 		this.valueSum += outcomeValue;
 		this.visitCount++;
 
@@ -104,22 +120,21 @@ export class MonteCarloNode {
 }
 
 export default class MonteCarloTreeSearch {
-	// Attributes
-	readonly game: Game;
-	readonly params: MonteCarloTreeSearchParams;
-	readonly model: ResNet;
+	/// Attributes
+	private game: Game;
+	private params: MonteCarloTreeSearchParams;
+	private resNet: ResNet;
 
-	constructor(game: Game, model: ResNet, params: MonteCarloTreeSearchParams) {
+	constructor(game: Game, resNet: ResNet, params: MonteCarloTreeSearchParams) {
 		this.game = game;
-		this.model = model;
+		this.resNet = resNet;
 		this.params = params;
 	}
 
 	/// Methods
-
 	// Search for the best action to take
-	search(state: State): number[] {
-		const root = new MonteCarloNode(this.game, this.params, state);
+	public search(state: State): number[] {
+		const root = new MonteCarloNode(this.params, this.game, state);
 
 		for (let i = 0; i < this.params.numSearches; i++) {
 			let node = root;
@@ -127,9 +142,9 @@ export default class MonteCarloTreeSearch {
 			// Selection phase
 			while (node.isFullyExpanded()) node = node.selectBestChild();
 
-			const actionOutcome = this.game.getActionOutcome(
-				node.state,
-				node.actionTaken,
+			const actionOutcome = Game.getActionOutcome(
+				node.getState(),
+				node.getActionTaken(),
 			);
 			// Flip the value, as the action was taken by the opponent
 			let valueToBackpropagate = this.game.getOpponentValue(
@@ -139,16 +154,16 @@ export default class MonteCarloTreeSearch {
 			if (!actionOutcome.isTerminal) {
 				// Calculate the policy and value from the neural network
 				const tensorState = tf
-					.tensor(this.game.getEncodedState(node.state))
+					.tensor(node.getState().getEncodedState())
 					.expandDims(0) as tf.Tensor4D;
-				const [policy, value] = this.model.predict(tensorState) as [
+				const [policy, value] = this.resNet.predict(tensorState) as [
 					tf.Tensor,
 					tf.Tensor,
 				];
 				const softMaxPolicy = tf.softmax(policy, 1).squeeze([0]);
 
 				// Mask the policy to only allow valid actions
-				const validActions = this.game.getValidActions(node.state);
+				const validActions = node.getState().getValidActions();
 				const maskedPolicy = softMaxPolicy.mul(
 					tf.tensor(validActions).expandDims(0),
 				);
@@ -169,9 +184,12 @@ export default class MonteCarloTreeSearch {
 		}
 
 		// Get the action probabilities from the root node
-		let actionProbabilities: number[] = new Array(this.game.actionSize).fill(0);
-		for (const child of root.children)
-			actionProbabilities[child.actionTaken as number] = child.visitCount;
+		let actionProbabilities: number[] = new Array(
+			this.game.getActionSize(),
+		).fill(0);
+		for (const child of root.getChildren())
+			actionProbabilities[child.getActionTaken() as number] =
+				child.getVisitCount();
 		const sum = actionProbabilities.reduce((sum, value) => sum + value, 0);
 		actionProbabilities = actionProbabilities.map(
 			value => value / sum,

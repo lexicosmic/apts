@@ -4,13 +4,13 @@ import {Box, Newline, Text} from 'ink';
 import {GameMode} from '../types.js';
 import ResNet from '../engine/ResNet.js';
 import MonteCarloTreeSearch from '../engine/MonteCarloTree.js';
-import TicTacToe, {
+import Game, {
 	Action,
 	ActionOutcome,
 	Outcome,
 	Player,
 	State,
-} from '../engine/TicTacToe.js';
+} from '../engine/Game.js';
 import HistoryFrame from './HistoryFrame.js';
 import PvPGame, {
 	formattedCellText as PvPFormattedCellText,
@@ -24,19 +24,16 @@ import CvCGame, {
 	formattedCellText as CvCFormattedCellText,
 	formattedPlayerName as CvCFormattedPlayerName,
 } from './CvCGame.js';
+import {gameDefinitions} from './definitions.js';
 
 type ParsedActionParams = {
 	input: string;
-	game: TicTacToe;
+	game: Game;
 };
 export const parsedAction = ({input, game}: ParsedActionParams): Action => {
 	let action: Action;
 	action = Number.parseInt(input);
-	if (
-		Number.isNaN(action) ||
-		action < 0 ||
-		action >= game.rowCount * game.columnCount
-	)
+	if (Number.isNaN(action) || action < 0 || action >= game.getActionSize())
 		throw new Error('Invalid move!');
 	return action;
 };
@@ -54,7 +51,7 @@ export function getValidAction({
 	setInvalidMove(false);
 	try {
 		const action = parsedAction({input, game});
-		const validActions = game.getValidActions(state);
+		const validActions = state.getValidActions();
 		if (validActions[action] !== true) throw new Error('Invalid move!');
 		return action;
 	} catch (e) {
@@ -65,7 +62,7 @@ export function getValidAction({
 
 type PerformActionParams = {
 	action: Action;
-	game: TicTacToe;
+	// game: Game;
 	state: State;
 	player: Player;
 	setOutcome: React.Dispatch<React.SetStateAction<ActionOutcome>>;
@@ -73,25 +70,29 @@ type PerformActionParams = {
 };
 export function performAction({
 	action,
-	game,
+	// game,
 	state,
 	player,
 	setOutcome,
 	setState,
-}: PerformActionParams): boolean {
-	const nextState = game.getNextState(state, action, player);
-	const actionOutcome = game.getActionOutcome(nextState, action);
+}: PerformActionParams): [State, ActionOutcome] {
+	const nextState = State.clone(state);
+	nextState.performAction(action, player);
+	const actionOutcome = Game.getActionOutcome(nextState, action);
 	setOutcome(actionOutcome);
 	setState(nextState);
-	return actionOutcome.isTerminal;
+	return [nextState, actionOutcome];
 }
 
 // Load the model and create the Monte Carlo Tree Search object
 async function loadModel(
-	game: TicTacToe,
+	game: Game,
 	setMonteCarloTreeSearch: (monteCarloTreeSearch: MonteCarloTreeSearch) => void,
 ) {
-	const model = await tf.loadLayersModel('file://models/main_model/model.json');
+	const model = await tf.loadLayersModel(
+		`file://models/${gameDefinitions.modelDirectory}/model.json`,
+	);
+
 	const resNet = new ResNet(game, {model});
 	const monteCarloTreeSearch = new MonteCarloTreeSearch(game, resNet, {
 		numSearches: 1000,
@@ -100,11 +101,11 @@ async function loadModel(
 	setMonteCarloTreeSearch(monteCarloTreeSearch);
 }
 
-interface GameProps {
+interface PlayGameProps {
 	gameMode: GameMode;
 }
-export default function Game({gameMode}: GameProps) {
-	const [game, setGame] = React.useState<TicTacToe>(new TicTacToe());
+export default function PlayGame({gameMode}: PlayGameProps) {
+	const [game, setGame] = React.useState<Game>(gameDefinitions.game);
 	const [monteCarloTreeSearch, setMonteCarloTreeSearch] =
 		React.useState<MonteCarloTreeSearch | null>(null);
 	const [state, setState] = React.useState<State>(game.getInitialState());

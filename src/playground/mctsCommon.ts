@@ -1,11 +1,28 @@
-import MonteCarloTreeSearch from '../engine/MonteCarloTreeCommon.ts';
-import TicTacToe from '../engine/TicTacToe.ts';
+import {State} from '../engine/Game.js';
+import MonteCarloTreeSearch from '../engine/MonteCarloTreeCommon.js';
+import {gameParams} from '../train/parameters.js';
+
+function playTurn(state: State, action: number, player: number) {
+	console.log(`Player ${player} plays action ${action}`);
+	state.performAction(action, player);
+	state.print();
+	const hasWon = state.checkWin(action);
+	if (hasWon) console.log(`Player ${player} has won!`);
+}
 
 // Set game and state data
-const game = new TicTacToe();
-let state = game.getInitialState();
-// state = game.getNextState(state, 2, 1);
-// state = game.getNextState(state, 7, -1);
+const game = gameParams.game;
+const state = game.getInitialState();
+playTurn(state, 0, 1);
+playTurn(state, 0, -1);
+playTurn(state, 0, 1);
+playTurn(state, 0, -1);
+playTurn(state, 1, 1);
+playTurn(state, 4, -1);
+playTurn(state, 2, 1);
+playTurn(state, 4, -1);
+playTurn(state, 3, 1);
+
 const mcts = new MonteCarloTreeSearch(game, {
 	explorationConstant: 2,
 	numSearches: 60,

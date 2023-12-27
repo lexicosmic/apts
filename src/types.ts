@@ -31,6 +31,7 @@ export interface TrainModelParams {
 
 export type ParamsToExport_TrainingData = SelfPlayMemoryParams & {
 	id: string;
+	memoryLength: number;
 	model: ParamsToExport_BuildModel | null;
 };
 
