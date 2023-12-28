@@ -1,31 +1,37 @@
-import {State} from '../engine/Game.js';
-import MonteCarloTreeSearch from '../engine/MonteCarloTreeCommon.js';
-import {gameParams} from '../train/parameters.js';
+import { State } from "../engine/Game.js";
+import MonteCarloTreeSearch from "../engine/MonteCarloTreeCommon.js";
+import { gameParams } from "../train/parameters.js";
 
-function playTurn(state: State, action: number, player: number) {
-	console.log(`Player ${player} plays action ${action}`);
+function playTurn(state: State, action: number, player: number): string {
+	let returnString = `Player ${player} plays action ${action}`;
 	state.performAction(action, player);
-	state.print();
+	returnString += "\n" + state.toString();
 	const hasWon = state.checkWin(action);
-	if (hasWon) console.log(`Player ${player} has won!`);
+	if (hasWon) returnString += "\n" + `Player ${player} has won!`;
+	return returnString;
 }
 
-// Set game and state data
-const game = gameParams.game;
-const state = game.getInitialState();
-playTurn(state, 0, 1);
-playTurn(state, 0, -1);
-playTurn(state, 0, 1);
-playTurn(state, 0, -1);
-playTurn(state, 1, 1);
-playTurn(state, 4, -1);
-playTurn(state, 2, 1);
-playTurn(state, 4, -1);
-playTurn(state, 3, 1);
+export async function testMCTSCommon(printMessage: (message: string) => void) {
+	// Set game and state data
+	const game = gameParams.game;
+	const state = game.getInitialState();
+	printMessage(state.toString());
 
-const mcts = new MonteCarloTreeSearch(game, {
-	explorationConstant: 2,
-	numSearches: 60,
-});
-const probabilities = mcts.search(state);
-console.log(probabilities);
+	printMessage(playTurn(state, 0, 1));
+
+	printMessage(playTurn(state, 0, -1));
+	printMessage(playTurn(state, 0, 1));
+	printMessage(playTurn(state, 0, -1));
+	printMessage(playTurn(state, 1, 1));
+	printMessage(playTurn(state, 4, -1));
+	printMessage(playTurn(state, 2, 1));
+	printMessage(playTurn(state, 4, -1));
+	printMessage(playTurn(state, 3, 1));
+
+	const mcts = new MonteCarloTreeSearch(game, {
+		explorationConstant: 2,
+		numSearches: 60,
+	});
+	const probabilities = mcts.search(state);
+	printMessage(probabilities.toString());
+}

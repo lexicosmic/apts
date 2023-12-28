@@ -1,6 +1,6 @@
-import * as tf from '@tensorflow/tfjs-node';
-import {ResNetBuildModelParams} from '../types.js';
-import Game from './Game.js';
+import * as tf from "@tensorflow/tfjs";
+import { ResNetBuildModelParams } from "../types.js";
+import Game from "./Game.js";
 
 const INPUT_CHANNELS = 3;
 
@@ -16,13 +16,13 @@ export default class ResNet {
 
 	/// Constructor
 	constructor(game: Game, params: ResNetParams) {
-		if ('model' in params) {
+		if ("model" in params) {
 			this.model = params.model;
 		} else {
 			this.model = buildResNetModel(
 				game,
 				params.numResBlocks,
-				params.numHiddenChannels,
+				params.numHiddenChannels
 			);
 		}
 	}
@@ -35,8 +35,8 @@ export default class ResNet {
 	}
 
 	// Prints a summary of the model
-	public summary() {
-		this.model.summary();
+	public summary(printMessage: (message: string) => void = console.log) {
+		this.model.summary(0, [0], printMessage);
 	}
 
 	// Disposes the model
@@ -49,16 +49,21 @@ export default class ResNet {
 		this.model.compile({
 			optimizer: tf.train.adam(learningRate),
 			loss: {
-				policyHead: 'categoricalCrossentropy',
-				valueHead: 'meanSquaredError',
+				policyHead: "categoricalCrossentropy",
+				valueHead: "meanSquaredError",
 			},
-			metrics: ['accuracy'],
+			metrics: ["accuracy"],
 		});
 	}
 
 	// Prints the progress of the training
-	private logProgress(epoch: number, logs: tf.Logs, trainingLog: tf.Logs[]) {
-		console.log(logs);
+	private logProgress(
+		printMessage: (message: string) => void,
+		epoch: number,
+		logs: tf.Logs,
+		trainingLog: tf.Logs[]
+	) {
+		printMessage(logs.toString());
 		trainingLog.push(logs);
 	}
 
@@ -70,7 +75,7 @@ export default class ResNet {
 		batchSize: number,
 		numEpochs: number,
 		learningRate: number,
-		validationSplit: number = 0,
+		validationSplit: number = 0
 	) {
 		const trainingLog: tf.Logs[] = [];
 
@@ -84,7 +89,7 @@ export default class ResNet {
 			epochs: numEpochs, // Go over the data N times!
 			callbacks: {
 				onEpochEnd: (epoch, logs) =>
-					this.logProgress(epoch, logs!, trainingLog),
+					this.logProgress(console.log, epoch, logs!, trainingLog),
 			},
 		});
 
@@ -137,7 +142,7 @@ export default class ResNet {
 		return tf.tidy(() => {
 			const outputs = this.model.predict(encodedState) as [
 				tf.Tensor2D,
-				tf.Tensor2D,
+				tf.Tensor2D
 			];
 			return outputs;
 		});
@@ -148,30 +153,30 @@ export default class ResNet {
 function buildResNetModel(
 	game: Game,
 	numResBlocks: number, // Length of the backbone
-	numHiddenChannels: number, // Number of channels in the backbone
+	numHiddenChannels: number // Number of channels in the backbone
 ) {
 	// Define input tensor
 	const inputTensor = tf.input({
-		name: 'input',
+		name: "input",
 		shape: [game.getRowCount(), game.getColumnCount(), INPUT_CHANNELS],
 	});
 
 	// Applies a convolutional layer to the input
 	const startBlock = tf.sequential({
-		name: 'startBlock',
+		name: "startBlock",
 		layers: [
 			tf.layers.conv2d({
 				filters: numHiddenChannels, // Produce as channels as set by numHiddenChannels
 				kernelSize: 3, // 3x3 filter
-				padding: 'same',
+				padding: "same",
 				inputShape: [game.getRowCount(), game.getColumnCount(), INPUT_CHANNELS],
 			}),
 			tf.layers.batchNormalization(),
-			tf.layers.activation({activation: 'relu'}),
+			tf.layers.activation({ activation: "relu" }),
 		],
 	});
 	const startBlockOutputTensor = startBlock.apply(
-		inputTensor,
+		inputTensor
 	) as tf.SymbolicTensor;
 
 	// Apply the residual blocks to the tensor
@@ -183,18 +188,18 @@ function buildResNetModel(
 			startBlockOutputTensor,
 			game.getRowCount(),
 			game.getColumnCount(),
-			numHiddenChannels,
+			numHiddenChannels
 		);
 	}
 
 	// Block that predicts the probability of each action
 	const policyHead = tf.sequential({
-		name: 'policyHead',
+		name: "policyHead",
 		layers: [
 			tf.layers.conv2d({
 				filters: 32, // Produce 32 channels
 				kernelSize: 3, // 3x3 filter
-				padding: 'same',
+				padding: "same",
 				inputShape: [
 					game.getRowCount(),
 					game.getColumnCount(),
@@ -202,21 +207,21 @@ function buildResNetModel(
 				], // Output of the backbone
 			}),
 			tf.layers.batchNormalization(),
-			tf.layers.activation({activation: 'relu'}),
+			tf.layers.activation({ activation: "relu" }),
 			tf.layers.flatten(),
-			tf.layers.dense({units: game.getActionSize() * 32}),
-			tf.layers.dense({units: game.getActionSize()}), // Output of the policy head, i.e. the probability of each action
+			tf.layers.dense({ units: game.getActionSize() * 32 }),
+			tf.layers.dense({ units: game.getActionSize() }), // Output of the policy head, i.e. the probability of each action
 		],
 	});
 
 	// Block that predicts the outcome value of the state, i.e. the probability of winning
 	const valueHead = tf.sequential({
-		name: 'valueHead',
+		name: "valueHead",
 		layers: [
 			tf.layers.conv2d({
 				filters: 3, // Produce 3 channels
 				kernelSize: 3, // 3x3 filter
-				padding: 'same',
+				padding: "same",
 				inputShape: [
 					game.getRowCount(),
 					game.getColumnCount(),
@@ -224,22 +229,22 @@ function buildResNetModel(
 				], // Output of the backbone
 			}),
 			tf.layers.batchNormalization(),
-			tf.layers.activation({activation: 'relu'}),
+			tf.layers.activation({ activation: "relu" }),
 			tf.layers.flatten(),
-			tf.layers.dense({units: game.getActionSize() * 3}),
-			tf.layers.dense({units: 1, activation: 'tanh'}), // Output of the value head, i.e. the probability of winning
+			tf.layers.dense({ units: game.getActionSize() * 3 }),
+			tf.layers.dense({ units: 1, activation: "tanh" }), // Output of the value head, i.e. the probability of winning
 		],
 	});
 
 	const valueOutput = valueHead.apply(
-		backboneOutputTensor,
+		backboneOutputTensor
 	) as tf.SymbolicTensor;
 	const policyOutput = policyHead.apply(
-		backboneOutputTensor,
+		backboneOutputTensor
 	) as tf.SymbolicTensor;
 
 	const model = tf.model({
-		name: 'ResNet',
+		name: "ResNet",
 		inputs: inputTensor,
 		outputs: [policyOutput, valueOutput],
 	});
@@ -253,15 +258,15 @@ function applyResBlock(
 	originalInputTensor: tf.SymbolicTensor,
 	dim1Size: number,
 	dim2Size: number,
-	numHiddenChannels: number,
+	numHiddenChannels: number
 ) {
 	const convolution1 = tf.layers.conv2d({
 		name: `ResBlock_${idNumber}_convolution1`,
 		inputShape: [dim1Size, dim2Size, numHiddenChannels],
 		filters: numHiddenChannels,
 		kernelSize: 3,
-		padding: 'same',
-		activation: 'relu',
+		padding: "same",
+		activation: "relu",
 	});
 	const normalization1 = tf.layers.batchNormalization({
 		name: `ResBlock_${idNumber}_normalization1`,
@@ -271,8 +276,8 @@ function applyResBlock(
 		name: `ResBlock_${idNumber}_convolution2`,
 		filters: numHiddenChannels,
 		kernelSize: 3,
-		padding: 'same',
-		activation: 'relu',
+		padding: "same",
+		activation: "relu",
 	});
 	const normalization2 = tf.layers.batchNormalization({
 		name: `ResBlock_${idNumber}_normalization2`,
@@ -281,8 +286,8 @@ function applyResBlock(
 	// Apply the common layers
 	let outputTensor = normalization2.apply(
 		convolution2.apply(
-			normalization1.apply(convolution1.apply(currentInputTensor)),
-		),
+			normalization1.apply(convolution1.apply(currentInputTensor))
+		)
 	) as tf.SymbolicTensor;
 
 	// Sum the original input to the output of the current residual block

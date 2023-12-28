@@ -8,3 +8,29 @@
 	font-weight: 500;
 	cursor: pointer;
 }
+
+.button:hover {
+	background-color: #eee;
+}
+
+.button:active {
+	background-color: #ccc;
+}
+
+.button:focus {
+	outline: none;
+}
+
+.disabled {
+	background-color: #aaa;
+	color: #000;
+	cursor: not-allowed;
+}
+
+.disabled:hover {
+	background-color: #aaa;
+}
+
+.disabled:active {
+	background-color: #aaa;
+}

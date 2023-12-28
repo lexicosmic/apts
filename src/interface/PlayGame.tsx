@@ -1,40 +1,40 @@
-import * as tf from '@tensorflow/tfjs-node';
-import React, {useEffect} from 'react';
-import {Box, Newline, Text} from 'ink';
-import {GameMode} from '../types.js';
-import ResNet from '../engine/ResNet.js';
-import MonteCarloTreeSearch from '../engine/MonteCarloTree.js';
+import * as tf from "@tensorflow/tfjs";
+import React, { useEffect } from "react";
+import { Box, Newline, Text } from "ink";
+import { GameMode } from "../types.js";
+import ResNet from "../engine/ResNet.js";
+import MonteCarloTreeSearch from "../engine/MonteCarloTree.js";
 import Game, {
 	Action,
 	ActionOutcome,
 	Outcome,
 	Player,
 	State,
-} from '../engine/Game.js';
-import HistoryFrame from './HistoryFrame.js';
+} from "../engine/Game.js";
+import HistoryFrame from "./HistoryFrame.js";
 import PvPGame, {
 	formattedCellText as PvPFormattedCellText,
 	formattedPlayerName as PvPFormattedPlayerName,
-} from './PvPGame.js';
+} from "./PvPGame.js";
 import PvCGame, {
 	formattedCellText as PvCFormattedCellText,
 	formattedPlayerName as PvCFormattedPlayerName,
-} from './PvCGame.js';
+} from "./PvCGame.js";
 import CvCGame, {
 	formattedCellText as CvCFormattedCellText,
 	formattedPlayerName as CvCFormattedPlayerName,
-} from './CvCGame.js';
-import {gameDefinitions} from './definitions.js';
+} from "./CvCGame.js";
+import { gameDefinitions } from "./definitions.js";
 
 type ParsedActionParams = {
 	input: string;
 	game: Game;
 };
-export const parsedAction = ({input, game}: ParsedActionParams): Action => {
+export const parsedAction = ({ input, game }: ParsedActionParams): Action => {
 	let action: Action;
 	action = Number.parseInt(input);
 	if (Number.isNaN(action) || action < 0 || action >= game.getActionSize())
-		throw new Error('Invalid move!');
+		throw new Error("Invalid move!");
 	return action;
 };
 
@@ -50,9 +50,9 @@ export function getValidAction({
 }: GetValidActionParams): Action | null {
 	setInvalidMove(false);
 	try {
-		const action = parsedAction({input, game});
+		const action = parsedAction({ input, game });
 		const validActions = state.getValidActions();
-		if (validActions[action] !== true) throw new Error('Invalid move!');
+		if (validActions[action] !== true) throw new Error("Invalid move!");
 		return action;
 	} catch (e) {
 		setInvalidMove(true);
@@ -87,13 +87,13 @@ export function performAction({
 // Load the model and create the Monte Carlo Tree Search object
 async function loadModel(
 	game: Game,
-	setMonteCarloTreeSearch: (monteCarloTreeSearch: MonteCarloTreeSearch) => void,
+	setMonteCarloTreeSearch: (monteCarloTreeSearch: MonteCarloTreeSearch) => void
 ) {
 	const model = await tf.loadLayersModel(
-		`file://models/${gameDefinitions.modelDirectory}/model.json`,
+		`file://models/${gameDefinitions.modelDirectory}/model.json`
 	);
 
-	const resNet = new ResNet(game, {model});
+	const resNet = new ResNet(game, { model });
 	const monteCarloTreeSearch = new MonteCarloTreeSearch(game, resNet, {
 		numSearches: 1000,
 		explorationConstant: 2,
@@ -104,7 +104,7 @@ async function loadModel(
 interface PlayGameProps {
 	gameMode: GameMode;
 }
-export default function PlayGame({gameMode}: PlayGameProps) {
+export default function PlayGame({ gameMode }: PlayGameProps) {
 	const [game, setGame] = React.useState<Game>(gameDefinitions.game);
 	const [monteCarloTreeSearch, setMonteCarloTreeSearch] =
 		React.useState<MonteCarloTreeSearch | null>(null);

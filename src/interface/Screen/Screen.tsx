@@ -1,15 +1,13 @@
 import styles from "./Screen.module.css";
-import Game from "../../engine/Game";
 
 interface ScreenProps {
-	game: Game;
+	text: string;
+	square?: boolean;
 }
-export default function Screen(props: ScreenProps) {
-	return (
-		<textarea
-			readOnly
-			className={styles.screen}
-			value={props.game.getInitialState().toString()}
-		/>
-	);
+export default function Screen({ square = false, ...props }: ScreenProps) {
+	let className = styles.screen;
+	if (square) {
+		className += ` ${styles.square}`;
+	}
+	return <textarea readOnly className={className} value={props.text} />;
 }

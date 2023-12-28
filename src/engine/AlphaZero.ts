@@ -1,15 +1,15 @@
-import * as tf from '@tensorflow/tfjs-node';
-import fs from 'fs';
-import {MonteCarloTreeSearchParams, TrainModelParams} from '../types.js';
+import * as tf from "@tensorflow/tfjs";
+import fs from "fs";
+import { MonteCarloTreeSearchParams, TrainModelParams } from "../types.js";
 import Game, {
 	Action,
 	ActionOutcome,
 	EncodedState,
 	Player,
 	State,
-} from './Game.js';
-import ResNet from './ResNet.js';
-import MonteCarloTreeSearch from './MonteCarloTree.js';
+} from "./Game.js";
+import ResNet from "./ResNet.js";
+import MonteCarloTreeSearch from "./MonteCarloTree.js";
 
 type GameMemoryBlock = {
 	state: State;
@@ -21,7 +21,7 @@ type GameMemory = GameMemoryBlock[];
 type TrainMemoryBlock = {
 	encodedState: EncodedState;
 	actionProbabilities: number[];
-	outcomeValue: ActionOutcome['value'];
+	outcomeValue: ActionOutcome["value"];
 };
 export type TrainingMemory = TrainMemoryBlock[];
 
@@ -52,10 +52,12 @@ export default class AlphaZero {
 			const neutralState = State.clone(state);
 			neutralState.changePerspective(player, this.game.getOpponent(player));
 			const actionProbabilities = this.mcts.search(neutralState);
-			gameMemory.push({state: neutralState, actionProbabilities, player});
+			gameMemory.push({ state: neutralState, actionProbabilities, player });
 
 			// Pick an action based on the probabilities from the MCTS
-			const logActionProbabilities = actionProbabilities.map(p => Math.log(p));
+			const logActionProbabilities = actionProbabilities.map((p) =>
+				Math.log(p)
+			);
 			const pickedAction: Action = tf.tidy(() => {
 				const actionTensor = tf.tensor(logActionProbabilities) as tf.Tensor1D;
 				const actionIndex = tf
@@ -64,7 +66,7 @@ export default class AlphaZero {
 				return actionIndex;
 			});
 			if (!state.getValidActions()[pickedAction])
-				throw new Error('Invalid action picked');
+				throw new Error("Invalid action picked");
 
 			// Perform the action and check if the game is over
 			state.performAction(pickedAction, player);
@@ -97,11 +99,11 @@ export default class AlphaZero {
 	private transposeMemory(trainingMemory: TrainingMemory): {
 		encodedStates: EncodedState[];
 		policyTargets: number[][];
-		valueTargets: ActionOutcome['value'][];
+		valueTargets: ActionOutcome["value"][];
 	} {
 		const encodedStates: EncodedState[] = [];
 		const policyTargets: number[][] = [];
-		const valueTargets: ActionOutcome['value'][] = [];
+		const valueTargets: ActionOutcome["value"][] = [];
 		for (const {
 			encodedState,
 			actionProbabilities,
@@ -111,14 +113,14 @@ export default class AlphaZero {
 			policyTargets.push(actionProbabilities);
 			valueTargets.push(outcomeValue);
 		}
-		return {encodedStates, policyTargets, valueTargets};
+		return { encodedStates, policyTargets, valueTargets };
 	}
 
 	// Build the training memory by self-playing the game
 	public async buildTrainingMemory(
 		numSelfPlayIterations: number,
 		showProgress = false,
-		showMemorySize = false,
+		showMemorySize = false
 	): Promise<TrainingMemory> {
 		const memory: TrainingMemory = [];
 		// Construct the training memory from self-playing the game
@@ -137,10 +139,10 @@ export default class AlphaZero {
 		memory: TrainingMemory,
 		batchSize: number,
 		numEpochs: number,
-		learningRate: number,
+		learningRate: number
 	): Promise<tf.Logs[]> {
 		// Convert the memory to a format that can be used to train the model
-		const {encodedStates, policyTargets, valueTargets} =
+		const { encodedStates, policyTargets, valueTargets } =
 			this.transposeMemory(memory);
 
 		// Convert the memory into tensors
@@ -157,7 +159,7 @@ export default class AlphaZero {
 			valueTargetsTensor,
 			batchSize,
 			numEpochs,
-			learningRate,
+			learningRate
 		);
 
 		// Dispose the tensors
@@ -171,16 +173,16 @@ export default class AlphaZero {
 		directoryName: string,
 		numSelfPlayIterations: number,
 		trainModelParams: TrainModelParams,
-		trainingMemoryArray?: TrainingMemory[],
+		trainingMemoryArray?: TrainingMemory[]
 	): Promise<void> {
-		console.log('=-=-=-=-=-=-=-= AlphaZero LEARNING =-=-=-=-=-=-=-=');
+		console.log("=-=-=-=-=-=-=-= AlphaZero LEARNING =-=-=-=-=-=-=-=");
 
 		for (let i = 0; i < trainModelParams.numIterations; i++) {
 			console.log(`ITERATION ${i + 1}/${trainModelParams.numIterations}`);
 			let memory;
 			if (
-				typeof trainingMemoryArray === 'undefined' ||
-				typeof trainingMemoryArray[i] === 'undefined'
+				typeof trainingMemoryArray === "undefined" ||
+				typeof trainingMemoryArray[i] === "undefined"
 			)
 				memory = await this.buildTrainingMemory(numSelfPlayIterations, true);
 			else memory = trainingMemoryArray[i];
@@ -189,7 +191,7 @@ export default class AlphaZero {
 				memory,
 				trainModelParams.batchSize,
 				trainModelParams.numEpochs,
-				trainModelParams.learningRate,
+				trainModelParams.learningRate
 			);
 
 			// Save the model architecture and optimizer weights
@@ -197,7 +199,7 @@ export default class AlphaZero {
 			try {
 				fs.writeFileSync(
 					`./models/${directoryName}/iteration_${i}/trainingLog.json`,
-					JSON.stringify(trainingLog),
+					JSON.stringify(trainingLog)
 				);
 			} catch (e) {
 				console.error(e);

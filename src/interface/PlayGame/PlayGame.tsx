@@ -1,4 +1,4 @@
-import * as tf from "@tensorflow/tfjs-node";
+import * as tf from "@tensorflow/tfjs";
 import { useEffect, useState } from "react";
 import { GameMode } from "../../types";
 import { gameDefinitions } from "../definitions";
@@ -57,7 +57,7 @@ export default function PlayGame(props: PlayGameProps) {
 		<FluidContainer
 			headerContent={
 				<Header>
-					<h1>TicTacToe</h1>
+					<h1 className="header-text-1">TicTacToe</h1>
 					<p className="display-text-3">{props.gameMode}</p>
 				</Header>
 			}
@@ -65,7 +65,7 @@ export default function PlayGame(props: PlayGameProps) {
 				<Button text="Return" handleClick={() => props.setGameMode(null)} />
 			}
 		>
-			<Screen game={game} />
+			<Screen text={`banana`} square />
 		</FluidContainer>
 	);
 }
