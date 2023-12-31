@@ -1,22 +1,22 @@
-import fs from 'fs';
+import fs from "fs";
 import {
 	ParamsToExport_BuildModel,
 	ParamsToExport_TrainingData,
 	ResNetBuildModelParams,
 	SelfPlayMemoryParams,
 	TrainModelParams,
-} from '../types.js';
-import {TrainingMemory} from '../engine/AlphaZero.js';
+} from "../types.js";
+import { TrainingMemory } from "../engine/AlphaZero.js";
 import {
 	selfPlayMemoryParams as defaultMemoryParams,
 	gameParams,
-} from './parameters.js';
+} from "./parameters.js";
 
 function getParamsToExport_TrainingData(
 	trainingDataId: string,
 	memoryLength: number,
 	modelParams: ParamsToExport_BuildModel | null,
-	selfPlayMemoryParams: SelfPlayMemoryParams,
+	selfPlayMemoryParams: SelfPlayMemoryParams
 ) {
 	const paramsToExport: ParamsToExport_TrainingData = {
 		id: trainingDataId,
@@ -30,7 +30,7 @@ function getParamsToExport_TrainingData(
 function getParamsToExport_BuildModel(
 	trainingDataIds: string[],
 	resNetBuildModelParams: ResNetBuildModelParams,
-	trainModelParams: TrainModelParams,
+	trainModelParams: TrainModelParams
 ) {
 	const listOfTrainingDataParemeters: (ParamsToExport_TrainingData | {})[] = [];
 	let i = 0;
@@ -42,10 +42,10 @@ function getParamsToExport_BuildModel(
 	}
 	while (i < trainModelParams.numIterations) {
 		const trainingDataParameters = getParamsToExport_TrainingData(
-			'',
+			"",
 			-1,
 			null,
-			defaultMemoryParams,
+			defaultMemoryParams
 		);
 		listOfTrainingDataParemeters.push(trainingDataParameters);
 		i++;
@@ -65,9 +65,9 @@ export function loadTrainingDataParameters(trainingDataId: string) {
 		trainingDataParameters = JSON.parse(
 			fs
 				.readFileSync(
-					`./trainingData/${gameParams.directoryName}/trainingData_${trainingDataId}/parameters.json`,
+					`./trainingData/${gameParams.directoryName}/trainingData_${trainingDataId}/parameters.json`
 				)
-				.toString(),
+				.toString()
 		);
 		return trainingDataParameters;
 	} catch (e) {
@@ -81,7 +81,7 @@ export function loadTrainingData(trainingDataIds: string[]) {
 		for (const trainingDataId of trainingDataIds) {
 			const trainingData = fs
 				.readFileSync(
-					`./trainingData/${gameParams.directoryName}/trainingData_${trainingDataId}/trainingData.json`,
+					`./trainingData/${gameParams.directoryName}/trainingData_${trainingDataId}/trainingData.json`
 				)
 				.toString();
 			trainingMemoryBatch.push(JSON.parse(trainingData));
@@ -98,7 +98,7 @@ export function loadModelParameters(modelDirectory: string) {
 		modelParameters = JSON.parse(
 			fs
 				.readFileSync(`./models/${modelDirectory}/../parameters.json`)
-				.toString(),
+				.toString()
 		);
 		return modelParameters;
 	} catch (e) {
@@ -109,7 +109,7 @@ export function loadModelParameters(modelDirectory: string) {
 export function writeTrainingData(
 	trainingMemory: TrainingMemory,
 	modelDirectory: string,
-	selfPlayMemoryParams: SelfPlayMemoryParams,
+	selfPlayMemoryParams: SelfPlayMemoryParams
 ) {
 	const currentTime = new Date().valueOf();
 	const modelParams = loadModelParameters(modelDirectory);
@@ -119,21 +119,21 @@ export function writeTrainingData(
 			currentTime.toString(),
 			trainingMemory.length,
 			modelParams ?? null,
-			selfPlayMemoryParams,
+			selfPlayMemoryParams
 		);
 
 	try {
 		fs.mkdirSync(
 			`./trainingData/${gameParams.directoryName}/trainingData_${currentTime}`,
-			{recursive: true},
+			{ recursive: true }
 		);
 		fs.writeFileSync(
 			`./trainingData/${gameParams.directoryName}/trainingData_${currentTime}/trainingData.json`,
-			JSON.stringify(trainingMemory),
+			JSON.stringify(trainingMemory)
 		);
 		fs.writeFileSync(
 			`./trainingData/${gameParams.directoryName}/trainingData_${currentTime}/parameters.json`,
-			JSON.stringify(paramsToExport),
+			JSON.stringify(paramsToExport)
 		);
 	} catch (e) {
 		console.error(e);
@@ -144,20 +144,20 @@ export function writeModelParameters(
 	modelDirectory: string,
 	trainingDataIds: string[],
 	resNetBuildModelParams: ResNetBuildModelParams,
-	trainModelParams: TrainModelParams,
+	trainModelParams: TrainModelParams
 ) {
 	const paramsToExport: ParamsToExport_BuildModel =
 		getParamsToExport_BuildModel(
 			trainingDataIds,
 			resNetBuildModelParams,
-			trainModelParams,
+			trainModelParams
 		);
 
 	try {
-		fs.mkdirSync(`./models/${modelDirectory}`, {recursive: true});
+		fs.mkdirSync(`./models/${modelDirectory}`, { recursive: true });
 		fs.writeFileSync(
 			`./models/${modelDirectory}/parameters.json`,
-			JSON.stringify(paramsToExport),
+			JSON.stringify(paramsToExport)
 		);
 	} catch (e) {
 		console.error(e);

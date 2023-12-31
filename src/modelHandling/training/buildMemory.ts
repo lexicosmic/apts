@@ -1,12 +1,12 @@
 import * as tf from "@tensorflow/tfjs";
-import ResNet from "../engine/ResNet.js";
-import AlphaZero from "../engine/AlphaZero.js";
+import ResNet from "../../engine/ResNet.js";
+import AlphaZero from "../../engine/AlphaZero.js";
 import {
 	gameParams,
 	monteCarloTreeSearchParams,
 	selfPlayMemoryParams,
-} from "./parameters.js";
-import { writeTrainingData } from "./util.js";
+} from "../parameters.js";
+import { writeTrainingData } from "../util.js";
 
 const game = gameParams.game;
 const path = `file://models/${gameParams.mainModelDirectory}/model.json`;

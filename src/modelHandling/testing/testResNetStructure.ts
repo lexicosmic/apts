@@ -1,8 +1,8 @@
 import * as tf from "@tensorflow/tfjs";
-import ResNet from "../engine/ResNet.js";
-import { gameParams } from "../train/parameters.js";
+import ResNet from "../../engine/ResNet.js";
+import { gameParams } from "../parameters.js";
 
-export async function testResNetStructure(
+export default async function testResNetStructure(
 	printMessage: (message: string) => void
 ) {
 	// Set game and state data

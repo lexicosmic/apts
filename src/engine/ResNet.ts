@@ -31,7 +31,7 @@ export default class ResNet {
 
 	// Saves the model to the given path, and returns a promise
 	public save(path: string) {
-		return this.model.save(path);
+		return this.model.save(path, {});
 	}
 
 	// Prints a summary of the model
@@ -63,7 +63,13 @@ export default class ResNet {
 		logs: tf.Logs,
 		trainingLog: tf.Logs[]
 	) {
-		printMessage(logs.toString());
+		let logsString = `Epoch ${epoch}\n`;
+		logsString += `Total Loss: ${logs.loss}\n`;
+		logsString += `Policy Head Loss: ${logs.policyHead_loss}\n`;
+		logsString += `Policy Head Accuracy: ${logs.policyHead_acc}\n`;
+		logsString += `Value Head Loss: ${logs.valueHead_loss}\n`;
+		logsString += `Value Head Accuracy: ${logs.valueHead_acc}\n`;
+		printMessage(logsString);
 		trainingLog.push(logs);
 	}
 
@@ -75,7 +81,8 @@ export default class ResNet {
 		batchSize: number,
 		numEpochs: number,
 		learningRate: number,
-		validationSplit: number = 0
+		validationSplit: number,
+		printMessage: (message: string) => void = console.log
 	) {
 		const trainingLog: tf.Logs[] = [];
 
@@ -89,7 +96,7 @@ export default class ResNet {
 			epochs: numEpochs, // Go over the data N times!
 			callbacks: {
 				onEpochEnd: (epoch, logs) =>
-					this.logProgress(console.log, epoch, logs!, trainingLog),
+					this.logProgress(printMessage, epoch, logs!, trainingLog),
 			},
 		});
 

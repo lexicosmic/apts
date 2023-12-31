@@ -4,14 +4,18 @@ import Header from "../Header/Header";
 import Footer from "../Footer/Footer";
 
 interface CardProps {
-	headerText: string;
+	headerTitle: string;
+	headerSubtitle?: string;
 	footerText?: string;
 }
 export default function Card(props: PropsWithChildren<CardProps>) {
 	return (
 		<article className={styles.card}>
 			<Header className={styles.header}>
-				<h1 className="header-text-1">{props.headerText}</h1>
+				<h1 className="header-text-2">{props.headerTitle}</h1>
+				{props.headerSubtitle && (
+					<p className="display-text-3">{props.headerSubtitle}</p>
+				)}
 			</Header>
 			{props.children}
 			{props.footerText && (

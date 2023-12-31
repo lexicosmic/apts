@@ -9,6 +9,7 @@ interface Option {
 
 interface SelectorButtonsProps {
 	title: string;
+	subtitle?: string;
 	options: Option[];
 }
 export default function SelectorButtons(props: SelectorButtonsProps) {
@@ -20,7 +21,7 @@ export default function SelectorButtons(props: SelectorButtonsProps) {
 		/>
 	));
 	return (
-		<Card headerText={props.title}>
+		<Card headerTitle={props.title} headerSubtitle={props.subtitle}>
 			<section className={styles.buttonGroupVertical}>{buttons}</section>
 		</Card>
 	);

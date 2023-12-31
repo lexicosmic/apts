@@ -90,7 +90,7 @@ async function loadModel(
 	setMonteCarloTreeSearch: (monteCarloTreeSearch: MonteCarloTreeSearch) => void
 ) {
 	const model = await tf.loadLayersModel(
-		`file://models/${gameDefinitions.modelDirectory}/model.json`
+		`indexeddb://models/${gameDefinitions.modelDirectory}`
 	);
 
 	const resNet = new ResNet(game, { model });
@@ -116,11 +116,11 @@ export default function PlayGame({ gameMode }: PlayGameProps) {
 		value: Outcome.Loss,
 	});
 
-	useEffect(() => {
-		if (gameMode === GameMode.PvC || gameMode === GameMode.CvC) {
-			loadModel(game, setMonteCarloTreeSearch);
-		}
-	}, []);
+	// useEffect(() => {
+	// 	if (gameMode === GameMode.PvC || gameMode === GameMode.CvC) {
+	// 		loadModel(game, setMonteCarloTreeSearch);
+	// 	}
+	// }, []);
 
 	let gameScreen = null;
 	let formattedCellText: (player: Player) => string;

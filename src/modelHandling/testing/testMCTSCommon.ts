@@ -1,6 +1,6 @@
-import { State } from "../engine/Game.js";
-import MonteCarloTreeSearch from "../engine/MonteCarloTreeCommon.js";
-import { gameParams } from "../train/parameters.js";
+import { State } from "../../engine/Game.js";
+import MonteCarloTreeSearch from "../../engine/MonteCarloTreeCommon.js";
+import { gameParams } from "../parameters.js";
 
 function playTurn(state: State, action: number, player: number): string {
 	let returnString = `Player ${player} plays action ${action}`;
@@ -11,7 +11,9 @@ function playTurn(state: State, action: number, player: number): string {
 	return returnString;
 }
 
-export async function testMCTSCommon(printMessage: (message: string) => void) {
+export default async function testMCTSCommon(
+	printMessage: (message: string) => void
+) {
 	// Set game and state data
 	const game = gameParams.game;
 	const state = game.getInitialState();

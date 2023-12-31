@@ -1,6 +1,6 @@
 import * as tf from "@tensorflow/tfjs";
-import ResNet from "../engine/ResNet.js";
-import { gameParams } from "../train/parameters.js";
+import ResNet from "../../engine/ResNet.js";
+import { gameParams } from "../parameters.js";
 
 // Load model
 const path = `file://models/${gameParams.mainModelDirectory}/model.json`;

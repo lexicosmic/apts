@@ -1,10 +1,11 @@
 import * as tf from "@tensorflow/tfjs";
-// import fs from "fs";
-import Game from "../engine/Game.js";
-import ResNet from "../engine/ResNet.js";
-import { gameParams } from "./parameters.js";
+import Game from "../../engine/Game.js";
+import ResNet from "../../engine/ResNet.js";
+import { gameParams } from "../parameters.js";
 
-export async function trainBlindly(printMessage: (message: string) => void) {
+export default async function testBlindTraining(
+	printMessage: (message: string) => void
+) {
 	const game = gameParams.game;
 	let state = game.getInitialState();
 	// state.performAction(0, Player.X);
@@ -23,11 +24,6 @@ export async function trainBlindly(printMessage: (message: string) => void) {
 
 	const currentTime = new Date().valueOf();
 	const modelDirectory = `${gameParams.directoryName}/blind_${currentTime}`;
-	// try {
-	// 	fs.mkdirSync(`./models/${modelDirectory}`, { recursive: true });
-	// } catch (e) {
-	// 	console.error(e);
-	// }
 
 	printMessage("\nSaving model before training...");
 	await resNet.save(
@@ -42,7 +38,9 @@ export async function trainBlindly(printMessage: (message: string) => void) {
 		outputValueTensor,
 		1,
 		30,
-		0.001
+		0.001,
+		0,
+		printMessage
 	);
 	printMessage("Model trained!\n");
 

@@ -8,8 +8,12 @@ import {
 	GameName,
 } from "../types.js";
 
+const generalParams = {
+	protocol: "indexeddb",
+};
+
 export const gameParams = {
-	protocol: "localstorage",
+	...generalParams,
 	directoryName: GameName.TicTacToe,
 	game: new TicTacToeGame(3, 3),
 	mainModelDirectory: `${GameName.TicTacToe}/selfplay_1700439885953/iteration_0`,
