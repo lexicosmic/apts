@@ -7,10 +7,13 @@ interface CardProps {
 	headerTitle: string;
 	headerSubtitle?: string;
 	footerText?: string;
+	className?: React.HTMLAttributes<HTMLDivElement>["className"];
 }
 export default function Card(props: PropsWithChildren<CardProps>) {
+	let className = styles.card;
+	if (props.className) className += ` ${props.className}`;
 	return (
-		<article className={styles.card}>
+		<article className={className}>
 			<Header className={styles.header}>
 				<h1 className="header-text-2">{props.headerTitle}</h1>
 				{props.headerSubtitle && (

@@ -7,72 +7,76 @@ import SelectorButtons from "../SelectorButtons/SelectorButtons";
 import Screen from "../Screen/Screen";
 import testMCTSCommon from "../../modelHandling/testing/testMCTSCommon";
 import testResNetStructure from "../../modelHandling/testing/testResNetStructure";
+import testLoadModel from "../../modelHandling/testing/testLoadModel";
 import testBlindTesting from "../../modelHandling/testing/testBlindTraining";
 
-enum TestingMode {
-	MCTSCommon = "Monte-Carlo Search Test",
-	ResNet = "ResNet Structure Test",
-	Blind = "Blind Testing Test",
+interface Test {
+	name: string;
+	handleClick: () => void;
+	testingFunction: (
+		printMessage: (message: string) => void,
+		modelPath: string
+	) => Promise<void>;
+	mustLoadModel: boolean;
 }
 
 interface TestingProps {
 	gameName: GameName;
 	handleReturn: () => void;
 	setShowMainHeader: (showMainHeader: boolean) => void;
+	setShowManageModelsScreen: (showManageModelsScreen: boolean) => void;
 }
 
 export default function Testing(props: TestingProps) {
-	const [testingMode, setTestingMode] = useState<TestingMode | null>(null);
+	const [test, setTest] = useState<Test | null>(null);
 	const [screenText, setScreenText] = useState<string>("");
 	const [buttonDisabled, setButtonDisabled] = useState<boolean>(false);
 
 	useEffect(() => {
-		performTesting();
-	}, [testingMode]);
+		if (test === null) {
+			setTest(null);
+			setButtonDisabled(false);
+			// props.setShowMainHeader(true);
+		} else {
+			performTesting(test);
+		}
+	}, [test]);
 
-	const testingModes = [
+	const tests: Test[] = [
 		{
-			name: TestingMode.MCTSCommon,
-			handleClick: () => handleTestingModeSelected(TestingMode.MCTSCommon),
+			name: "Monte-Carlo Search Test",
+			handleClick: () => handleTestSelected(tests[0]),
+			testingFunction: testMCTSCommon,
+			mustLoadModel: false,
 		},
 		{
-			name: TestingMode.ResNet,
-			handleClick: () => handleTestingModeSelected(TestingMode.ResNet),
+			name: "ResNet Structure Test",
+			handleClick: () => handleTestSelected(tests[1]),
+			testingFunction: testResNetStructure,
+			mustLoadModel: false,
 		},
 		{
-			name: TestingMode.Blind,
-			handleClick: () => handleTestingModeSelected(TestingMode.Blind),
+			name: "Load Model Test",
+			handleClick: () => handleTestSelected(tests[2]),
+			testingFunction: testLoadModel,
+			mustLoadModel: true,
+		},
+		{
+			name: "Blind Testing Test",
+			handleClick: () => handleTestSelected(tests[3]),
+			testingFunction: testBlindTesting,
+			mustLoadModel: false,
 		},
 	];
 
-	function handleTestingModeSelected(testingMode: TestingMode) {
+	function handleTestSelected(test: Test) {
 		setButtonDisabled(true);
-		setTestingMode(testingMode);
-		props.setShowMainHeader(false);
+		setTest(test);
+		// props.setShowMainHeader(false);
 	}
 
-	async function performTesting() {
-		let testingFunction: (
-			printMessage: (message: string) => void
-		) => Promise<void> = () => Promise.resolve();
-		switch (testingMode) {
-			case TestingMode.MCTSCommon:
-				testingFunction = testMCTSCommon;
-				break;
-			case TestingMode.ResNet:
-				testingFunction = testResNetStructure;
-				break;
-			case TestingMode.Blind:
-				testingFunction = testBlindTesting;
-				break;
-			default:
-				setTestingMode(null);
-				setButtonDisabled(false);
-				props.setShowMainHeader(true);
-				return;
-		}
-
-		await testingFunction(writeScreenText);
+	async function performTesting(test: Test) {
+		await test.testingFunction(writeScreenText, "");
 		setButtonDisabled(false);
 	}
 
@@ -81,22 +85,20 @@ export default function Testing(props: TestingProps) {
 	}
 
 	function resetTesting() {
-		setTestingMode(null);
+		setTest(null);
 		setScreenText("");
-		props.setShowMainHeader(true);
+		// props.setShowMainHeader(true);
 	}
 
 	let pageContent = null;
-	if (testingMode === null) {
-		pageContent = (
-			<SelectorButtons title={`Select test`} options={testingModes} />
-		);
+	if (test === null) {
+		pageContent = <SelectorButtons title={`Select test`} options={tests} />;
 	} else {
 		pageContent = <Screen text={screenText} />;
 	}
 
 	let footerContent = null;
-	if (testingMode === null) {
+	if (test === null) {
 		footerContent = (
 			<Button
 				text={`Return`}

@@ -30,12 +30,12 @@ export default function Playing(props: PlayingProps) {
 	];
 
 	function handleGameModeSelected(gameMode: GameMode) {
-		props.setShowMainHeader(false);
+		// props.setShowMainHeader(false);
 		setGameMode(gameMode);
 	}
 
 	function handleReturn() {
-		props.setShowMainHeader(true);
+		// props.setShowMainHeader(true);
 		if (gameMode === null) {
 			props.handleReturn();
 		} else {
