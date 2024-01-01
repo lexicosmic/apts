@@ -1,3 +1,5 @@
+import { GameName } from "../types";
+
 // Definitions
 export enum Player {
 	None = 0,
@@ -19,6 +21,8 @@ export type ActionOutcome = {
 
 export default abstract class Game {
 	/// Getters
+	public abstract getName(): GameName;
+
 	public abstract getRowCount(): number;
 
 	public abstract getColumnCount(): number;

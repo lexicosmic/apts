@@ -8,17 +8,20 @@ import {
 	GameName,
 } from "../types.js";
 
-const generalParams = {
-	protocol: "indexeddb",
+export const fileSystemProtocol = "indexeddb";
+
+export type GameParams = {
+	gameName: GameName;
+	game: TicTacToeGame | ConnectFourGame;
 };
 
-export const gameParams = {
-	...generalParams,
-	directoryName: GameName.TicTacToe,
-	game: new TicTacToeGame(3, 3),
-	mainModelDirectory: `${GameName.TicTacToe}/selfplay_1700439885953/iteration_0`,
-	trainingDataIds: ["1700442540627", "1700444129387", "1700444618455"],
-};
+// export const gameParams = {
+// 	...generalParams,
+// 	directoryName: GameName.TicTacToe,
+// 	game: new TicTacToeGame(3, 3),
+// 	// mainModelDirectory: `${GameName.TicTacToe}/selfplay_1700439885953/iteration_0`,
+// 	// trainingDataIds: ["1700442540627", "1700444129387", "1700444618455"],
+// };
 
 // export const gameParams = {
 // 	directoryName: GameName.ConnectFour,

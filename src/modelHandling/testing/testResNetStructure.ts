@@ -1,21 +1,20 @@
 import * as tf from "@tensorflow/tfjs";
+import { fileSystemProtocol } from "../parameters.js";
+import { ModelType, TrainingFunctionParams } from "../../types.js";
 import ResNet from "../../engine/ResNet.js";
-import { gameParams } from "../parameters.js";
 
-export default async function testResNetStructure(
-	printMessage: (message: string) => void
-) {
+export default async function testResNetStructure({
+	printMessage,
+	game,
+}: TrainingFunctionParams) {
 	// Set game and state data
-	const game = gameParams.game;
 	const state = game.getInitialState();
 
 	// Build model and save it
 	const resNet = new ResNet(game, { numResBlocks: 4, numHiddenChannels: 64 });
 	resNet.summary(printMessage);
 	printMessage("\nSaving model...");
-	await resNet.save(
-		`${gameParams.protocol}://models/${gameParams.directoryName}/structure`
-	);
+	await resNet.save(fileSystemProtocol, ModelType.Structure);
 	printMessage("Model saved!\n");
 
 	// Play a few moves

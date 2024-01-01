@@ -1,27 +1,28 @@
 import styles from "./Testing.module.css";
-import { GameName, formatGameName } from "../../types";
 import { useEffect, useState } from "react";
+import { TrainingFunctionParams } from "../../types";
+import { formatGameName } from "../../util";
+import Game from "../../engine/Game";
+import testMCTSCommon from "../../modelHandling/testing/testMCTSCommon";
+import testResNetStructure from "../../modelHandling/testing/testResNetStructure";
+import testBlindTesting from "../../modelHandling/testing/testBlindTraining";
 import FluidContainer from "../FluidContainer/FluidContainer";
 import Button from "../Button/Button";
 import SelectorButtons from "../SelectorButtons/SelectorButtons";
 import Screen from "../Screen/Screen";
-import testMCTSCommon from "../../modelHandling/testing/testMCTSCommon";
-import testResNetStructure from "../../modelHandling/testing/testResNetStructure";
-import testLoadModel from "../../modelHandling/testing/testLoadModel";
-import testBlindTesting from "../../modelHandling/testing/testBlindTraining";
 
 interface Test {
 	name: string;
 	handleClick: () => void;
-	testingFunction: (
-		printMessage: (message: string) => void,
-		modelPath: string
-	) => Promise<void>;
+	testingFunction: ({
+		printMessage,
+		game,
+	}: TrainingFunctionParams) => Promise<void>;
 	mustLoadModel: boolean;
 }
 
 interface TestingProps {
-	gameName: GameName;
+	game: Game;
 	handleReturn: () => void;
 	setShowMainHeader: (showMainHeader: boolean) => void;
 	setShowManageModelsScreen: (showManageModelsScreen: boolean) => void;
@@ -56,14 +57,8 @@ export default function Testing(props: TestingProps) {
 			mustLoadModel: false,
 		},
 		{
-			name: "Load Model Test",
-			handleClick: () => handleTestSelected(tests[2]),
-			testingFunction: testLoadModel,
-			mustLoadModel: true,
-		},
-		{
 			name: "Blind Testing Test",
-			handleClick: () => handleTestSelected(tests[3]),
+			handleClick: () => handleTestSelected(tests[2]),
 			testingFunction: testBlindTesting,
 			mustLoadModel: false,
 		},
@@ -76,7 +71,10 @@ export default function Testing(props: TestingProps) {
 	}
 
 	async function performTesting(test: Test) {
-		await test.testingFunction(writeScreenText, "");
+		await test.testingFunction({
+			printMessage: writeScreenText,
+			game: props.game,
+		});
 		setButtonDisabled(false);
 	}
 
@@ -125,7 +123,7 @@ export default function Testing(props: TestingProps) {
 					Test model
 				</h1>,
 				<p className="display-text-3" key={`subtitle`}>
-					{formatGameName(props.gameName)}
+					{formatGameName(props.game.getName())}
 				</p>,
 			]}
 			footerContent={footerContent}

@@ -1,12 +1,13 @@
 import * as tf from "@tensorflow/tfjs";
+import { fileSystemProtocol } from "../parameters.js";
+import { ModelType, TrainingFunctionParams } from "../../types.js";
 import Game from "../../engine/Game.js";
 import ResNet from "../../engine/ResNet.js";
-import { gameParams } from "../parameters.js";
 
-export default async function testBlindTraining(
-	printMessage: (message: string) => void
-) {
-	const game = gameParams.game;
+export default async function testBlindTraining({
+	printMessage,
+	game,
+}: TrainingFunctionParams) {
 	let state = game.getInitialState();
 	// state.performAction(0, Player.X);
 	// state.performAction(4, Player.O);
@@ -22,13 +23,10 @@ export default async function testBlindTraining(
 	const outputPolicyTensor = tf.tensor2d([Array(game.getActionSize()).fill(0)]); // N - Batch of outcomes
 	const outputValueTensor = tf.tensor2d([[outcome.value]]); // N - Batch of outcomes
 
-	const currentTime = new Date().valueOf();
-	const modelDirectory = `${gameParams.directoryName}/blind_${currentTime}`;
-
+	// const currentTime = new Date().valueOf();
 	printMessage("\nSaving model before training...");
-	await resNet.save(
-		`${gameParams.protocol}://models/${modelDirectory}/beforeTrain`
-	);
+	let innerPath = `/beforeTrain`;
+	await resNet.save(fileSystemProtocol, ModelType.Blind, innerPath);
 	printMessage("Model saved!\n");
 
 	printMessage("Training model...");
@@ -45,8 +43,7 @@ export default async function testBlindTraining(
 	printMessage("Model trained!\n");
 
 	printMessage("\nSaving model after training...");
-	await resNet.save(
-		`${gameParams.protocol}://models/${modelDirectory}/afterTrain`
-	);
+	innerPath = `/afterTrain`;
+	await resNet.save(fileSystemProtocol, ModelType.Blind, innerPath);
 	printMessage("Model saved!\n");
 }

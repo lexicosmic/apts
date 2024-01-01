@@ -1,10 +1,11 @@
+import { GameName } from "../../types.js";
 import Game, {
 	ActionOutcome,
 	EncodedState,
 	Player,
 	State,
 	ValidAction,
-} from '../Game.js';
+} from "../Game.js";
 
 export default class ConnectFourGame extends Game {
 	/// Attributes
@@ -19,7 +20,7 @@ export default class ConnectFourGame extends Game {
 			columnCount < ConnectFourGame.WINDOW_SIZE
 		)
 			throw new Error(
-				`The board must be at least ${ConnectFourGame.WINDOW_SIZE}x${ConnectFourGame.WINDOW_SIZE}`,
+				`The board must be at least ${ConnectFourGame.WINDOW_SIZE}x${ConnectFourGame.WINDOW_SIZE}`
 			);
 		super();
 		this.rowCount = rowCount;
@@ -28,6 +29,10 @@ export default class ConnectFourGame extends Game {
 	}
 
 	/// Getters
+	public getName(): GameName {
+		return GameName.ConnectFour;
+	}
+
 	public getRowCount(): number {
 		return this.rowCount;
 	}
@@ -51,8 +56,8 @@ export default class ConnectFourGame extends Game {
 
 	// Return the outcome value, considering that the opponent is the one playing
 	public getOpponentValue(
-		value: ActionOutcome['value'],
-	): ActionOutcome['value'] {
+		value: ActionOutcome["value"]
+	): ActionOutcome["value"] {
 		return -value + 0;
 	}
 }
@@ -68,7 +73,7 @@ export class ConnectFourState extends State {
 		this.rowCount = rowCount;
 		this.columnCount = columnCount;
 		this.table = Array.from(Array(rowCount), () =>
-			Array.from(Array(columnCount), () => Player.None),
+			Array.from(Array(columnCount), () => Player.None)
 		);
 	}
 
@@ -90,7 +95,7 @@ export class ConnectFourState extends State {
 
 	public getEncodedState(): EncodedState {
 		const encodedState: EncodedState = Array.from(Array(this.rowCount), () =>
-			Array.from(Array(this.columnCount), () => Array(3).fill(0)),
+			Array.from(Array(this.columnCount), () => Array(3).fill(0))
 		);
 		for (let i = 0; i < this.rowCount; i++) {
 			for (let j = 0; j < this.columnCount; j++) {
@@ -111,31 +116,31 @@ export class ConnectFourState extends State {
 	}
 
 	/// Methods
-	public print(): void {
-		let boardString = '';
+	public toString(): string {
+		let boardString = "";
 		for (let i = 0; i < this.table.length; i++) {
-			boardString += '|';
+			boardString += "|";
 			for (let j = 0; j < this.table[i].length; j++) {
 				const cell = this.table[i][j];
-				boardString += ' ';
-				if (cell === Player.X) boardString += 'X';
-				else if (cell === Player.O) boardString += 'O';
-				else boardString += '-';
-				boardString += ' |';
+				boardString += " ";
+				if (cell === Player.X) boardString += "X";
+				else if (cell === Player.O) boardString += "O";
+				else boardString += "-";
+				boardString += " |";
 			}
-			boardString += '\n';
+			boardString += "\n";
 		}
-		console.log(boardString);
+		return boardString;
 	}
 
 	private checkWinOnRow(row: number, column: number, player: Player): boolean {
 		const firstWindowColumn = Math.max(
 			0,
-			column - ConnectFourGame.WINDOW_SIZE + 1,
+			column - ConnectFourGame.WINDOW_SIZE + 1
 		);
 		const lastWindowColumn = Math.min(
 			this.columnCount - 1,
-			column + ConnectFourGame.WINDOW_SIZE - 1,
+			column + ConnectFourGame.WINDOW_SIZE - 1
 		);
 
 		for (
@@ -162,7 +167,7 @@ export class ConnectFourState extends State {
 	private checkWinOnColumn(
 		row: number,
 		column: number,
-		player: Player,
+		player: Player
 	): boolean {
 		if (row > this.rowCount - ConnectFourGame.WINDOW_SIZE) return false;
 		// Check if all the cells in the window are from the same player
@@ -175,11 +180,11 @@ export class ConnectFourState extends State {
 	private checkWinOnPrimaryDiagonal(
 		row: number,
 		column: number,
-		player: Player,
+		player: Player
 	): boolean {
 		let firstWindowColumn = Math.max(
 			0,
-			column - ConnectFourGame.WINDOW_SIZE + 1,
+			column - ConnectFourGame.WINDOW_SIZE + 1
 		);
 		const xInitialOffset = column - firstWindowColumn;
 		let correspondingInitialRow = row - xInitialOffset;
@@ -189,7 +194,7 @@ export class ConnectFourState extends State {
 		}
 		let lastWindowColumn = Math.min(
 			this.columnCount - 1,
-			column + ConnectFourGame.WINDOW_SIZE - 1,
+			column + ConnectFourGame.WINDOW_SIZE - 1
 		);
 		const xFinalOffset = lastWindowColumn - column;
 		let correspondingFinalRow = row + xFinalOffset;
@@ -228,11 +233,11 @@ export class ConnectFourState extends State {
 	private checkWinOnSecondaryDiagonal(
 		row: number,
 		column: number,
-		player: Player,
+		player: Player
 	): boolean {
 		let firstWindowColumn = Math.max(
 			0,
-			column - ConnectFourGame.WINDOW_SIZE + 1,
+			column - ConnectFourGame.WINDOW_SIZE + 1
 		);
 		const xInitialOffset = column - firstWindowColumn;
 		let correspondingInitialRow = row + xInitialOffset;
@@ -242,7 +247,7 @@ export class ConnectFourState extends State {
 		}
 		let lastWindowColumn = Math.min(
 			this.columnCount - 1,
-			column + ConnectFourGame.WINDOW_SIZE - 1,
+			column + ConnectFourGame.WINDOW_SIZE - 1
 		);
 		const xFinalOffset = lastWindowColumn - column;
 		let correspondingFinalRow = row - xFinalOffset;
@@ -316,7 +321,7 @@ export class ConnectFourState extends State {
 	/// Static methods
 	public changePerspective(
 		currentPlayer: Player,
-		opponentPlayer: Player,
+		opponentPlayer: Player
 	): void {
 		for (let i = 0; i < this.rowCount; i++) {
 			for (let j = 0; j < this.columnCount; j++) {

@@ -1,3 +1,4 @@
+import { GameName } from "../../types.js";
 import Game, {
 	ActionOutcome,
 	EncodedState,
@@ -20,6 +21,10 @@ export default class TicTacToeGame extends Game {
 	}
 
 	/// Getters
+	public getName(): GameName {
+		return GameName.TicTacToe;
+	}
+
 	public getRowCount(): number {
 		return this.rowCount;
 	}

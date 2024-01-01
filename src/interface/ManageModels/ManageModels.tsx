@@ -1,13 +1,29 @@
-import Button from "../Button/Button";
+import styles from "./ManageModels.module.css";
+import { useEffect, useState } from "react";
+import { ModelInfo } from "../../types";
+import { CRUDModels } from "../../database";
+import Game from "../../engine/Game";
 import FluidContainer from "../FluidContainer/FluidContainer";
 import Header from "../Header/Header";
-import styles from "./ManageModels.module.css";
 
 interface ManageModelsProps {
+	game: Game;
+	selectedModel: ModelInfo | null;
 	setShowManageModelsScreen: (showManageModelsScreen: boolean) => void;
 }
 
 export default function ManageModels(props: ManageModelsProps) {
+	const [models, setModels] = useState<ModelInfo[]>([]);
+
+	useEffect(() => {
+		const callback = (models: ModelInfo[]) => {
+			setModels(models);
+		};
+		CRUDModels.getAllFromGame(props.game.getName(), callback);
+	}, []);
+
+	const modelInfos = models.map((model) => ModelContainer(model));
+
 	return (
 		<aside className={styles.manageModels}>
 			<FluidContainer
@@ -34,20 +50,18 @@ export default function ManageModels(props: ManageModelsProps) {
 						<h1 className={`header-text-2`}>Selected model:</h1>
 						<p className={`display-text-2`}>None</p>
 					</Header>
-					<div className={styles.modelContainer}>
-						<div className={styles.modelName}>Model 1</div>
-						<div className={styles.modelDescription}>Description 1</div>
-					</div>
-					<div className={styles.modelContainer}>
-						<div className={styles.modelName}>Model 2</div>
-						<div className={styles.modelDescription}>Description 2</div>
-					</div>
-					<div className={styles.modelContainer}>
-						<div className={styles.modelName}>Model 3</div>
-						<div className={styles.modelDescription}>Description 3</div>
-					</div>
+					<section>{modelInfos}</section>
 				</article>
 			</FluidContainer>
 		</aside>
+	);
+}
+
+function ModelContainer(model: ModelInfo) {
+	return (
+		<section className={styles.modelContainer} key={model.path}>
+			<p className={styles.modelName}>{model.path}</p>
+			<p className={styles.modelDescription}>{model.type}</p>
+		</section>
 	);
 }

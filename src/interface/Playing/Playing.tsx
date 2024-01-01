@@ -1,6 +1,7 @@
 import styles from "./Playing.module.css";
 import { useState } from "react";
-import { GameMode, GameName, formatGameName } from "../../types";
+import { GameMode, GameName } from "../../types";
+import { formatGameName } from "../../util";
 import Button from "../Button/Button";
 import FluidContainer from "../FluidContainer/FluidContainer";
 import SelectorButtons from "../SelectorButtons/SelectorButtons";

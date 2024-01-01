@@ -1,6 +1,7 @@
 import * as tf from "@tensorflow/tfjs";
-import { ResNetBuildModelParams } from "../types.js";
+import { ModelType, ResNetBuildModelParams } from "../types.js";
 import Game from "./Game.js";
+import { CRUDModels } from "../database.js";
 
 const INPUT_CHANNELS = 3;
 
@@ -13,9 +14,11 @@ export type ResNetParams = ResNetLoadedModelParams | ResNetBuildModelParams;
 export default class ResNet {
 	/// Attributes
 	private model: tf.LayersModel;
+	private game: Game;
 
 	/// Constructor
 	constructor(game: Game, params: ResNetParams) {
+		this.game = game;
 		if ("model" in params) {
 			this.model = params.model;
 		} else {
@@ -30,8 +33,14 @@ export default class ResNet {
 	/// Methods
 
 	// Saves the model to the given path, and returns a promise
-	public save(path: string) {
-		return this.model.save(path, {});
+	public save(protocol: string, modelType: ModelType, innerPath: string = "") {
+		const path = `models/${this.game.getName()}/${modelType}${innerPath}`;
+		CRUDModels.add({
+			path: path,
+			game: this.game.getName(),
+			type: modelType,
+		});
+		return this.model.save(`${protocol}://${path}`, {});
 	}
 
 	// Prints a summary of the model

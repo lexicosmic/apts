@@ -1,25 +1,19 @@
+import Game from "./engine/Game";
+
+/// Common
 export enum GameName {
 	TicTacToe = "tictactoe",
 	ConnectFour = "connect4",
 }
 
-export function formatGameName(gameName: GameName) {
-	if (gameName === GameName.TicTacToe) return "Tic Tac Toe";
-	else if (gameName === GameName.ConnectFour) return "Connect Four";
-	else return "Unknown";
-}
-
+/// Interface
 export enum GameMode {
 	PvP = "Player vs. Player",
 	PvC = "Player vs. Computer",
 	CvC = "Computer vs. Computer",
 }
 
-export interface SelectListItem {
-	label: string;
-	value: string;
-}
-
+/// Engine
 export interface ResNetBuildModelParams {
 	numResBlocks: number; // Length of the backbone
 	numHiddenChannels: number; // Number of channels in each block
@@ -41,6 +35,7 @@ export interface TrainModelParams {
 	learningRate: number;
 }
 
+/// Export
 export type ParamsToExport_TrainingData = SelfPlayMemoryParams & {
 	id: string;
 	memoryLength: number;
@@ -51,4 +46,22 @@ export type ParamsToExport_BuildModel = {
 	resNet: ResNetBuildModelParams;
 	memory: (ParamsToExport_TrainingData | {})[];
 	training: TrainModelParams;
+};
+
+export interface TrainingFunctionParams {
+	printMessage: (message: string) => void;
+	game: Game;
+}
+
+/// Database
+export enum ModelType {
+	Structure = "structure",
+	Blind = "blind",
+	selfPlay = "selfPlay",
+}
+
+export type ModelInfo = {
+	path: string;
+	game: GameName;
+	type: ModelType;
 };

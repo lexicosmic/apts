@@ -1,6 +1,9 @@
 import styles from "./App.module.css";
-import { GameName, formatGameName } from "../../types";
 import { useState } from "react";
+import { loadGame } from "../definitions";
+import { GameName, ModelInfo } from "../../types";
+import { formatGameName } from "../../util";
+import Game from "../../engine/Game";
 import Header from "../Header/Header";
 import SelectorButtons from "../SelectorButtons/SelectorButtons";
 import Button from "../Button/Button";
@@ -17,13 +20,19 @@ interface Action {
 
 export default function App() {
 	const [showMainHeader, setShowMainHeader] = useState<boolean>(true);
-	// const [showManageModelsButton, setShowManageModelsButton] =
-	// 	useState<boolean>(false);
 	const [showManageModelsScreen, setShowManageModelsScreen] =
-		useState<boolean>(true);
+		useState<boolean>(false);
 
 	const [gameName, setGameName] = useState<GameName | null>(null);
 	const [action, setAction] = useState<Action | null>(null);
+	const [selectedModel, setSelectedModel] = useState<ModelInfo | null>(null);
+
+	let game: Game | null;
+	if (gameName !== null) {
+		game = loadGame(gameName);
+	} else {
+		game = null;
+	}
 
 	const gameOptions = [
 		{
@@ -51,7 +60,8 @@ export default function App() {
 		{
 			name: "Train",
 			pageContent: (
-				<Training gameName={gameName!} handleReturn={() => setAction(null)} />
+				// <Training gameName={gameName!} handleReturn={() => setAction(null)} />
+				<></>
 			),
 			handleClick: () => setAction(actions[1]),
 		},
@@ -59,7 +69,7 @@ export default function App() {
 			name: "Test",
 			pageContent: (
 				<Testing
-					gameName={gameName!}
+					game={game!}
 					handleReturn={() => setAction(null)}
 					setShowMainHeader={setShowMainHeader}
 					setShowManageModelsScreen={setShowManageModelsScreen}
@@ -112,8 +122,12 @@ export default function App() {
 					</h1>
 				)}
 			</Header>
-			{showManageModelsScreen && (
-				<ManageModels setShowManageModelsScreen={setShowManageModelsScreen} />
+			{game !== null && showManageModelsScreen && (
+				<ManageModels
+					game={game}
+					selectedModel={selectedModel}
+					setShowManageModelsScreen={setShowManageModelsScreen}
+				/>
 			)}
 			<main className={styles.main}>{pageContent}</main>
 		</>
