@@ -1,16 +1,16 @@
 import * as tf from "@tensorflow/tfjs";
 import React, { useEffect } from "react";
 import { Box, Newline, Text } from "ink";
-import { GameMode } from "../types.js";
-import ResNet from "../engine/ResNet.js";
-import MonteCarloTreeSearch from "../engine/MonteCarloTree.js";
+import { GameMode } from "../../types.js";
+import ResNet from "../../engine/ResNet.js";
+import MonteCarloTreeSearch from "../../engine/MonteCarloTree.js";
 import Game, {
 	Action,
 	ActionOutcome,
 	Outcome,
 	Player,
 	State,
-} from "../engine/Game.js";
+} from "../../engine/Game.js";
 import HistoryFrame from "./HistoryFrame.js";
 import PvPGame, {
 	formattedCellText as PvPFormattedCellText,
@@ -24,7 +24,7 @@ import CvCGame, {
 	formattedCellText as CvCFormattedCellText,
 	formattedPlayerName as CvCFormattedPlayerName,
 } from "./CvCGame.js";
-import { gameDefinitions } from "./definitions.js";
+import { gameDefinitions } from "../definitions.js";
 
 type ParsedActionParams = {
 	input: string;

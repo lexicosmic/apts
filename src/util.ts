@@ -5,3 +5,6 @@ export function formatGameName(gameName: GameName) {
 	else if (gameName === GameName.ConnectFour) return "Connect Four";
 	else return "Unknown";
 }
+export function capitalizeFirstLetter(str: string) {
+	return str.charAt(0).toUpperCase() + str.slice(1);
+}

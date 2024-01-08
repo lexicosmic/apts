@@ -4,9 +4,9 @@ import { GameMode } from "../../types";
 import { gameDefinitions } from "../definitions";
 import Game, { ActionOutcome, Outcome, Player, State } from "../../engine/Game";
 import MonteCarloTreeSearch from "../../engine/MonteCarloTree";
-import Button from "../Button/Button";
+import Button from "../Button";
 import FluidContainer from "../FluidContainer/FluidContainer";
-import Header from "../Header/Header";
+import Header from "../Header";
 import Screen from "../Screen/Screen";
 import ResNet from "../../engine/ResNet";
 

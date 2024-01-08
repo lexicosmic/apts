@@ -1,0 +1,25 @@
+.container {
+	display: flex;
+	flex-direction: row;
+	width: 100%;
+	justify-content: space-between;
+	gap: 0.5rem;
+}
+
+.type {
+	text-align: left;
+	font-weight: bold;
+}
+
+.path {
+	overflow-wrap: anywhere;
+}
+
+.button {
+	line-height: 0;
+}
+
+.icon {
+	width: 1.25rem;
+	height: 1.25rem;
+}

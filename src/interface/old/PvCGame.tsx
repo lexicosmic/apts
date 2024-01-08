@@ -1,18 +1,23 @@
-import React from 'react';
-import {Box, Text} from 'ink';
-import Game, {Action, ActionOutcome, Player, State} from '../engine/Game.js';
-import MonteCarloTreeSearch from '../engine/MonteCarloTree.js';
-import HistoryFrame from './HistoryFrame.js';
-import {performAction} from './PlayGame.js';
-import ActionSelector from './ActionSelector.js';
+import React from "react";
+import { Box, Text } from "ink";
+import Game, {
+	Action,
+	ActionOutcome,
+	Player,
+	State,
+} from "../../engine/Game.js";
+import MonteCarloTreeSearch from "../../engine/MonteCarloTree.js";
+import HistoryFrame from "./HistoryFrame.js";
+import { performAction } from "./PlayGame.js";
+import ActionSelector from "../ActionSelector.js";
 
 export const formattedCellText = (player: Player) => {
-	const cellText = player === Player.X ? 'X' : player === Player.O ? 'O' : ' ';
+	const cellText = player === Player.X ? "X" : player === Player.O ? "O" : " ";
 	return `| ${cellText} `;
 };
 
 export const formattedPlayerName = (player: Player) => {
-	return player === Player.X ? 'Player X' : 'Computer';
+	return player === Player.X ? "Player X" : "Computer";
 };
 
 interface PvCGameProps {
@@ -73,11 +78,11 @@ export default function PvCGame({
 			let neutralState = State.clone(currentState);
 			neutralState.changePerspective(
 				currentPlayer,
-				game.getOpponent(currentPlayer),
+				game.getOpponent(currentPlayer)
 			);
 			const actionProbabilities = monteCarloTreeSearch.search(neutralState);
 			let computerAction = actionProbabilities.indexOf(
-				Math.max(...actionProbabilities),
+				Math.max(...actionProbabilities)
 			);
 			const [nextState, outcome] = performAction({
 				action: computerAction,

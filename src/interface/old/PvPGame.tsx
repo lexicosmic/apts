@@ -1,17 +1,22 @@
-import React from 'react';
-import {Box, Text} from 'ink';
-import Game, {Action, ActionOutcome, Player, State} from '../engine/Game.js';
-import ActionSelector from './ActionSelector.js';
-import {performAction} from './PlayGame.js';
-import HistoryFrame from './HistoryFrame.js';
+import React from "react";
+import { Box, Text } from "ink";
+import Game, {
+	Action,
+	ActionOutcome,
+	Player,
+	State,
+} from "../../engine/Game.js";
+import ActionSelector from "../ActionSelector.js";
+import { performAction } from "./PlayGame.js";
+import HistoryFrame from "./HistoryFrame.js";
 
 export const formattedCellText = (player: Player) => {
-	const cellText = player === Player.X ? 'X' : player === Player.O ? 'O' : ' ';
+	const cellText = player === Player.X ? "X" : player === Player.O ? "O" : " ";
 	return `| ${cellText} `;
 };
 
 export const formattedPlayerName = (player: Player) => {
-	return player === Player.X ? 'Player X' : 'Player O';
+	return player === Player.X ? "Player X" : "Player O";
 };
 
 interface PvPGameProps {

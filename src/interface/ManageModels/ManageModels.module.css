@@ -1,31 +1,15 @@
 .manageModels {
-	z-index: 1;
 	position: absolute;
-	top: 0;
-	left: 0;
-	height: 100vh;
-	width: 100vw;
-	margin: 0;
-	background-color: hsla(0, 0%, 0%, 70%);
-}
-
-.aside {
-	color: black;
-	background-color: antiquewhite;
-	height: 100%;
+	z-index: 1;
 	width: 100%;
-}
-
-@media screen and (min-width: 768px) {
-	.aside {
-		width: 40%;
-	}
+	height: 100%;
+	background-color: antiquewhite;
+	color: black;
 }
 
 .header {
 	box-sizing: border-box;
 	padding-inline: 1rem;
-	width: 100%;
 	display: flex;
 	flex-direction: row;
 	justify-content: space-between;
@@ -47,12 +31,12 @@
 	transform: scale(0.9);
 }
 
-.container {
-	display: flex;
-	flex-direction: column;
-	height: 100%;
-}
-
 .selectedModelHeader {
 	gap: 0.5rem;
+}
+
+.container {
+	padding-inline: 1rem;
+	display: grid;
+	grid-template-columns: "auto";
 }

@@ -53,6 +53,11 @@ export interface TrainingFunctionParams {
 	game: Game;
 }
 
+export type TestingFunction = ({
+	printMessage,
+	game,
+}: TrainingFunctionParams) => Promise<void>;
+
 /// Database
 export enum ModelType {
 	Structure = "structure",
