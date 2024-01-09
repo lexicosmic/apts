@@ -2,6 +2,7 @@ import * as tf from "@tensorflow/tfjs";
 import { fileSystemProtocol } from "../parameters.js";
 import { ModelType, TrainingFunctionParams } from "../../types.js";
 import ResNet from "../../engine/ResNet.js";
+import { Action, State } from "../../engine/Game.js";
 
 export default async function testResNetStructure({
 	printMessage,
@@ -11,15 +12,18 @@ export default async function testResNetStructure({
 	const state = game.getInitialState();
 
 	// Build model and save it
+	printMessage("Building model...");
 	const resNet = new ResNet(game, { numResBlocks: 4, numHiddenChannels: 64 });
 	resNet.summary(printMessage);
+	printMessage("Model built!");
 	printMessage("\nSaving model...");
 	await resNet.save(fileSystemProtocol, ModelType.Structure);
 	printMessage("Model saved!\n");
 
 	// Play a few moves
+	printMessage("Initial state:");
 	printMessage(state.toString());
-	state.performAction(6, -1);
+	state.performAction(getRandomValidAction(state), -1);
 	printMessage(state.toString());
 
 	// Calculate the policy and value from the neural network
@@ -70,8 +74,17 @@ export default async function testResNetStructure({
 	encodedStateString += "]\n";
 	printMessage(encodedStateString);
 	printMessage("Action probabilities: " + "\n[");
-	actionProbabilities.forEach((p) => printMessage(p.toString()));
+	actionProbabilities.forEach((p) => printMessage(p.toString() + ","));
 	printMessage("]");
 	printMessage("Action: " + action);
 	printMessage("Value: " + valueData.toString());
+}
+
+function getRandomValidAction(state: State): Action {
+	const validActionsEncoded = state.getValidActions();
+	const validActions = [];
+	for (let i = 0; i < validActionsEncoded.length; i++) {
+		if (validActionsEncoded[i]) validActions.push(i);
+	}
+	return validActions[Math.floor(Math.random() * validActions.length)];
 }

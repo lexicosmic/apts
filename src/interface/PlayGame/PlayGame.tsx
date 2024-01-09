@@ -7,7 +7,7 @@ import MonteCarloTreeSearch from "../../engine/MonteCarloTree";
 import Button from "../Button";
 import FluidContainer from "../FluidContainer/FluidContainer";
 import Header from "../Header";
-import Screen from "../Screen/Screen";
+import Screen from "../Screen";
 import ResNet from "../../engine/ResNet";
 
 // Load the model and create the Monte Carlo Tree Search object

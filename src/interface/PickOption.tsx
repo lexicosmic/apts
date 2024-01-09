@@ -1,5 +1,5 @@
 import Button from "./Button";
-import SelectorButtons from "./ButtonGroup";
+import ButtonGroup from "./ButtonGroup";
 
 interface PickOptionProps {
 	title: string;
@@ -15,7 +15,7 @@ export default function PickOption({
 	handleReturn,
 }: PickOptionProps) {
 	return (
-		<article className={`flex flex-col gap-2`}>
+		<article className={`w-max flex flex-col gap-2`}>
 			<header className={`text-center`}>
 				<h1 className={`text-4xl`} key={`title`}>
 					{title}
@@ -26,7 +26,7 @@ export default function PickOption({
 					</p>
 				)}
 			</header>
-			<SelectorButtons options={actions} />
+			<ButtonGroup options={actions} />
 			{handleReturn && (
 				<footer className={`w-full flex flex-col`}>
 					<Button
@@ -42,7 +42,7 @@ export default function PickOption({
 	);
 }
 
-type Option = {
+export type Option = {
 	name: string;
 	handleClick: () => void;
 };
