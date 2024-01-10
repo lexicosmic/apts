@@ -44,8 +44,7 @@ export default function Testing({
 
 	return (
 		<article
-			className={`w-full my-2 flex-grow
-			gap-2 grid`}
+			className={`w-full py-2 flex-grow gap-2 grid`}
 			style={{
 				gridTemplateColumns: "1fr auto 1fr",
 				gridTemplateRows: "auto 1fr auto",
@@ -64,7 +63,7 @@ export default function Testing({
 			</section>
 			<footer className={`col-start-2 col-span-1 flex flex-col`}>
 				<Button
-					handleClick={() => quitTesting()}
+					onClick={() => quitTesting()}
 					disabled={buttonDisabled}
 					key={`quit-button`}
 				>

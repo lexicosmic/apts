@@ -6,7 +6,7 @@ import Game, {
 	Player,
 	State,
 } from "../../engine/Game.js";
-import ActionSelector from "../ActionSelector.js";
+import ActionSelector from "./ActionSelector.js";
 import { performAction } from "./PlayGame.js";
 import HistoryFrame from "./HistoryFrame.js";
 

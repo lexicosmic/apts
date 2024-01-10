@@ -1,77 +1,66 @@
-// import { useState } from "react";
-// import { GameMode, GameName } from "../types";
-// import { formatGameName } from "../util";
-// import Button from "./Button";
-// import SelectorButtons from "./ButtonGroup";
+import { useState } from "react";
+import { formatGameName } from "../util";
+import Game from "../engine/Game";
+import Button from "./Button";
+import Screen from "./Screen";
+import { TestingFunction } from "../types";
+import { useOnMountUnsafe } from "./util";
 
-// interface PlayingProps {
-// 	gameName: GameName;
-// 	handleReturn: () => void;
-// }
+interface PlayingProps {
+	game: Game;
+	handleReturn: () => void;
+}
 
-// export default function Playing(props: PlayingProps) {
-// 	const [gameMode, setGameMode] = useState<GameMode | null>(null);
+export default function Playing({ game, handleReturn }: PlayingProps) {
+	const [screenText, setScreenText] = useState<string>("");
+	// const [buttonDisabled, setButtonDisabled] = useState<boolean>(true);
 
-// 	const gameModes = [
-// 		{
-// 			name: GameMode.PvP,
-// 			handleClick: () => handleGameModeSelected(GameMode.PvP),
-// 		},
-// 		{
-// 			name: GameMode.PvC,
-// 			handleClick: () => handleGameModeSelected(GameMode.PvC),
-// 		},
-// 		{
-// 			name: GameMode.CvC,
-// 			handleClick: () => handleGameModeSelected(GameMode.CvC),
-// 		},
-// 	];
+	// useOnMountUnsafe(() => {
+	// 	setButtonDisabled(true);
+	// 	performTesting();
+	// });
 
-// 	function handleGameModeSelected(gameMode: GameMode) {
-// 		setGameMode(gameMode);
-// 	}
+	// async function performTesting() {
+	// 	await testingFunction({
+	// 		printMessage: writeScreenText,
+	// 		game,
+	// 	});
+	// 	setButtonDisabled(false);
+	// }
 
-// 	function handleReturn() {
-// 		if (gameMode === null) {
-// 			props.handleReturn();
-// 		} else {
-// 			setGameMode(null);
-// 		}
-// 	}
+	// function writeScreenText(text: string) {
+	// 	setScreenText((prevText) => prevText + text + "\n");
+	// }
 
-// 	let pageContent = null;
-// 	if (gameMode === null) {
-// 		pageContent = (
-// 			<SelectorButtons
-// 				title={`Select game mode`}
-// 				options={gameModes}
-// 				key={`select-game-mode`}
-// 			/>
-// 		);
-// 	} else {
-// 		pageContent = (
-// 			<div>
-// 				<p>Game mode: {gameMode}</p>
-// 			</div>
-// 		);
-// 	}
+	function quitPlaying() {
+		setScreenText("");
+		handleReturn();
+	}
 
-// 	return (
-// 		<article className={`flex flex-col gap-2`}>
-// 			<header className={`text-center`}>
-// 				<h1 className={`text-4xl`} key={`title`}>
-// 					Playing
-// 				</h1>
-// 				<p className={`text-2xl font-light`} key={`subtitle`}>
-// 					{formatGameName(props.gameName)}
-// 				</p>
-// 			</header>
-// 			<section>{pageContent}</section>
-// 			<footer className={`w-full flex flex-col`}>
-// 				<Button handleClick={handleReturn} key={`return-button`} color="light">
-// 					<p>Return</p>
-// 				</Button>
-// 			</footer>
-// 		</article>
-// 	);
-// }
+	return (
+		<article
+			className={`w-full py-2 flex-grow gap-2 grid`}
+			style={{
+				gridTemplateColumns: "1fr auto 1fr",
+				gridTemplateRows: "auto 1fr auto",
+			}}
+		>
+			<header className={`col-start-2 col-span-1 text-center`}>
+				<h1 className={`text-4xl`} key={`title`}>
+					Playing
+				</h1>
+				<p className={`text-2xl font-light`} key={`subtitle`}>
+					{formatGameName(game.getName())}
+				</p>
+			</header>
+			<section className={`col-start-1 col-span-3 mx-2 flex flex-col`}>
+				<Screen text={screenText} />
+			</section>
+			<footer className={`col-start-2 col-span-1 flex flex-col`}>
+				<Button onClick={() => quitPlaying()} key={`quit-button`}>
+					<p>Quit</p>
+				</Button>
+			</footer>
+		</article>
+	);
+}

@@ -11,7 +11,7 @@ interface ButtonGroupProps {
 export default function ButtonGroup({ options }: ButtonGroupProps) {
 	const buttons = options.map((option, index) => (
 		<Button
-			handleClick={option.handleClick}
+			onClick={option.handleClick}
 			key={`${index}_${option.name}`}
 			className={`text-lg px-2`}
 		>

@@ -18,7 +18,7 @@ export default function Screen({ text, square = false }: ScreenProps) {
 		<textarea
 			ref={ref}
 			readOnly
-			className={`text-black font-mono flex-grow border-2 border-indigo-500`}
+			className={`text-black font-mono flex-grow border-2 border-indigo-500 bg-white`}
 			value={text}
 			style={{
 				resize: "none",

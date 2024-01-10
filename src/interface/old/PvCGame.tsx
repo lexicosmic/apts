@@ -9,7 +9,7 @@ import Game, {
 import MonteCarloTreeSearch from "../../engine/MonteCarloTree.js";
 import HistoryFrame from "./HistoryFrame.js";
 import { performAction } from "./PlayGame.js";
-import ActionSelector from "../ActionSelector.js";
+import ActionSelector from "./ActionSelector.js";
 
 export const formattedCellText = (player: Player) => {
 	const cellText = player === Player.X ? "X" : player === Player.O ? "O" : " ";
