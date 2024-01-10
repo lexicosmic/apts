@@ -1,10 +1,9 @@
 import { useState } from "react";
-import { formatGameName } from "../util";
-import Game from "../engine/Game";
-import Button from "./Button";
-import Screen from "./Screen";
 import { TestingFunction } from "../types";
+import { formatGameName } from "../util";
 import { useOnMountUnsafe } from "./util";
+import Game from "../engine/Game";
+import TerminalPage from "./TerminalPage";
 
 interface TestingProps {
 	game: Game;
@@ -17,7 +16,7 @@ export default function Testing({
 	testingFunction,
 	handleReturn,
 }: TestingProps) {
-	const [screenText, setScreenText] = useState<string>("");
+	const [terminalText, setTerminalText] = useState<string>(``);
 	const [buttonDisabled, setButtonDisabled] = useState<boolean>(true);
 
 	useOnMountUnsafe(() => {
@@ -27,49 +26,28 @@ export default function Testing({
 
 	async function performTesting() {
 		await testingFunction({
-			printMessage: writeScreenText,
+			printMessage: writeTerminalText,
 			game,
 		});
 		setButtonDisabled(false);
 	}
 
-	function writeScreenText(text: string) {
-		setScreenText((prevText) => prevText + text + "\n");
+	function writeTerminalText(text: string) {
+		setTerminalText((prevText) => prevText + text + "\n");
 	}
 
 	function quitTesting() {
-		setScreenText("");
+		setTerminalText("");
 		handleReturn();
 	}
 
 	return (
-		<article
-			className={`w-full py-2 flex-grow gap-2 grid`}
-			style={{
-				gridTemplateColumns: "1fr auto 1fr",
-				gridTemplateRows: "auto 1fr auto",
-			}}
-		>
-			<header className={`col-start-2 col-span-1 text-center`}>
-				<h1 className={`text-4xl`} key={`title`}>
-					Testing
-				</h1>
-				<p className={`text-2xl font-light`} key={`subtitle`}>
-					{formatGameName(game.getName())}
-				</p>
-			</header>
-			<section className={`col-start-1 col-span-3 mx-2 flex flex-col`}>
-				<Screen text={screenText} />
-			</section>
-			<footer className={`col-start-2 col-span-1 flex flex-col`}>
-				<Button
-					onClick={() => quitTesting()}
-					disabled={buttonDisabled}
-					key={`quit-button`}
-				>
-					<p>Quit</p>
-				</Button>
-			</footer>
-		</article>
+		<TerminalPage
+			title={`Testing`}
+			subtitle={formatGameName(game.getName())}
+			terminalText={terminalText}
+			handleReturn={quitTesting}
+			returnButtonDisabled={buttonDisabled}
+		/>
 	);
 }
