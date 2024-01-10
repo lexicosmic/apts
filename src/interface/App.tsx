@@ -1,7 +1,7 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { GameMode, GameName, ModelInfo, TestingFunction } from "../types";
 import { formatGameName } from "../util";
-import { loadGame } from "./util";
+import { loadGame, loadResNetModel } from "./util";
 import Game from "../engine/Game";
 import testMCTSCommon from "../modelHandling/testing/testMCTSCommon";
 import testResNetStructure from "../modelHandling/testing/testResNetStructure";
@@ -11,17 +11,21 @@ import Testing from "./Testing";
 import Playing from "./Playing";
 import Anchor from "./Anchor";
 import ManageModels from "./ManageModels";
+import ResNet from "../engine/ResNet";
 
 export default function App() {
 	const [gameName, setGameName] = useState<GameName | null>(null);
 	const [action, setAction] = useState<ActionOnGame | null>(null);
 	const [gameMode, setGameMode] = useState<GameMode | null>(null);
 	const [test, setTest] = useState<Test | null>(null);
-	const [selectedModel, setSelectedModel] = useState<ModelInfo | null>(null);
+	const [selectedModelInfo, setSelectedModelInfo] = useState<ModelInfo | null>(
+		null
+	);
 
 	let game: Game | null;
 	if (gameName !== null) game = loadGame(gameName);
 	else game = null;
+	let resNet: ResNet | null = null;
 
 	const [showManageModelsScreen, setShowManageModelsScreen] =
 		useState<boolean>(false);
@@ -31,6 +35,18 @@ export default function App() {
 	let isManageModelsButtonDisabled =
 		(action === ActionOnGame.Play && gameMode !== null) ||
 		(action === ActionOnGame.Test && test !== null);
+
+	useEffect(() => {
+		if (game === null) setSelectedModelInfo(null);
+	}, [game]);
+	useEffect(() => {
+		if (selectedModelInfo === null) resNet = null;
+		else if (game !== null)
+			loadResNetModel(game, selectedModelInfo.path, (loadedModel) => {
+				resNet = loadedModel;
+				console.log(resNet);
+			});
+	}, [selectedModelInfo]);
 
 	function getMainContent() {
 		if (gameName === null)
@@ -54,7 +70,8 @@ export default function App() {
 			return (
 				<ManageModels
 					game={game}
-					selectedModel={selectedModel}
+					selectedModel={selectedModelInfo}
+					setSelectedModel={setSelectedModelInfo}
 					handleReturn={() => {
 						setShowManageModelsScreen(false);
 					}}
@@ -107,6 +124,7 @@ export default function App() {
 							handleReturn={() => setAction(null)}
 						/>
 					);
+				if (resNet === null) return <p>Loading model</p>;
 				return (
 					<Playing
 						game={game}
@@ -189,9 +207,13 @@ export default function App() {
 							}}
 							disabled={isManageModelsButtonDisabled}
 							color={`light`}
-							className={`text-xl`}
 						>
-							Model: {selectedModel ? selectedModel.path : "none"}
+							<p className={`text-xl`}>
+								Model:{` `}
+								<span className={`text-lg font-mono`}>
+									{selectedModelInfo ? selectedModelInfo.path : `none`}
+								</span>
+							</p>
 						</Anchor>
 					</footer>
 				)}

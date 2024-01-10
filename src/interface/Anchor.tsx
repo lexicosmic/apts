@@ -4,14 +4,14 @@ interface AnchorProps {
 	onClick: HTMLAttributes<HTMLAnchorElement>["onClick"];
 	color?: AnchorColor;
 	disabled?: boolean;
-	className: HTMLAttributes<HTMLAnchorElement>["className"];
+	className?: HTMLAttributes<HTMLAnchorElement>["className"];
 }
 
 export default function Anchor({
 	onClick,
 	color = `indigo`,
 	disabled = false,
-	className,
+	className = ``,
 	children,
 }: PropsWithChildren<AnchorProps>) {
 	if (disabled) onClick = () => {};
@@ -19,8 +19,8 @@ export default function Anchor({
 		<a
 			onClick={onClick}
 			className={`
-                cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-opacity-50
-                ${disabled ? `cursor-default` : ``}
+                focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-opacity-50
+                ${disabled ? `cursor-default` : `cursor-pointer`}
 				${getColorClasses(color, disabled)}
                 ${className}
             `}
