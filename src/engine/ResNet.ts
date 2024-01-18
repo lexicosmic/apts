@@ -90,7 +90,7 @@ export default class ResNet {
 		batchSize: number,
 		numEpochs: number,
 		learningRate: number,
-		validationSplit: number,
+		validationSplit: number = 0.15,
 		printMessage: (message: string) => void = console.log
 	) {
 		const trainingLog: tf.Logs[] = [];

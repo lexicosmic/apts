@@ -1,15 +1,15 @@
 import * as tf from "@tensorflow/tfjs";
 import ResNet from "./ResNet.js";
-import TicTacToe from "./games/TicTacToe.js";
+import TicTacToeGame from "./games/TicTacToe.js";
 
 describe("ResNet", () => {
-	let game: TicTacToe;
+	let game: TicTacToeGame;
 	let numResBlocks: number;
 	let numHiddenChannels: number;
 	let resNet: ResNet;
 
 	beforeEach(() => {
-		game = new TicTacToe();
+		game = new TicTacToeGame(3, 3);
 		numResBlocks = 3;
 		numHiddenChannels = 64;
 		resNet = new ResNet(game, { numResBlocks, numHiddenChannels });
@@ -20,8 +20,8 @@ describe("ResNet", () => {
 			// Set up a test input tensor
 			const input: tf.Tensor4D = tf.randomNormal([
 				1,
-				game.rowCount,
-				game.columnCount,
+				game.getRowCount(),
+				game.getColumnCount(),
 				3,
 			]);
 

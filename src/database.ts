@@ -1,11 +1,6 @@
 import { GameName, ModelInfo, ModelType } from "./types";
 
-const idxdb =
-	window.indexedDB ||
-	window.mozIndexedDB ||
-	window.webkitIndexedDB ||
-	window.msIndexedDB ||
-	window.shimIndexedDB;
+const idxdb = window.indexedDB;
 
 let transaction: IDBTransaction | null = null;
 

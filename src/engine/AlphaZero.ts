@@ -177,33 +177,33 @@ export default class AlphaZero {
 	): Promise<void> {
 		console.log("=-=-=-=-=-=-=-= AlphaZero LEARNING =-=-=-=-=-=-=-=");
 
-		for (let i = 0; i < trainModelParams.numIterations; i++) {
-			console.log(`ITERATION ${i + 1}/${trainModelParams.numIterations}`);
-			let memory;
-			if (
-				typeof trainingMemoryArray === "undefined" ||
-				typeof trainingMemoryArray[i] === "undefined"
-			)
-				memory = await this.buildTrainingMemory(numSelfPlayIterations, true);
-			else memory = trainingMemoryArray[i];
+		// for (let i = 0; i < trainModelParams.numIterations; i++) {
+		// 	console.log(`ITERATION ${i + 1}/${trainModelParams.numIterations}`);
+		// 	let memory;
+		// 	if (
+		// 		typeof trainingMemoryArray === "undefined" ||
+		// 		typeof trainingMemoryArray[i] === "undefined"
+		// 	)
+		// 		memory = await this.buildTrainingMemory(numSelfPlayIterations, true);
+		// 	else memory = trainingMemoryArray[i];
 
-			const trainingLog = await this.train(
-				memory,
-				trainModelParams.batchSize,
-				trainModelParams.numEpochs,
-				trainModelParams.learningRate
-			);
+		// 	const trainingLog = await this.train(
+		// 		memory,
+		// 		trainModelParams.batchSize,
+		// 		trainModelParams.numEpochs,
+		// 		trainModelParams.learningRate
+		// 	);
 
-			// Save the model architecture and optimizer weights
-			await this.resNet.save(`file://models/${directoryName}/iteration_${i}`);
-			try {
-				fs.writeFileSync(
-					`./models/${directoryName}/iteration_${i}/trainingLog.json`,
-					JSON.stringify(trainingLog)
-				);
-			} catch (e) {
-				console.error(e);
-			}
-		}
+		// 	// Save the model architecture and optimizer weights
+		// 	await this.resNet.save(`file://models/${directoryName}/iteration_${i}`);
+		// 	try {
+		// 		fs.writeFileSync(
+		// 			`./models/${directoryName}/iteration_${i}/trainingLog.json`,
+		// 			JSON.stringify(trainingLog)
+		// 		);
+		// 	} catch (e) {
+		// 		console.error(e);
+		// 	}
+		// }
 	}
 }
