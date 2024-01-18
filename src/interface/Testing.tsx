@@ -26,13 +26,13 @@ export default function Testing({
 
 	async function performTesting() {
 		await testingFunction({
-			printMessage: writeTerminalText,
+			printMessage: writeToTerminal,
 			game,
 		});
 		setButtonDisabled(false);
 	}
 
-	function writeTerminalText(text: string) {
+	function writeToTerminal(text: string) {
 		setTerminalText((prevText) => prevText + text + "\n");
 	}
 

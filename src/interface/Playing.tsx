@@ -1,3 +1,4 @@
+import * as tf from "@tensorflow/tfjs";
 import { useState } from "react";
 import { GameMode, ModelInfo } from "../types";
 import { formatGameName } from "../util";
@@ -25,6 +26,7 @@ export default function Playing({
 	const [state, setState] = useState<State>(game.getInitialState());
 	const [currentPlayer, setCurrentPlayer] = useState<Player>(Player.X);
 	let resNet: ResNet | null = null;
+	let handleAction: (action: Action) => void = playTurnPvP;
 
 	useOnMountUnsafe(() => {
 		if (modelInfo !== null)
@@ -36,37 +38,31 @@ export default function Playing({
 	});
 
 	function startGame() {
-		writeTerminalText(`Game mode: ${gameMode}\n`);
+		writeToTerminal(`Game mode: ${gameMode}\n`);
 		setActions(getValidActions(state));
 	}
 
-	function handleActionSelect(action: Action) {
-		writeTerminalText(`Player ${currentPlayer}: ${action}`);
-		const nextState = State.clone(state);
-		nextState.performAction(action, currentPlayer);
-		writeTerminalText(state.toString());
+	function playTurnPvP(action: Action) {
+		const nextState = performAction(
+			state,
+			currentPlayer,
+			action,
+			writeToTerminal
+		);
 
-		const { isTerminal } = Game.getActionOutcome(nextState, action);
-		const opponent = game.getOpponent(currentPlayer);
-		let validActions = getValidActions(nextState);
-
-		if (isTerminal) {
-			const hasWon = nextState.checkWin(action);
-			validActions = [];
-			if (hasWon) {
-				writeTerminalText(`Player ${currentPlayer} has won!`);
-			} else {
-				if (validActions.length === 0) writeTerminalText(`Draw!`);
-				else writeTerminalText(`Player ${opponent} has won!`);
-			}
-		}
-
+		const { nextPlayer, nextTurnActions } = getNextTurnData(
+			game,
+			nextState,
+			currentPlayer,
+			action,
+			writeToTerminal
+		);
 		setState(nextState);
-		setActions(validActions);
-		setCurrentPlayer(opponent);
+		setCurrentPlayer(nextPlayer);
+		setActions(nextTurnActions);
 	}
 
-	function writeTerminalText(text: string) {
+	function writeToTerminal(text: string) {
 		setTerminalText((prevText) => prevText + text + "\n");
 	}
 
@@ -78,7 +74,7 @@ export default function Playing({
 	const actionButtons = actions.map((action, index) => (
 		<ActionButton
 			action={action}
-			handleActionSelected={handleActionSelect}
+			handleActionSelected={handleAction}
 			key={`action-${index}`}
 		/>
 	));
@@ -122,4 +118,47 @@ function getValidActions(state: State): Action[] {
 		if (validActionsEncoded[i]) validActions.push(i);
 	}
 	return validActions;
+}
+
+function performAction(
+	state: State,
+	player: Player,
+	action: Action,
+	writeToTerminal: (text: string) => void
+): State {
+	const nextState = State.clone(state);
+	writeToTerminal(`Player ${player}: ${action}`);
+	nextState.performAction(action, player);
+	writeToTerminal(nextState.toString());
+	return nextState;
+}
+
+function getNextTurnData(
+	game: Game,
+	state: State,
+	player: Player,
+	action: Action,
+	writeToTerminal: (text: string) => void
+): {
+	nextPlayer: Player;
+	nextTurnActions: Action[];
+} {
+	const { isTerminal } = Game.getActionOutcome(state, action);
+	let nextTurnActions = getValidActions(state);
+	let nextPlayer = game.getOpponent(player);
+	if (isTerminal) {
+		const hasWon = state.checkWin(action);
+		if (hasWon) {
+			nextPlayer = player;
+			writeToTerminal(`Player ${player} has won!`);
+		} else {
+			if (nextTurnActions.length === 0) writeToTerminal(`Draw!`);
+			else writeToTerminal(`Player ${nextPlayer} has won!`);
+		}
+		nextTurnActions = [];
+	}
+	return {
+		nextPlayer,
+		nextTurnActions,
+	};
 }
