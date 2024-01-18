@@ -5,7 +5,7 @@ import {
 	selfPlayMemoryParams,
 	trainModelParams,
 } from "../parameters.js";
-import { loadTrainingData, writeModelParameters } from "../util.js";
+import { loadTrainingData, writeModelParameters } from "../util.ts.old";
 import ResNet from "../../engine/ResNet.js";
 import AlphaZero from "../../engine/AlphaZero.js";
 

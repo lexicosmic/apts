@@ -1,8 +1,8 @@
 import * as tf from "@tensorflow/tfjs";
+import { getRandomValidAction } from "../util.js";
 import { fileSystemProtocol } from "../parameters.js";
 import { ModelType, TrainingFunctionParams } from "../../types.js";
 import ResNet from "../../engine/ResNet.js";
-import { Action, State } from "../../engine/Game.js";
 
 export default async function testResNetStructure({
 	printMessage,
@@ -78,13 +78,4 @@ export default async function testResNetStructure({
 	printMessage("]");
 	printMessage("Action: " + action);
 	printMessage("Value: " + valueData.toString());
-}
-
-function getRandomValidAction(state: State): Action {
-	const validActionsEncoded = state.getValidActions();
-	const validActions = [];
-	for (let i = 0; i < validActionsEncoded.length; i++) {
-		if (validActionsEncoded[i]) validActions.push(i);
-	}
-	return validActions[Math.floor(Math.random() * validActions.length)];
 }

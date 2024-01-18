@@ -1,6 +1,7 @@
-import { Action, State } from "../../engine/Game.js";
-import MonteCarloTreeSearch from "../../engine/MonteCarloTreeCommon.js";
+import { getRandomValidAction } from "../util.js";
 import { TrainingFunctionParams } from "../../types.js";
+import { State } from "../../engine/Game.js";
+import MonteCarloTreeSearch from "../../engine/MonteCarloTreeCommon.js";
 
 export default async function testMCTSCommon({
 	printMessage,
@@ -33,13 +34,4 @@ function playTurn(state: State, action: number, player: number): string {
 	const hasWon = state.checkWin(action);
 	if (hasWon) returnString += "\n" + `Player ${player} has won!`;
 	return returnString;
-}
-
-function getRandomValidAction(state: State): Action {
-	const validActionsEncoded = state.getValidActions();
-	const validActions = [];
-	for (let i = 0; i < validActionsEncoded.length; i++) {
-		if (validActionsEncoded[i]) validActions.push(i);
-	}
-	return validActions[Math.floor(Math.random() * validActions.length)];
 }

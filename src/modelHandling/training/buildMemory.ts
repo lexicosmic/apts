@@ -6,7 +6,7 @@ import {
 	monteCarloTreeSearchParams,
 	selfPlayMemoryParams,
 } from "../parameters.js";
-import { writeTrainingData } from "../util.js";
+import { writeTrainingData } from "../util.ts.old";
 
 const game = gameParams.game;
 const path = `file://models/${gameParams.mainModelDirectory}/model.json`;

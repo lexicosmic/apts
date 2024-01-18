@@ -1,165 +1,62 @@
-import fs from "fs";
-import {
-	ParamsToExport_BuildModel,
-	ParamsToExport_TrainingData,
-	ResNetBuildModelParams,
-	SelfPlayMemoryParams,
-	TrainModelParams,
-} from "../types.js";
-import { TrainingMemory } from "../engine/AlphaZero.js";
-import {
-	selfPlayMemoryParams as defaultMemoryParams,
-	gameParams,
-} from "./parameters.js";
+import * as tf from "@tensorflow/tfjs";
+import { State, Action } from "../engine/Game";
+import ResNet from "../engine/ResNet";
 
-function getParamsToExport_TrainingData(
-	trainingDataId: string,
-	memoryLength: number,
-	modelParams: ParamsToExport_BuildModel | null,
-	selfPlayMemoryParams: SelfPlayMemoryParams
-) {
-	const paramsToExport: ParamsToExport_TrainingData = {
-		id: trainingDataId,
-		memoryLength: memoryLength ?? -1,
-		model: modelParams,
-		...selfPlayMemoryParams,
-	};
-	return paramsToExport;
+export function getRandomValidAction(state: State): Action {
+	const validActionsEncoded = state.getValidActions();
+	const validActions = [];
+	for (let i = 0; i < validActionsEncoded.length; i++) {
+		if (validActionsEncoded[i]) validActions.push(i);
+	}
+	return validActions[Math.floor(Math.random() * validActions.length)];
 }
 
-function getParamsToExport_BuildModel(
-	trainingDataIds: string[],
-	resNetBuildModelParams: ResNetBuildModelParams,
-	trainModelParams: TrainModelParams
-) {
-	const listOfTrainingDataParemeters: (ParamsToExport_TrainingData | {})[] = [];
-	let i = 0;
-	while (i < trainingDataIds.length && i < trainModelParams.numIterations) {
-		const trainingDataId = trainingDataIds[i];
-		const trainingDataParameters = loadTrainingDataParameters(trainingDataId);
-		listOfTrainingDataParemeters.push(trainingDataParameters ?? {});
-		i++;
-	}
-	while (i < trainModelParams.numIterations) {
-		const trainingDataParameters = getParamsToExport_TrainingData(
-			"",
-			-1,
-			null,
-			defaultMemoryParams
-		);
-		listOfTrainingDataParemeters.push(trainingDataParameters);
-		i++;
-	}
-
-	const paramsToExport: ParamsToExport_BuildModel = {
-		resNet: resNetBuildModelParams,
-		memory: listOfTrainingDataParemeters,
-		training: trainModelParams,
-	};
-	return paramsToExport;
+// Returns the masked policy and value as Tensors
+export function getMaskedPrediction(
+	state: State,
+	resNet: ResNet
+): {
+	policy: tf.Tensor1D;
+	value: tf.Scalar;
+} {
+	return tf.tidy(() => {
+		// Calculate the policy and value from the neural network
+		const encodedState = state.getEncodedState();
+		const tensorState = tf.tensor(encodedState).expandDims(0) as tf.Tensor4D;
+		const [policy, value] = resNet.predict(tensorState);
+		const squeezedValue = value.squeeze().squeeze() as tf.Scalar;
+		const softMaxPolicy = tf.softmax(policy, 1).squeeze([0]);
+		// Mask the policy to only allow valid actions
+		const validActions = state.getValidActions();
+		const maskedPolicy = softMaxPolicy
+			.mul(tf.tensor(validActions).expandDims(0))
+			.squeeze() as tf.Tensor1D;
+		return {
+			policy: maskedPolicy,
+			value: squeezedValue,
+		};
+	});
 }
 
-export function loadTrainingDataParameters(trainingDataId: string) {
-	let trainingDataParameters: ParamsToExport_TrainingData;
-	try {
-		trainingDataParameters = JSON.parse(
-			fs
-				.readFileSync(
-					`./trainingData/${gameParams.directoryName}/trainingData_${trainingDataId}/parameters.json`
-				)
-				.toString()
-		);
-		return trainingDataParameters;
-	} catch (e) {
-		console.error(e);
-	}
+// Returns the action probabilities as a Tensor
+export function getProbabilities(policy: tf.Tensor1D): tf.Tensor1D {
+	return tf.tidy(() => {
+		const sum = policy.sum();
+		return policy.div(sum);
+	});
 }
 
-export function loadTrainingData(trainingDataIds: string[]) {
-	const trainingMemoryBatch: TrainingMemory[] = [];
-	try {
-		for (const trainingDataId of trainingDataIds) {
-			const trainingData = fs
-				.readFileSync(
-					`./trainingData/${gameParams.directoryName}/trainingData_${trainingDataId}/trainingData.json`
-				)
-				.toString();
-			trainingMemoryBatch.push(JSON.parse(trainingData));
-		}
-		return trainingMemoryBatch;
-	} catch (e) {
-		console.error(e);
-	}
-}
-
-export function loadModelParameters(modelDirectory: string) {
-	let modelParameters: ParamsToExport_BuildModel;
-	try {
-		modelParameters = JSON.parse(
-			fs
-				.readFileSync(`./models/${modelDirectory}/../parameters.json`)
-				.toString()
-		);
-		return modelParameters;
-	} catch (e) {
-		console.error(e);
-	}
-}
-
-export function writeTrainingData(
-	trainingMemory: TrainingMemory,
-	modelDirectory: string,
-	selfPlayMemoryParams: SelfPlayMemoryParams
-) {
-	const currentTime = new Date().valueOf();
-	const modelParams = loadModelParameters(modelDirectory);
-
-	const paramsToExport: ParamsToExport_TrainingData =
-		getParamsToExport_TrainingData(
-			currentTime.toString(),
-			trainingMemory.length,
-			modelParams ?? null,
-			selfPlayMemoryParams
-		);
-
-	try {
-		fs.mkdirSync(
-			`./trainingData/${gameParams.directoryName}/trainingData_${currentTime}`,
-			{ recursive: true }
-		);
-		fs.writeFileSync(
-			`./trainingData/${gameParams.directoryName}/trainingData_${currentTime}/trainingData.json`,
-			JSON.stringify(trainingMemory)
-		);
-		fs.writeFileSync(
-			`./trainingData/${gameParams.directoryName}/trainingData_${currentTime}/parameters.json`,
-			JSON.stringify(paramsToExport)
-		);
-	} catch (e) {
-		console.error(e);
-	}
-}
-
-export function writeModelParameters(
-	modelDirectory: string,
-	trainingDataIds: string[],
-	resNetBuildModelParams: ResNetBuildModelParams,
-	trainModelParams: TrainModelParams
-) {
-	const paramsToExport: ParamsToExport_BuildModel =
-		getParamsToExport_BuildModel(
-			trainingDataIds,
-			resNetBuildModelParams,
-			trainModelParams
-		);
-
-	try {
-		fs.mkdirSync(`./models/${modelDirectory}`, { recursive: true });
-		fs.writeFileSync(
-			`./models/${modelDirectory}/parameters.json`,
-			JSON.stringify(paramsToExport)
-		);
-	} catch (e) {
-		console.error(e);
-	}
+export function getActionFromProbabilities(probabilities: tf.Tensor1D) {
+	tf.tidy(() => {
+		// const actionTensor = tf.multinomial(probabilities, 1);
+		// const actionIndex = actionTensor.dataSync()[0];
+		// return actionIndex;
+		const [rowsT] = tf.unstack(probabilities.shape);
+		const rows = rowsT.arraySync() as number;
+		console.log(rows);
+		const distribution = tf.randomUniform([rows], 0, 1, "float32");
+		distribution.print();
+		const result = tf.gather(probabilities, distribution);
+		result.print();
+	});
 }

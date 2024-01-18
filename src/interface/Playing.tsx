@@ -7,6 +7,11 @@ import Game, { Action, ActionOutcome, Player, State } from "../engine/Game";
 import ResNet from "../engine/ResNet";
 import TerminalPage from "./TerminalPage";
 import Button from "./Button";
+import {
+	getActionFromProbabilities,
+	getMaskedPrediction,
+	getProbabilities,
+} from "../modelHandling/util";
 
 interface PlayingProps {
 	game: Game;
@@ -32,7 +37,13 @@ export default function Playing({
 		if (modelInfo !== null)
 			loadResNetModel(game, modelInfo.path, (loadedModel) => {
 				resNet = loadedModel;
-				console.log(resNet);
+				// const { policy, value } = getMaskedPrediction(state, resNet);
+				// console.log(policy.arraySync());
+				// console.log(value.arraySync());
+				const policy = tf.tensor1d([0.1, 0.7, 0.9, 0.3, 0.03, 0, 0.45, 0, 0]);
+				const probabilities = getProbabilities(policy);
+				console.log(probabilities.arraySync());
+				getActionFromProbabilities(probabilities);
 			});
 		startGame();
 	});
@@ -49,7 +60,6 @@ export default function Playing({
 			action,
 			writeToTerminal
 		);
-
 		const { nextPlayer, nextTurnActions } = getNextTurnData(
 			game,
 			nextState,
