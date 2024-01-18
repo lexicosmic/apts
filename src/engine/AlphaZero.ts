@@ -1,5 +1,4 @@
 import * as tf from "@tensorflow/tfjs";
-import fs from "fs";
 import { MonteCarloTreeSearchParams, TrainModelParams } from "../types.js";
 import Game, {
 	Action,

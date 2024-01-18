@@ -56,10 +56,42 @@ function getActionFromProbabilities(probabilities: tf.Tensor1D): Action {
 	});
 }
 
-export function getActionFromState(state: State, resNet: ResNet): Action {
+type DesiredData = {
+	policy: boolean;
+	value: boolean;
+	probabilities: boolean;
+	action: boolean;
+};
+type ReturnedData = {
+	policy?: tf.Tensor1D;
+	value?: tf.Scalar;
+	probabilities?: tf.Tensor1D;
+	action?: Action;
+};
+export function getPredictionDataFromState(
+	state: State,
+	resNet: ResNet,
+	desiredData: DesiredData
+): ReturnedData {
 	return tf.tidy(() => {
-		const { policy } = getMaskedPrediction(state, resNet);
+		const { policy, value } = getMaskedPrediction(state, resNet);
 		const probabilities = getProbabilities(policy);
-		return getActionFromProbabilities(probabilities);
+		const action = getActionFromProbabilities(probabilities);
+		const data: ReturnedData = {};
+		if (desiredData.policy) data.policy = policy;
+		if (desiredData.value) data.value = value;
+		if (desiredData.probabilities) data.probabilities = probabilities;
+		if (desiredData.action) data.action = action;
+		return data;
 	});
+}
+
+export function getActionFromState(state: State, resNet: ResNet): Action {
+	const data = getPredictionDataFromState(state, resNet, {
+		policy: false,
+		value: false,
+		probabilities: false,
+		action: true,
+	});
+	return data.action!;
 }

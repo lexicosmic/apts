@@ -1,5 +1,5 @@
 import * as tf from "@tensorflow/tfjs";
-import { getRandomValidAction } from "../util.js";
+import { getPredictionDataFromState, getRandomValidAction } from "../util.js";
 import { fileSystemProtocol } from "../parameters.js";
 import { ModelType, TrainingFunctionParams } from "../../types.js";
 import ResNet from "../../engine/ResNet.js";
@@ -26,33 +26,8 @@ export default async function testResNetStructure({
 	state.performAction(getRandomValidAction(state), -1);
 	printMessage(state.toString());
 
-	// Calculate the policy and value from the neural network
-	let encodedState = state.getEncodedState();
-	const tensorState = tf.tensor(encodedState).expandDims(0) as tf.Tensor4D;
-	const [policy, value] = resNet.predict(tensorState);
-	const softMaxPolicy = tf.softmax(policy, 1).squeeze([0]);
-
-	// Mask the policy to only allow valid actions
-	const validActions = state.getValidActions();
-	const maskedPolicy = softMaxPolicy.mul(tf.tensor(validActions).expandDims(0));
-	const sum = maskedPolicy.sum().arraySync() as number;
-	const actionProbabilities = maskedPolicy
-		.div(sum)
-		.squeeze()
-		.arraySync() as number[];
-	const valueData = value.dataSync()[0];
-
-	// Convert raw probabilities to log probabilities
-	const logActionProbabilities = actionProbabilities.map((p) => Math.log(p));
-	const action = tf.tidy(() => {
-		const actionTensor = tf.tensor(logActionProbabilities) as tf.Tensor1D;
-		const actionIndex = tf.multinomial(actionTensor, 1).dataSync()[0];
-		return actionIndex;
-	});
-
-	// Log the results
-	encodedState = state.getEncodedState();
 	// Print the encoded state as a 3D array
+	const encodedState = state.getEncodedState();
 	printMessage("Encoded state: ");
 	let encodedStateString = "[";
 	for (let i = 0; i < encodedState.length; i++) {
@@ -73,9 +48,33 @@ export default async function testResNetStructure({
 	}
 	encodedStateString += "]\n";
 	printMessage(encodedStateString);
+
+	// Predict
+	const { policy, value, probabilities, action } = tf.tidy(() => {
+		const { policy, value, probabilities, action } = getPredictionDataFromState(
+			state,
+			resNet,
+			{
+				policy: true,
+				value: true,
+				probabilities: true,
+				action: true,
+			}
+		);
+		return {
+			policy: policy!.arraySync(),
+			value: value!.arraySync(),
+			probabilities: probabilities!.arraySync(),
+			action: action,
+		};
+	});
+
+	printMessage("Policy: " + "\n[");
+	policy.forEach((p) => printMessage(p.toString() + ","));
+	printMessage("]");
 	printMessage("Action probabilities: " + "\n[");
-	actionProbabilities.forEach((p) => printMessage(p.toString() + ","));
+	probabilities.forEach((p) => printMessage(p.toString() + ","));
 	printMessage("]");
 	printMessage("Action: " + action);
-	printMessage("Value: " + valueData.toString());
+	printMessage("Value: " + value.toString());
 }
