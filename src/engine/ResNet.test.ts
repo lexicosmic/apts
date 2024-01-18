@@ -1,8 +1,8 @@
-import * as tf from '@tensorflow/tfjs-node';
-import ResNet from './ResNet.js';
-import TicTacToe from './games/TicTacToe.js';
+import * as tf from "@tensorflow/tfjs";
+import ResNet from "./ResNet.js";
+import TicTacToe from "./games/TicTacToe.js";
 
-describe('ResNet', () => {
+describe("ResNet", () => {
 	let game: TicTacToe;
 	let numResBlocks: number;
 	let numHiddenChannels: number;
@@ -12,11 +12,11 @@ describe('ResNet', () => {
 		game = new TicTacToe();
 		numResBlocks = 3;
 		numHiddenChannels = 64;
-		resNet = new ResNet(game, {numResBlocks, numHiddenChannels});
+		resNet = new ResNet(game, { numResBlocks, numHiddenChannels });
 	});
 
-	describe('call', () => {
-		it('should return two tensors for policy and value heads', () => {
+	describe("call", () => {
+		it("should return two tensors for policy and value heads", () => {
 			// Set up a test input tensor
 			const input: tf.Tensor4D = tf.randomNormal([
 				1,

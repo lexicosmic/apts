@@ -1,6 +1,6 @@
-import React from 'react';
-import SelectInput from 'ink-select-input';
-import Game, {Action, State} from '../engine/Game.js';
+import React from "react";
+import SelectInput from "ink-select-input";
+import Game, { Action, State } from "../../engine/Game.js";
 
 interface ActionSelectorProps {
 	game: Game;
@@ -26,7 +26,7 @@ export default function ActionSelector({
 	return (
 		<SelectInput
 			items={items}
-			onSelect={(item: {value: any}) => handleSelect(item.value)}
+			onSelect={(item: { value: any }) => handleSelect(item.value)}
 		/>
 	);
 }

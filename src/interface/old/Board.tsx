@@ -1,13 +1,13 @@
-import React from 'react';
-import {Box, Text} from 'ink';
-import Game, {Player, State} from '../engine/Game.js';
+import React from "react";
+import { Box, Text } from "ink";
+import Game, { Player, State } from "../../engine/Game.js";
 
 interface BoardProps {
 	game: Game;
 	state: State;
 	formattedCellText: (player: Player) => string;
 }
-export default function Board({game, state, formattedCellText}: BoardProps) {
+export default function Board({ game, state, formattedCellText }: BoardProps) {
 	const board = [];
 	for (let i = 0; i < game.getRowCount(); i++) {
 		const row = [];
@@ -16,7 +16,7 @@ export default function Board({game, state, formattedCellText}: BoardProps) {
 			row.push(
 				<Text key={`cell-${i + j}`}>
 					{formattedCellText(cell ?? Player.None)}
-				</Text>,
+				</Text>
 			);
 		}
 		board.push(<Text key={`row-${i}`}>{row}|</Text>);

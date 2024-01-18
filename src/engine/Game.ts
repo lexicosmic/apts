@@ -1,3 +1,5 @@
+import { GameName } from "../types";
+
 // Definitions
 export enum Player {
 	None = 0,
@@ -19,6 +21,8 @@ export type ActionOutcome = {
 
 export default abstract class Game {
 	/// Getters
+	public abstract getName(): GameName;
+
 	public abstract getRowCount(): number;
 
 	public abstract getColumnCount(): number;
@@ -27,26 +31,29 @@ export default abstract class Game {
 
 	public abstract getInitialState(): State;
 
+	public abstract getPlayerName(player: Player): string;
+
 	public abstract getOpponent(player: Player): Player;
+
 	// Return the outcome value, considering that the opponent is the one playing
 	public abstract getOpponentValue(
-		value: ActionOutcome['value'],
-	): ActionOutcome['value'];
+		value: ActionOutcome["value"]
+	): ActionOutcome["value"];
 
 	/// Static methods
 	// Return if the game is over and if the player has won
 	public static getActionOutcome(
 		state: State,
-		action: Action | null,
+		action: Action | null
 	): ActionOutcome {
 		// Check if the player has won
 		if (action === null ? false : state.checkWin(action))
-			return {isTerminal: true, value: Outcome.Win};
+			return { isTerminal: true, value: Outcome.Win };
 		// Check if the game is a draw
-		if (state.getValidActions().some(validAction => validAction) === false)
-			return {isTerminal: true, value: Outcome.Loss};
+		if (state.getValidActions().some((validAction) => validAction) === false)
+			return { isTerminal: true, value: Outcome.Loss };
 		// No terminal state
-		return {isTerminal: false, value: Outcome.Loss};
+		return { isTerminal: false, value: Outcome.Loss };
 	}
 }
 
@@ -65,7 +72,7 @@ export abstract class State {
 	public abstract setPlayerAt(player: Player, position: number): void;
 
 	/// Methods
-	public abstract print(): void;
+	public abstract toString(): string;
 
 	public abstract checkWin(action: Action): boolean;
 
@@ -74,7 +81,7 @@ export abstract class State {
 	// Return the state with the perspective changed, i.e. the opponent is now the player
 	public abstract changePerspective(
 		currentPlayer: Player,
-		opponentPlayer: Player,
+		opponentPlayer: Player
 	): void;
 
 	/// Static methods

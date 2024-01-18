@@ -1,10 +1,11 @@
+import { GameName } from "../../types.js";
 import Game, {
 	ActionOutcome,
 	EncodedState,
 	Player,
 	State,
 	ValidAction,
-} from '../Game.js';
+} from "../Game.js";
 
 export default class TicTacToeGame extends Game {
 	/// Attributes
@@ -20,6 +21,10 @@ export default class TicTacToeGame extends Game {
 	}
 
 	/// Getters
+	public getName(): GameName {
+		return GameName.TicTacToe;
+	}
+
 	public getRowCount(): number {
 		return this.rowCount;
 	}
@@ -36,6 +41,11 @@ export default class TicTacToeGame extends Game {
 		return new TicTacToeState(this.rowCount, this.columnCount);
 	}
 
+	public getPlayerName(player: Player): string {
+		if (player === Player.None) return "N";
+		return player === Player.X ? "X" : "O";
+	}
+
 	public getOpponent(player: Player): Player {
 		if (player === Player.None) return Player.None;
 		return player === Player.X ? Player.O : Player.X;
@@ -43,8 +53,8 @@ export default class TicTacToeGame extends Game {
 
 	// Return the outcome value, considering that the opponent is the one playing
 	public getOpponentValue(
-		value: ActionOutcome['value'],
-	): ActionOutcome['value'] {
+		value: ActionOutcome["value"]
+	): ActionOutcome["value"] {
 		return -value + 0;
 	}
 }
@@ -60,7 +70,7 @@ export class TicTacToeState extends State {
 		this.rowCount = rowCount;
 		this.columnCount = columnCount;
 		this.table = Array.from(Array(rowCount), () =>
-			Array.from(Array(columnCount), () => Player.None),
+			Array.from(Array(columnCount), () => Player.None)
 		);
 	}
 
@@ -84,7 +94,7 @@ export class TicTacToeState extends State {
 
 	public getEncodedState(): Array<Array<Array<number>>> {
 		const encodedState: EncodedState = Array.from(Array(this.rowCount), () =>
-			Array.from(Array(this.columnCount), () => Array(3).fill(0)),
+			Array.from(Array(this.columnCount), () => Array(3).fill(0))
 		);
 		for (let i = 0; i < this.rowCount; i++) {
 			for (let j = 0; j < this.columnCount; j++) {
@@ -105,21 +115,21 @@ export class TicTacToeState extends State {
 	}
 
 	/// Methods
-	public print(): void {
-		let boardString = '';
+	public toString(): string {
+		let boardString = "";
 		for (let i = 0; i < this.table.length; i++) {
-			boardString += '|';
+			boardString += "|";
 			for (let j = 0; j < this.table[i].length; j++) {
 				const cell = this.table[i][j];
-				boardString += ' ';
-				if (cell === Player.X) boardString += 'X';
-				else if (cell === Player.O) boardString += 'O';
-				else boardString += '-';
-				boardString += ' |';
+				boardString += " ";
+				if (cell === Player.X) boardString += "X";
+				else if (cell === Player.O) boardString += "O";
+				else boardString += "-";
+				boardString += " |";
 			}
-			boardString += '\n';
+			boardString += "\n";
 		}
-		console.log(boardString);
+		return boardString;
 	}
 
 	public checkWin(action: number): boolean {
@@ -128,9 +138,9 @@ export class TicTacToeState extends State {
 		const player = this.table[row]![column];
 
 		// Won on the row
-		if (this.table[row]!.every(cell => cell === player)) return true;
+		if (this.table[row]!.every((cell) => cell === player)) return true;
 		// Won on the column
-		if (this.table.every(row => row[column] === player)) return true;
+		if (this.table.every((row) => row[column] === player)) return true;
 		// Won on the primary diagonal
 		if (this.table.every((row, i) => row[i] === player)) return true;
 		// Won on the secondary diagonal
@@ -150,7 +160,7 @@ export class TicTacToeState extends State {
 	/// Static methods
 	public changePerspective(
 		currentPlayer: Player,
-		opponentPlayer: Player,
+		opponentPlayer: Player
 	): void {
 		for (let i = 0; i < this.rowCount; i++) {
 			for (let j = 0; j < this.columnCount; j++) {
