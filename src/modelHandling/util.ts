@@ -12,7 +12,7 @@ export function getRandomValidAction(state: State): Action {
 }
 
 // Returns the masked policy and value as Tensors
-export function getMaskedPrediction(
+function getMaskedPrediction(
 	state: State,
 	resNet: ResNet
 ): {
@@ -39,24 +39,27 @@ export function getMaskedPrediction(
 }
 
 // Returns the action probabilities as a Tensor
-export function getProbabilities(policy: tf.Tensor1D): tf.Tensor1D {
+function getProbabilities(policy: tf.Tensor1D): tf.Tensor1D {
 	return tf.tidy(() => {
 		const sum = policy.sum();
 		return policy.div(sum);
 	});
 }
 
-export function getActionFromProbabilities(probabilities: tf.Tensor1D) {
-	tf.tidy(() => {
-		// const actionTensor = tf.multinomial(probabilities, 1);
-		// const actionIndex = actionTensor.dataSync()[0];
-		// return actionIndex;
-		const [rowsT] = tf.unstack(probabilities.shape);
-		const rows = rowsT.arraySync() as number;
-		console.log(rows);
-		const distribution = tf.randomUniform([rows], 0, 1, "float32");
-		distribution.print();
-		const result = tf.gather(probabilities, distribution);
-		result.print();
+// Returns the action as a common integer
+function getActionFromProbabilities(probabilities: tf.Tensor1D): Action {
+	return tf.tidy(() => {
+		return tf
+			.multinomial(probabilities, 1, undefined, true)
+			.squeeze()
+			.arraySync() as number;
+	});
+}
+
+export function getActionFromState(state: State, resNet: ResNet): Action {
+	return tf.tidy(() => {
+		const { policy } = getMaskedPrediction(state, resNet);
+		const probabilities = getProbabilities(policy);
+		return getActionFromProbabilities(probabilities);
 	});
 }

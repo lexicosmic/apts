@@ -1,17 +1,12 @@
-import * as tf from "@tensorflow/tfjs";
 import { useState } from "react";
 import { GameMode, ModelInfo } from "../types";
 import { formatGameName } from "../util";
 import { loadResNetModel, useOnMountUnsafe } from "./util";
-import Game, { Action, ActionOutcome, Player, State } from "../engine/Game";
+import Game, { Action, Player, State } from "../engine/Game";
 import ResNet from "../engine/ResNet";
 import TerminalPage from "./TerminalPage";
 import Button from "./Button";
-import {
-	getActionFromProbabilities,
-	getMaskedPrediction,
-	getProbabilities,
-} from "../modelHandling/util";
+import { getActionFromState } from "../modelHandling/util";
 
 interface PlayingProps {
 	game: Game;
@@ -30,20 +25,12 @@ export default function Playing({
 	const [actions, setActions] = useState<Action[]>([]);
 	const [state, setState] = useState<State>(game.getInitialState());
 	const [currentPlayer, setCurrentPlayer] = useState<Player>(Player.X);
-	let resNet: ResNet | null = null;
-	let handleAction: (action: Action) => void = playTurnPvP;
+	const [resNet, setResNet] = useState<ResNet | null>(null);
 
 	useOnMountUnsafe(() => {
 		if (modelInfo !== null)
 			loadResNetModel(game, modelInfo.path, (loadedModel) => {
-				resNet = loadedModel;
-				// const { policy, value } = getMaskedPrediction(state, resNet);
-				// console.log(policy.arraySync());
-				// console.log(value.arraySync());
-				const policy = tf.tensor1d([0.1, 0.7, 0.9, 0.3, 0.03, 0, 0.45, 0, 0]);
-				const probabilities = getProbabilities(policy);
-				console.log(probabilities.arraySync());
-				getActionFromProbabilities(probabilities);
+				setResNet(loadedModel);
 			});
 		startGame();
 	});
@@ -72,8 +59,55 @@ export default function Playing({
 		setActions(nextTurnActions);
 	}
 
+	function playTurnPvC(action: Action) {
+		if (!resNet) return;
+		let nextPlayer = currentPlayer;
+		let nextState = performAction(
+			state,
+			currentPlayer,
+			action,
+			writeToTerminal
+		);
+		const nextTurnData = getNextTurnData(
+			game,
+			nextState,
+			currentPlayer,
+			action,
+			writeToTerminal
+		);
+		nextPlayer = nextTurnData.nextPlayer;
+		let nextTurnActions = nextTurnData.nextTurnActions;
+		if (nextTurnActions.length > 0) {
+			const computerAction = getActionFromState(nextState, resNet);
+			nextState = performAction(
+				nextState,
+				nextPlayer,
+				computerAction,
+				writeToTerminal
+			);
+			const postComputerTurnData = getNextTurnData(
+				game,
+				nextState,
+				nextPlayer,
+				computerAction,
+				writeToTerminal
+			);
+			nextPlayer = postComputerTurnData.nextPlayer;
+			nextTurnActions = postComputerTurnData.nextTurnActions;
+		}
+		setState(nextState);
+		setCurrentPlayer(nextPlayer);
+		setActions(nextTurnActions);
+	}
+
 	function writeToTerminal(text: string) {
 		setTerminalText((prevText) => prevText + text + "\n");
+	}
+
+	function handleActionSelected(action: Action) {
+		console.log(resNet);
+		if (resNet && gameMode === GameMode.PvC) playTurnPvC(action);
+		else playTurnPvP(action);
 	}
 
 	function quitPlaying() {
@@ -84,7 +118,7 @@ export default function Playing({
 	const actionButtons = actions.map((action, index) => (
 		<ActionButton
 			action={action}
-			handleActionSelected={handleAction}
+			handleActionSelected={handleActionSelected}
 			key={`action-${index}`}
 		/>
 	));
