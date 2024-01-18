@@ -31,7 +31,10 @@ export default abstract class Game {
 
 	public abstract getInitialState(): State;
 
+	public abstract getPlayerName(player: Player): string;
+
 	public abstract getOpponent(player: Player): Player;
+
 	// Return the outcome value, considering that the opponent is the one playing
 	public abstract getOpponentValue(
 		value: ActionOutcome["value"]

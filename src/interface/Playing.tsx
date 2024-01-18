@@ -31,6 +31,7 @@ export default function Playing({
 		if (modelInfo !== null)
 			loadResNetModel(game, modelInfo.path, (loadedModel) => {
 				setResNet(loadedModel);
+				if (gameMode === GameMode.CvC) playCvCGame(loadedModel);
 			});
 		startGame();
 	});
@@ -38,10 +39,13 @@ export default function Playing({
 	function startGame() {
 		writeToTerminal(`Game mode: ${gameMode}\n`);
 		setActions(getValidActions(state));
+		writeToTerminal("Good luck!");
+		writeToTerminal(state.toString());
 	}
 
 	function playTurnPvP(action: Action) {
 		const nextState = performAction(
+			game,
 			state,
 			currentPlayer,
 			action,
@@ -63,6 +67,7 @@ export default function Playing({
 		if (!resNet) return;
 		let nextPlayer = currentPlayer;
 		let nextState = performAction(
+			game,
 			state,
 			currentPlayer,
 			action,
@@ -80,6 +85,7 @@ export default function Playing({
 		if (nextTurnActions.length > 0) {
 			const computerAction = getActionFromState(nextState, resNet);
 			nextState = performAction(
+				game,
 				nextState,
 				nextPlayer,
 				computerAction,
@@ -100,12 +106,39 @@ export default function Playing({
 		setActions(nextTurnActions);
 	}
 
+	function playCvCGame(resNet: ResNet) {
+		let nextState = state;
+		let nextPlayer = currentPlayer;
+		let nextTurnActions = getValidActions(state);
+		while (nextTurnActions.length > 0) {
+			const computerAction = getActionFromState(state, resNet);
+			nextState = performAction(
+				game,
+				nextState,
+				nextPlayer,
+				computerAction,
+				writeToTerminal
+			);
+			const nextTurnData = getNextTurnData(
+				game,
+				nextState,
+				nextPlayer,
+				computerAction,
+				writeToTerminal
+			);
+			nextPlayer = nextTurnData.nextPlayer;
+			nextTurnActions = nextTurnData.nextTurnActions;
+		}
+		setState(nextState);
+		setCurrentPlayer(nextPlayer);
+		setActions(nextTurnActions);
+	}
+
 	function writeToTerminal(text: string) {
 		setTerminalText((prevText) => prevText + text + "\n");
 	}
 
 	function handleActionSelected(action: Action) {
-		console.log(resNet);
 		if (resNet && gameMode === GameMode.PvC) playTurnPvC(action);
 		else playTurnPvP(action);
 	}
@@ -165,13 +198,14 @@ function getValidActions(state: State): Action[] {
 }
 
 function performAction(
+	game: Game,
 	state: State,
 	player: Player,
 	action: Action,
 	writeToTerminal: (text: string) => void
 ): State {
 	const nextState = State.clone(state);
-	writeToTerminal(`Player ${player}: ${action}`);
+	writeToTerminal(`Player ${game.getPlayerName(player)}: ${action}`);
 	nextState.performAction(action, player);
 	writeToTerminal(nextState.toString());
 	return nextState;
@@ -194,10 +228,10 @@ function getNextTurnData(
 		const hasWon = state.checkWin(action);
 		if (hasWon) {
 			nextPlayer = player;
-			writeToTerminal(`Player ${player} has won!`);
+			writeToTerminal(`Player ${game.getPlayerName(player)} has won!`);
 		} else {
 			if (nextTurnActions.length === 0) writeToTerminal(`Draw!`);
-			else writeToTerminal(`Player ${nextPlayer} has won!`);
+			else writeToTerminal(`Player ${game.getPlayerName(nextPlayer)} has won!`);
 		}
 		nextTurnActions = [];
 	}

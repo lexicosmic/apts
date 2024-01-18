@@ -49,6 +49,11 @@ export default class ConnectFourGame extends Game {
 		return new ConnectFourState(this.rowCount, this.columnCount);
 	}
 
+	public getPlayerName(player: Player): string {
+		if (player === Player.None) return "N";
+		return player === Player.X ? "X" : "O";
+	}
+
 	public getOpponent(player: Player): Player {
 		if (player === Player.None) return Player.None;
 		return player === Player.X ? Player.O : Player.X;
