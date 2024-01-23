@@ -14,10 +14,7 @@ export enum GameMode {
 }
 
 /// Engine
-export interface ResNetBuildModelParams {
-	numResBlocks: number; // Length of the backbone
-	numHiddenChannels: number; // Number of channels in each block
-}
+export type LogMessage = (message: string) => void;
 
 export interface MonteCarloTreeSearchParams {
 	readonly numSearches: number;
@@ -35,28 +32,30 @@ export interface TrainModelParams {
 	learningRate: number;
 }
 
-/// Export
-export type ParamsToExport_TrainingData = SelfPlayMemoryParams & {
-	id: string;
-	memoryLength: number;
-	model: ParamsToExport_BuildModel | null;
-};
-
-export type ParamsToExport_BuildModel = {
-	resNet: ResNetBuildModelParams;
-	memory: (ParamsToExport_TrainingData | {})[];
-	training: TrainModelParams;
-};
-
 export interface TrainingFunctionParams {
-	printMessage: (message: string) => void;
+	logMessage: LogMessage;
 	game: Game;
+	fileSystemProtocol: string;
 }
 
 export type TestingFunction = ({
-	printMessage,
+	logMessage,
 	game,
+	fileSystemProtocol,
 }: TrainingFunctionParams) => Promise<void>;
+
+/// Export
+// export type ParamsToExport_TrainingData = SelfPlayMemoryParams & {
+// 	id: string;
+// 	memoryLength: number;
+// 	model: ParamsToExport_BuildModel | null;
+// };
+
+// export type ParamsToExport_BuildModel = {
+// 	resNet: ResNetBuildModelParams;
+// 	memory: (ParamsToExport_TrainingData | {})[];
+// 	training: TrainModelParams;
+// };
 
 /// Database
 export enum ModelType {

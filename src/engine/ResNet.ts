@@ -1,16 +1,23 @@
 import * as tf from "@tensorflow/tfjs";
-import { ModelType, ResNetBuildModelParams } from "../types.js";
-import Game from "./Game.js";
+import { LogMessage, ModelType } from "../types.js";
 import { CRUDModels } from "../database.js";
+import Game from "./Game.js";
 
 const INPUT_CHANNELS = 3;
 
-interface ResNetLoadedModelParams {
+interface LoadResNetModelParams {
 	model: tf.LayersModel;
 }
+interface BuildResNetParams {
+	numResBlocks: number; // Length of the backbone
+	numHiddenChannels: number; // Number of channels in the backbone
+}
 
-export type ResNetParams = ResNetLoadedModelParams | ResNetBuildModelParams;
+export type ResNetParams = LoadResNetModelParams | BuildResNetParams;
 
+/* Class that represents a ResNet model, via a Layers Model from TensorFlow.js.
+ * It is important to dispose the model when it is no longer needed.
+ */
 export default class ResNet {
 	/// Attributes
 	private model: tf.LayersModel;
@@ -44,8 +51,8 @@ export default class ResNet {
 	}
 
 	// Prints a summary of the model
-	public summary(printMessage: (message: string) => void = console.log) {
-		this.model.summary(0, [0], printMessage);
+	public summary(logMessage: LogMessage = console.log) {
+		this.model.summary(0, [0], logMessage);
 	}
 
 	// Disposes the model
@@ -54,7 +61,7 @@ export default class ResNet {
 	}
 
 	// Compiles the model with the most proper optimizer and loss functions
-	private compile(learningRate: number = 0.001) {
+	private compile(learningRate: number) {
 		this.model.compile({
 			optimizer: tf.train.adam(learningRate),
 			loss: {
@@ -67,7 +74,7 @@ export default class ResNet {
 
 	// Prints the progress of the training
 	private logProgress(
-		printMessage: (message: string) => void,
+		logMessage: LogMessage = console.log,
 		epoch: number,
 		logs: tf.Logs,
 		trainingLog: tf.Logs[]
@@ -78,7 +85,7 @@ export default class ResNet {
 		logsString += `Policy Head Accuracy: ${logs.policyHead_acc}\n`;
 		logsString += `Value Head Loss: ${logs.valueHead_loss}\n`;
 		logsString += `Value Head Accuracy: ${logs.valueHead_acc}\n`;
-		printMessage(logsString);
+		logMessage(logsString);
 		trainingLog.push(logs);
 	}
 
@@ -91,10 +98,9 @@ export default class ResNet {
 		numEpochs: number,
 		learningRate: number,
 		validationSplit: number = 0.15,
-		printMessage: (message: string) => void = console.log
+		logMessage: LogMessage = console.log
 	) {
 		const trainingLog: tf.Logs[] = [];
-
 		this.compile(learningRate);
 
 		// Fit the model using the prepared training data
@@ -105,7 +111,7 @@ export default class ResNet {
 			epochs: numEpochs, // Go over the data N times!
 			callbacks: {
 				onEpochEnd: (epoch, logs) =>
-					this.logProgress(printMessage, epoch, logs!, trainingLog),
+					this.logProgress(logMessage, epoch, logs!, trainingLog),
 			},
 		});
 
@@ -170,7 +176,7 @@ function buildResNetModel(
 	game: Game,
 	numResBlocks: number, // Length of the backbone
 	numHiddenChannels: number // Number of channels in the backbone
-) {
+): tf.LayersModel {
 	// Define input tensor
 	const inputTensor = tf.input({
 		name: "input",
@@ -275,7 +281,7 @@ function applyResBlock(
 	dim1Size: number,
 	dim2Size: number,
 	numHiddenChannels: number
-) {
+): tf.SymbolicTensor {
 	const convolution1 = tf.layers.conv2d({
 		name: `ResBlock_${idNumber}_convolution1`,
 		inputShape: [dim1Size, dim2Size, numHiddenChannels],

@@ -1,30 +1,30 @@
-import { getRandomValidAction } from "../util.js";
+import { getRandomValidAction } from "../../engine/util.js";
 import { TrainingFunctionParams } from "../../types.js";
 import { State } from "../../engine/Game.js";
 import MonteCarloTreeSearch from "../../engine/MonteCarloTreeCommon.js";
 
 export default async function testMCTSCommon({
-	printMessage,
+	logMessage,
 	game,
 }: TrainingFunctionParams) {
 	// Set game and state data
 	const state = game.getInitialState();
-	printMessage("Initial state:");
-	printMessage(state.toString());
+	logMessage("Initial state:");
+	logMessage(state.toString());
 
-	printMessage(playTurn(state, getRandomValidAction(state), 1));
-	printMessage(playTurn(state, getRandomValidAction(state), -1));
-	printMessage(playTurn(state, getRandomValidAction(state), 1));
-	printMessage(playTurn(state, getRandomValidAction(state), -1));
+	logMessage(playTurn(state, getRandomValidAction(state), 1));
+	logMessage(playTurn(state, getRandomValidAction(state), -1));
+	logMessage(playTurn(state, getRandomValidAction(state), 1));
+	logMessage(playTurn(state, getRandomValidAction(state), -1));
 
 	const mcts = new MonteCarloTreeSearch(game, {
 		explorationConstant: 2,
 		numSearches: 60,
 	});
 	const actionProbabilities = mcts.search(state);
-	printMessage("Action probabilities: " + "\n[");
-	actionProbabilities.forEach((p) => printMessage(p.toString() + ","));
-	printMessage("]");
+	logMessage("Action probabilities: " + "\n[");
+	actionProbabilities.forEach((p) => logMessage(p.toString() + ","));
+	logMessage("]");
 }
 
 function playTurn(state: State, action: number, player: number): string {

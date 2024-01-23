@@ -6,7 +6,7 @@ import Game, { Action, Player, State } from "../engine/Game";
 import ResNet from "../engine/ResNet";
 import TerminalPage from "./TerminalPage";
 import Button from "./Button";
-import { getActionFromState } from "../modelHandling/util";
+import { getActionFromState } from "../engine/util";
 
 interface PlayingProps {
 	game: Game;

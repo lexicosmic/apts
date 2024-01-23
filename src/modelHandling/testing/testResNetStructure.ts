@@ -1,34 +1,40 @@
 import * as tf from "@tensorflow/tfjs";
-import { getPredictionDataFromState, getRandomValidAction } from "../util.js";
-import { fileSystemProtocol } from "../parameters.js";
 import { ModelType, TrainingFunctionParams } from "../../types.js";
+import {
+	getPredictionDataFromState_Policy_Value_Probabilities_Action,
+	getRandomValidAction,
+} from "../../engine/util.js";
 import ResNet from "../../engine/ResNet.js";
 
 export default async function testResNetStructure({
-	printMessage,
+	logMessage,
 	game,
+	fileSystemProtocol = "indexeddb",
 }: TrainingFunctionParams) {
 	// Set game and state data
 	const state = game.getInitialState();
 
 	// Build model and save it
-	printMessage("Building model...");
-	const resNet = new ResNet(game, { numResBlocks: 4, numHiddenChannels: 64 });
-	resNet.summary(printMessage);
-	printMessage("Model built!");
-	printMessage("\nSaving model...");
+	logMessage("Building model...");
+	const resNet = new ResNet(game, {
+		numResBlocks: 4,
+		numHiddenChannels: 64,
+	});
+	resNet.summary(logMessage);
+	logMessage("Model built!");
+	logMessage("\nSaving model...");
 	await resNet.save(fileSystemProtocol, ModelType.Structure);
-	printMessage("Model saved!\n");
+	logMessage("Model saved!\n");
 
 	// Play a few moves
-	printMessage("Initial state:");
-	printMessage(state.toString());
+	logMessage("Initial state:");
+	logMessage(state.toString());
 	state.performAction(getRandomValidAction(state), -1);
-	printMessage(state.toString());
+	logMessage(state.toString());
 
 	// Print the encoded state as a 3D array
 	const encodedState = state.getEncodedState();
-	printMessage("Encoded state: ");
+	logMessage("Encoded state: ");
 	let encodedStateString = "[";
 	for (let i = 0; i < encodedState.length; i++) {
 		for (let j = 0; j < encodedState[i].length; j++) {
@@ -42,39 +48,36 @@ export default async function testResNetStructure({
 		}
 		if (i !== encodedState.length - 1) {
 			encodedStateString += ",";
-			printMessage(encodedStateString);
+			logMessage(encodedStateString);
 			encodedStateString = "";
 		}
 	}
 	encodedStateString += "]\n";
-	printMessage(encodedStateString);
+	logMessage(encodedStateString);
 
 	// Predict
 	const { policy, value, probabilities, action } = tf.tidy(() => {
-		const { policy, value, probabilities, action } = getPredictionDataFromState(
-			state,
-			resNet,
-			{
-				policy: true,
-				value: true,
-				probabilities: true,
-				action: true,
-			}
-		);
+		const { policy, value, probabilities, action } =
+			getPredictionDataFromState_Policy_Value_Probabilities_Action(
+				state,
+				resNet
+			);
 		return {
-			policy: policy!.arraySync(),
-			value: value!.arraySync(),
-			probabilities: probabilities!.arraySync(),
+			policy: policy.arraySync(),
+			value: value.arraySync(),
+			probabilities: probabilities.arraySync(),
 			action: action,
 		};
 	});
 
-	printMessage("Policy: " + "\n[");
-	policy.forEach((p) => printMessage(p.toString() + ","));
-	printMessage("]");
-	printMessage("Action probabilities: " + "\n[");
-	probabilities.forEach((p) => printMessage(p.toString() + ","));
-	printMessage("]");
-	printMessage("Action: " + action);
-	printMessage("Value: " + value.toString());
+	logMessage("Policy: " + "\n[");
+	policy.forEach((p) => logMessage(p.toString() + ","));
+	logMessage("]");
+	logMessage("Action probabilities: " + "\n[");
+	probabilities.forEach((p) => logMessage(p.toString() + ","));
+	logMessage("]");
+	logMessage("Action: " + action);
+	logMessage("Value: " + value.toString());
+
+	resNet.dispose();
 }

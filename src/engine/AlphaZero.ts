@@ -1,5 +1,5 @@
 import * as tf from "@tensorflow/tfjs";
-import { MonteCarloTreeSearchParams, TrainModelParams } from "../types.js";
+import { LogMessage, TrainModelParams } from "../types.js";
 import Game, {
 	Action,
 	ActionOutcome,
@@ -31,13 +31,20 @@ export default class AlphaZero {
 	private mcts: MonteCarloTreeSearch;
 
 	/// Constructor
-	constructor(game: Game, resNet: ResNet, params: MonteCarloTreeSearchParams) {
+	constructor(
+		game: Game,
+		resNet: ResNet,
+		numSearches: number,
+		explorationConstant: number
+	) {
 		this.game = game;
 		this.resNet = resNet;
-		this.mcts = new MonteCarloTreeSearch(this.game, this.resNet, {
-			explorationConstant: params.explorationConstant,
-			numSearches: params.numSearches,
-		});
+		this.mcts = new MonteCarloTreeSearch(
+			this.game,
+			this.resNet,
+			numSearches,
+			explorationConstant
+		);
 	}
 
 	/// Methods
@@ -169,40 +176,43 @@ export default class AlphaZero {
 
 	// Train the model multiple times
 	public async learn(
-		directoryName: string,
+		fileSystemProtocol: string,
+		logMessage: LogMessage = console.log,
+		targetPath: string,
 		numSelfPlayIterations: number,
 		trainModelParams: TrainModelParams,
 		trainingMemoryArray?: TrainingMemory[]
 	): Promise<void> {
-		console.log("=-=-=-=-=-=-=-= AlphaZero LEARNING =-=-=-=-=-=-=-=");
+		logMessage("=-=-=-=-=-=-=-= AlphaZero LEARNING =-=-=-=-=-=-=-=");
 
-		// for (let i = 0; i < trainModelParams.numIterations; i++) {
-		// 	console.log(`ITERATION ${i + 1}/${trainModelParams.numIterations}`);
-		// 	let memory;
-		// 	if (
-		// 		typeof trainingMemoryArray === "undefined" ||
-		// 		typeof trainingMemoryArray[i] === "undefined"
-		// 	)
-		// 		memory = await this.buildTrainingMemory(numSelfPlayIterations, true);
-		// 	else memory = trainingMemoryArray[i];
-
-		// 	const trainingLog = await this.train(
-		// 		memory,
-		// 		trainModelParams.batchSize,
-		// 		trainModelParams.numEpochs,
-		// 		trainModelParams.learningRate
-		// 	);
-
-		// 	// Save the model architecture and optimizer weights
-		// 	await this.resNet.save(`file://models/${directoryName}/iteration_${i}`);
-		// 	try {
-		// 		fs.writeFileSync(
-		// 			`./models/${directoryName}/iteration_${i}/trainingLog.json`,
-		// 			JSON.stringify(trainingLog)
-		// 		);
-		// 	} catch (e) {
-		// 		console.error(e);
-		// 	}
-		// }
+		for (let i = 0; i < trainModelParams.numIterations; i++) {
+			// console.log(`ITERATION ${i + 1}/${trainModelParams.numIterations}`);
+			// let memory;
+			// if (
+			// 	typeof trainingMemoryArray === "undefined" ||
+			// 	typeof trainingMemoryArray[i] === "undefined"
+			// )
+			// 	memory = await this.buildTrainingMemory(numSelfPlayIterations, true);
+			// else memory = trainingMemoryArray[i];
+			// const trainingLog = await this.train(
+			// 	memory,
+			// 	trainModelParams.batchSize,
+			// 	trainModelParams.numEpochs,
+			// 	trainModelParams.learningRate
+			// );
+			// // Save the model architecture and optimizer weights
+			// await this.resNet.save(
+			// 	fileSystemProtocol,
+			// 	`file://models/${directoryName}/iteration_${i}`
+			// );
+			// try {
+			// 	fs.writeFileSync(
+			// 		`./models/${directoryName}/iteration_${i}/trainingLog.json`,
+			// 		JSON.stringify(trainingLog)
+			// 	);
+			// } catch (e) {
+			// 	console.error(e);
+			// }
+		}
 	}
 }

@@ -26,7 +26,7 @@ export default function Testing({
 
 	async function performTesting() {
 		await testingFunction({
-			printMessage: writeToTerminal,
+			logMessage: writeToTerminal,
 			game,
 		});
 		setButtonDisabled(false);

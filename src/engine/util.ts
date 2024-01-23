@@ -1,6 +1,6 @@
 import * as tf from "@tensorflow/tfjs";
-import { State, Action } from "../engine/Game";
-import ResNet from "../engine/ResNet";
+import { State, Action } from "./Game";
+import ResNet from "./ResNet";
 
 export function getRandomValidAction(state: State): Action {
 	const validActionsEncoded = state.getValidActions();
@@ -56,42 +56,104 @@ function getActionFromProbabilities(probabilities: tf.Tensor1D): Action {
 	});
 }
 
-type DesiredData = {
-	policy: boolean;
-	value: boolean;
-	probabilities: boolean;
-	action: boolean;
-};
+type DesiredData =
+	| {
+			policy: true;
+			value?: boolean;
+			probabilities?: boolean;
+			action?: boolean;
+	  }
+	| {
+			policy?: boolean;
+			value: true;
+			probabilities?: boolean;
+			action?: boolean;
+	  }
+	| {
+			policy?: boolean;
+			value?: boolean;
+			probabilities: true;
+			action?: boolean;
+	  }
+	| {
+			policy?: boolean;
+			value?: boolean;
+			probabilities?: boolean;
+			action: true;
+	  };
+
 type ReturnedData = {
 	policy?: tf.Tensor1D;
 	value?: tf.Scalar;
 	probabilities?: tf.Tensor1D;
 	action?: Action;
 };
-export function getPredictionDataFromState(
+
+function getPredictionDataFromState(
 	state: State,
 	resNet: ResNet,
 	desiredData: DesiredData
-): ReturnedData {
+) {
 	return tf.tidy(() => {
-		const { policy, value } = getMaskedPrediction(state, resNet);
-		const probabilities = getProbabilities(policy);
-		const action = getActionFromProbabilities(probabilities);
 		const data: ReturnedData = {};
+		const { policy, value } = getMaskedPrediction(state, resNet);
 		if (desiredData.policy) data.policy = policy;
 		if (desiredData.value) data.value = value;
-		if (desiredData.probabilities) data.probabilities = probabilities;
-		if (desiredData.action) data.action = action;
+		if (desiredData.probabilities || desiredData.action) {
+			const probabilities = getProbabilities(policy);
+			if (desiredData.probabilities) data.probabilities = probabilities;
+			if (desiredData.action)
+				data.action = getActionFromProbabilities(probabilities);
+		}
 		return data;
 	});
 }
 
-export function getActionFromState(state: State, resNet: ResNet): Action {
+export function getPredictionDataFromState_Action(
+	state: State,
+	resNet: ResNet
+): { action: Action } {
 	const data = getPredictionDataFromState(state, resNet, {
 		policy: false,
 		value: false,
 		probabilities: false,
 		action: true,
 	});
-	return data.action!;
+	return { action: data.action! };
+}
+
+export function getPredictionDataFromState_Value_Probabilities(
+	state: State,
+	resNet: ResNet
+): { value: tf.Scalar; probabilities: tf.Tensor1D } {
+	const data = getPredictionDataFromState(state, resNet, {
+		policy: false,
+		value: true,
+		probabilities: true,
+		action: false,
+	});
+	return { value: data.value!, probabilities: data.probabilities! };
+}
+
+export function getPredictionDataFromState_Policy_Value_Probabilities_Action(
+	state: State,
+	resNet: ResNet
+): {
+	policy: tf.Tensor1D;
+	value: tf.Scalar;
+	probabilities: tf.Tensor1D;
+	action: Action;
+} {
+	const data = getPredictionDataFromState(state, resNet, {
+		policy: true,
+		value: true,
+		probabilities: true,
+		action: true,
+	});
+	return {
+		policy: data.policy!,
+		value: data.value!,
+		probabilities: data.probabilities!,
+		action: data.action!,
+	};
 }

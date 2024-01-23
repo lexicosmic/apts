@@ -1,8 +1,7 @@
-// import * as tf from "@tensorflow/tfjs";
-// import ResNet from "../../engine/ResNet.js";
-// import { TrainingFunctionParams } from "../../types.js";
-// import { fileSystemProtocol } from "../parameters.js";
-// import AlphaZero from "../../engine/AlphaZero.js";
+import * as tf from "@tensorflow/tfjs";
+import ResNet from "../../engine/ResNet.js";
+import { TrainingFunctionParams } from "../../types.js";
+import AlphaZero from "../../engine/AlphaZero.js";
 
 // const game = gameParams.game;
 // const path = `file://models/${gameParams.mainModelDirectory}/model.json`;
@@ -17,13 +16,13 @@
 // );
 // writeTrainingData(memory, gameParams.mainModelDirectory, selfPlayMemoryParams);
 
-// interface BuildTrainingMemoryParams extends TrainingFunctionParams {
-// 	resNet: ResNet;
-// }
-// export default async function buildTrainingMemory({
-// 	printMessage,
-// 	game,
-// 	resNet,
-// }: BuildTrainingMemoryParams) {
-// 	const alphaZeroTraining = new AlphaZero(game, resNet);
-// }
+interface BuildTrainingMemoryParams extends TrainingFunctionParams {
+	resNet: ResNet;
+}
+export default async function buildTrainingMemory({
+	logMessage,
+	game,
+	resNet,
+}: BuildTrainingMemoryParams) {
+	const alphaZeroTraining = new AlphaZero(game, resNet);
+}

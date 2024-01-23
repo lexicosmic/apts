@@ -1,16 +1,16 @@
 import * as tf from "@tensorflow/tfjs";
-import { fileSystemProtocol } from "../parameters.js";
 import { ModelType, TrainingFunctionParams } from "../../types.js";
 import Game from "../../engine/Game.js";
 import ResNet from "../../engine/ResNet.js";
 
 export default async function testBlindTraining({
-	printMessage,
+	logMessage,
 	game,
+	fileSystemProtocol = "indexeddb",
 }: TrainingFunctionParams) {
 	let state = game.getInitialState();
-	printMessage("Initial state:");
-	printMessage(state.toString());
+	logMessage("Initial state:");
+	logMessage(state.toString());
 
 	const resNet = new ResNet(game, { numResBlocks: 4, numHiddenChannels: 64 });
 
@@ -20,12 +20,12 @@ export default async function testBlindTraining({
 	const outputPolicyTensor = tf.tensor2d([Array(game.getActionSize()).fill(0)]); // N - Batch of outcomes
 	const outputValueTensor = tf.tensor2d([[outcome.value]]); // N - Batch of outcomes
 
-	printMessage("Saving model before training...");
+	logMessage("Saving model before training...");
 	let innerPath = `/beforeTrain`;
 	await resNet.save(fileSystemProtocol, ModelType.Blind, innerPath);
-	printMessage("Model saved!\n");
+	logMessage("Model saved!\n");
 
-	printMessage("Training model...");
+	logMessage("Training model...");
 	await resNet.train(
 		inputsTensor,
 		outputPolicyTensor,
@@ -34,12 +34,17 @@ export default async function testBlindTraining({
 		30,
 		0.001,
 		0,
-		printMessage
+		logMessage
 	);
-	printMessage("Model trained!");
+	logMessage("Model trained!");
 
-	printMessage("\nSaving model after training...");
+	logMessage("\nSaving model after training...");
 	innerPath = `/afterTrain`;
 	await resNet.save(fileSystemProtocol, ModelType.Blind, innerPath);
-	printMessage("Model saved!");
+	logMessage("Model saved!");
+
+	inputsTensor.dispose();
+	outputPolicyTensor.dispose();
+	outputValueTensor.dispose();
+	resNet.dispose();
 }
