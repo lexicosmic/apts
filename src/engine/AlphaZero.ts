@@ -1,12 +1,7 @@
 import * as tf from "@tensorflow/tfjs";
 import { LogMessage, TrainModelParams } from "../types.js";
-import Game, {
-	Action,
-	ActionOutcome,
-	EncodedState,
-	Player,
-	State,
-} from "./Game.js";
+import { getActionFromProbabilities } from "./util.js";
+import Game, { ActionOutcome, EncodedState, Player, State } from "./Game.js";
 import ResNet from "./ResNet.js";
 import MonteCarloTreeSearch from "./MonteCarloTree.js";
 
@@ -17,12 +12,11 @@ type GameMemoryBlock = {
 };
 type GameMemory = GameMemoryBlock[];
 
-type TrainMemoryBlock = {
-	encodedState: EncodedState;
-	actionProbabilities: number[];
-	outcomeValue: ActionOutcome["value"];
+type TrainingMemory = {
+	encodedStates: EncodedState[];
+	policyTargets: number[][];
+	valueTargets: ActionOutcome["value"][];
 };
-export type TrainingMemory = TrainMemoryBlock[];
 
 export default class AlphaZero {
 	/// Attributes
@@ -48,6 +42,10 @@ export default class AlphaZero {
 	}
 
 	/// Methods
+	/**
+	 * Performs self-play to generate training data for the AlphaZero algorithm.
+	 * @returns A promise that resolves to a TrainingMemory object containing the generated training data, composed by encoded states, policy targets, and value targets.
+	 */
 	private async selfPlay(): Promise<TrainingMemory> {
 		let player = Player.X;
 		let state = this.game.getInitialState();
@@ -61,39 +59,22 @@ export default class AlphaZero {
 			gameMemory.push({ state: neutralState, actionProbabilities, player });
 
 			// Pick an action based on the probabilities from the MCTS
-			const logActionProbabilities = actionProbabilities.map((p) =>
-				Math.log(p)
-			);
-			const pickedAction: Action = tf.tidy(() => {
-				const actionTensor = tf.tensor(logActionProbabilities) as tf.Tensor1D;
-				const actionIndex = tf
-					.multinomial(actionTensor, 1)
-					.dataSync()[0] as Action;
-				return actionIndex;
-			});
+			const probabilitiesTensor = tf.tensor(actionProbabilities) as tf.Tensor1D;
+			const pickedAction = getActionFromProbabilities(probabilitiesTensor);
+			tf.dispose(probabilitiesTensor);
 			if (!state.getValidActions()[pickedAction])
 				throw new Error("Invalid action picked");
 
 			// Perform the action and check if the game is over
 			state.performAction(pickedAction, player);
 			const actionOutcome = Game.getActionOutcome(state, pickedAction);
-
 			if (actionOutcome.isTerminal) {
 				// When the game is over, construct the training memory from the perspective of the current player
-				const trainingMemory: TrainingMemory = [];
-				for (const memoryBlock of gameMemory) {
-					// Get the outcome value from the perspective of the current player
-					const memoryOutcomeValue =
-						memoryBlock.player === player
-							? actionOutcome.value
-							: this.game.getOpponentValue(actionOutcome.value);
-					trainingMemory.push({
-						encodedState: memoryBlock.state.getEncodedState(),
-						actionProbabilities: memoryBlock.actionProbabilities,
-						outcomeValue: memoryOutcomeValue,
-					});
-				}
-				return trainingMemory;
+				return this.convertGameMemoryToTrainingMemory(
+					gameMemory,
+					player,
+					actionOutcome.value
+				);
 			}
 
 			// If the game is not over, switch the player and continue
@@ -101,72 +82,108 @@ export default class AlphaZero {
 		}
 	}
 
-	// Transpose the training memory to a format that can be used to train the model
-	private transposeMemory(trainingMemory: TrainingMemory): {
-		encodedStates: EncodedState[];
-		policyTargets: number[][];
-		valueTargets: ActionOutcome["value"][];
-	} {
-		const encodedStates: EncodedState[] = [];
-		const policyTargets: number[][] = [];
-		const valueTargets: ActionOutcome["value"][] = [];
-		for (const {
-			encodedState,
-			actionProbabilities,
-			outcomeValue,
-		} of trainingMemory) {
-			encodedStates.push(encodedState);
-			policyTargets.push(actionProbabilities);
-			valueTargets.push(outcomeValue);
+	// Transpose the game memory to a format that can be used to train the model
+	private convertGameMemoryToTrainingMemory(
+		gameMemory: GameMemory,
+		lastPlayer: Player,
+		lastActionValue: ActionOutcome["value"]
+	): TrainingMemory {
+		const trainingMemory: TrainingMemory = {
+			encodedStates: [],
+			policyTargets: [],
+			valueTargets: [],
+		};
+		for (const memoryBlock of gameMemory) {
+			// Get the outcome value from the perspective of the current player
+			const memoryOutcomeValue =
+				memoryBlock.player === lastPlayer
+					? lastActionValue
+					: this.game.getOpponentValue(lastActionValue);
+			trainingMemory.encodedStates.push(memoryBlock.state.getEncodedState());
+			trainingMemory.policyTargets.push(memoryBlock.actionProbabilities);
+			trainingMemory.valueTargets.push(memoryOutcomeValue);
 		}
+		return trainingMemory;
+	}
+
+	/**
+	 * Builds the training memory by self-playing the game for a specified number of iterations.
+	 * @param numSelfPlayIterations The number of self-play iterations.
+	 * @param progressStep The number of iterations between each progress message (default is 25).
+	 * @param showMemorySize Whether to show the size of the training memory.
+	 * @param logMessage The optional log message function (default is console.log).
+	 * @returns A promise that resolves to the TrainingMemory object containing encoded states, policy targets, and value targets.
+	 */
+	public async buildTrainingMemory({
+		numSelfPlayIterations,
+		progressStep = 25,
+		showMemorySize = false,
+		logMessage = console.log,
+	}: {
+		numSelfPlayIterations: number;
+		progressStep?: number;
+		showMemorySize?: boolean;
+		logMessage?: LogMessage;
+	}): Promise<TrainingMemory> {
+		const encodedStates = [];
+		const policyTargets = [];
+		const valueTargets = [];
+		// Construct the training memory from self-playing the game
+		for (let j = 0; j < numSelfPlayIterations; j++) {
+			if (progressStep > 0 && (j + 1) % progressStep === 0)
+				logMessage(`Self-play iteration ${j + 1}/${numSelfPlayIterations}`);
+			const selfPlayMemory = await this.selfPlay();
+			encodedStates.push(...selfPlayMemory.encodedStates);
+			policyTargets.push(...selfPlayMemory.policyTargets);
+			valueTargets.push(...selfPlayMemory.valueTargets);
+		}
+		if (showMemorySize) logMessage(`Memory size: ${encodedStates.length}`);
 		return { encodedStates, policyTargets, valueTargets };
 	}
 
-	// Build the training memory by self-playing the game
-	public async buildTrainingMemory(
-		numSelfPlayIterations: number,
-		showProgress = false,
-		showMemorySize = false
-	): Promise<TrainingMemory> {
-		const memory: TrainingMemory = [];
-		// Construct the training memory from self-playing the game
-		for (let j = 0; j < numSelfPlayIterations; j++) {
-			if (showProgress && (j + 1) % 25 === 0)
-				console.log(`Self-play iteration ${j + 1}/${numSelfPlayIterations}`);
-			const selfPlayMemory = await this.selfPlay();
-			memory.push(...selfPlayMemory);
-		}
-		if (showMemorySize) console.log(`Memory size: ${memory.length}`);
-		return memory;
-	}
-
-	// Train the model using the training memory
-	private async train(
-		memory: TrainingMemory,
-		batchSize: number,
-		numEpochs: number,
-		learningRate: number
-	): Promise<tf.Logs[]> {
+	/**
+	 * Trains the AlphaZero model using the provided training memory.
+	 *
+	 * @param trainingMemory - The training memory containing encoded states, policy targets, and value targets.
+	 * @param batchSize - The size of each training batch.
+	 * @param numEpochs - The number of training epochs.
+	 * @param learningRate - The learning rate for the training.
+	 * @param logMessage - Optional callback function for logging messages during training.
+	 * @returns A promise that resolves to an array of training logs.
+	 */
+	private async train({
+		trainingMemory,
+		batchSize,
+		numEpochs,
+		learningRate,
+		logMessage = console.log,
+	}: {
+		trainingMemory: TrainingMemory;
+		batchSize: number;
+		numEpochs: number;
+		learningRate: number;
+		logMessage?: LogMessage;
+	}): Promise<tf.Logs[]> {
 		// Convert the memory to a format that can be used to train the model
-		const { encodedStates, policyTargets, valueTargets } =
-			this.transposeMemory(memory);
-
-		// Convert the memory into tensors
+		const { encodedStates, policyTargets, valueTargets } = trainingMemory;
 		const encodedStatesTensor = tf.tensor(encodedStates) as tf.Tensor4D;
 		const policyTargetsTensor = tf.tensor(policyTargets) as tf.Tensor2D;
+		//TODO: Check if this reshape is necessary
 		const valueTargetsTensor = tf
 			.tensor(valueTargets)
 			.reshape([-1, 1]) as tf.Tensor2D;
 
 		// Train the model
-		const trainingLog = await this.resNet.train(
-			encodedStatesTensor,
-			policyTargetsTensor,
-			valueTargetsTensor,
+		const trainingLog = await this.resNet.train({
+			inputsBatch: encodedStatesTensor,
+			policyOutputsBatch: policyTargetsTensor,
+			valueOutputsBatch: valueTargetsTensor,
 			batchSize,
 			numEpochs,
-			learningRate
-		);
+			learningRate,
+			validationSplit: 0.1,
+			logMessage,
+		});
 
 		// Dispose the tensors
 		tf.dispose([encodedStatesTensor, policyTargetsTensor, valueTargetsTensor]);
@@ -175,18 +192,25 @@ export default class AlphaZero {
 	}
 
 	// Train the model multiple times
-	public async learn(
-		fileSystemProtocol: string,
-		logMessage: LogMessage = console.log,
-		targetPath: string,
-		numSelfPlayIterations: number,
-		trainModelParams: TrainModelParams,
-		trainingMemoryArray?: TrainingMemory[]
-	): Promise<void> {
+	public async learn({
+		fileSystemProtocol,
+		logMessage = console.log,
+		targetPath,
+		numSelfPlayIterations,
+		trainModelParams,
+		trainingMemoryArray,
+	}: {
+		fileSystemProtocol: string;
+		logMessage: LogMessage;
+		targetPath: string;
+		numSelfPlayIterations: number;
+		trainModelParams: TrainModelParams;
+		trainingMemoryArray?: TrainingMemory[];
+	}): Promise<void> {
 		logMessage("=-=-=-=-=-=-=-= AlphaZero LEARNING =-=-=-=-=-=-=-=");
 
 		for (let i = 0; i < trainModelParams.numIterations; i++) {
-			// console.log(`ITERATION ${i + 1}/${trainModelParams.numIterations}`);
+			logMessage(`ITERATION ${i + 1}/${trainModelParams.numIterations}`);
 			// let memory;
 			// if (
 			// 	typeof trainingMemoryArray === "undefined" ||

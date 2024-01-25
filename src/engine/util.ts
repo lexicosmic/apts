@@ -38,8 +38,8 @@ function getMaskedPrediction(
 	});
 }
 
-// Returns the action probabilities as a Tensor
-function getProbabilities(policy: tf.Tensor1D): tf.Tensor1D {
+// Returns the action probabilities from a policy Tensor as another Tensor
+function getProbabilitiesFromPolicy(policy: tf.Tensor1D): tf.Tensor1D {
 	return tf.tidy(() => {
 		const sum = policy.sum();
 		return policy.div(sum);
@@ -47,7 +47,7 @@ function getProbabilities(policy: tf.Tensor1D): tf.Tensor1D {
 }
 
 // Returns the action as a common integer
-function getActionFromProbabilities(probabilities: tf.Tensor1D): Action {
+export function getActionFromProbabilities(probabilities: tf.Tensor1D): Action {
 	return tf.tidy(() => {
 		return tf
 			.multinomial(probabilities, 1, undefined, true)
@@ -100,7 +100,7 @@ function getPredictionDataFromState(
 		if (desiredData.policy) data.policy = policy;
 		if (desiredData.value) data.value = value;
 		if (desiredData.probabilities || desiredData.action) {
-			const probabilities = getProbabilities(policy);
+			const probabilities = getProbabilitiesFromPolicy(policy);
 			if (desiredData.probabilities) data.probabilities = probabilities;
 			if (desiredData.action)
 				data.action = getActionFromProbabilities(probabilities);

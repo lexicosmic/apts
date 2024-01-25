@@ -89,17 +89,37 @@ export default class ResNet {
 		trainingLog.push(logs);
 	}
 
-	// Trains the model on the given batch of data
-	public async train(
-		inputsBatch: tf.Tensor4D,
-		policyOutputsBatch: tf.Tensor2D,
-		valueOutputsBatch: tf.Tensor2D,
-		batchSize: number,
-		numEpochs: number,
-		learningRate: number,
-		validationSplit: number = 0.15,
-		logMessage: LogMessage = console.log
-	) {
+	/**
+	 * Trains the model using the provided batch of data.
+	 * @param inputsBatch - The batch of input tensors.
+	 * @param policyOutputsBatch - The batch of policy output tensors.
+	 * @param valueOutputsBatch - The batch of value output tensors.
+	 * @param batchSize - The size of each training batch.
+	 * @param numEpochs - The number of training epochs.
+	 * @param learningRate - The learning rate for the optimizer.
+	 * @param validationSplit - The percentage of data to use for validation.
+	 * @param logMessage - The function to use for logging progress (optional, default is console.log).
+	 * @returns A promise that resolves to an array of training logs.
+	 */
+	public async train({
+		inputsBatch,
+		policyOutputsBatch,
+		valueOutputsBatch,
+		batchSize,
+		numEpochs,
+		learningRate,
+		validationSplit,
+		logMessage = console.log,
+	}: {
+		inputsBatch: tf.Tensor4D;
+		policyOutputsBatch: tf.Tensor2D;
+		valueOutputsBatch: tf.Tensor2D;
+		batchSize: number;
+		numEpochs: number;
+		learningRate: number;
+		validationSplit: number;
+		logMessage?: LogMessage;
+	}): Promise<tf.Logs[]> {
 		const trainingLog: tf.Logs[] = [];
 		this.compile(learningRate);
 
@@ -110,16 +130,16 @@ export default class ResNet {
 			batchSize: batchSize, // Update weights after every N examples.
 			epochs: numEpochs, // Go over the data N times!
 			callbacks: {
-				onEpochEnd: (epoch, logs) =>
-					this.logProgress(logMessage, epoch, logs!, trainingLog),
+				onEpochEnd: (epoch, logs) => {
+					if (logs !== undefined)
+						this.logProgress(logMessage, epoch, logs, trainingLog);
+				},
 			},
 		});
 
-		// // Dispose the tensors
-		// tf.dispose([inputsBatch, policyOutputsBatch, valueOutputsBatch]);
-
 		return trainingLog;
 
+		//TODO: Fix this test
 		// // Test the model
 		// tf.tidy(() => {
 		// 	this.evaluate(
@@ -149,6 +169,7 @@ export default class ResNet {
 		// });
 	}
 
+	//TODO: Fix this test
 	// Evaluates the model on the given batch of data
 	private evaluate(inputsBatch: tf.Tensor4D) {
 		let answer = tf.tidy(() => {

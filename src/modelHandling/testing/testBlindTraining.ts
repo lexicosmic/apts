@@ -26,16 +26,16 @@ export default async function testBlindTraining({
 	logMessage("Model saved!\n");
 
 	logMessage("Training model...");
-	await resNet.train(
-		inputsTensor,
-		outputPolicyTensor,
-		outputValueTensor,
-		1,
-		30,
-		0.001,
-		0,
-		logMessage
-	);
+	await resNet.train({
+		inputsBatch: inputsTensor,
+		policyOutputsBatch: outputPolicyTensor,
+		valueOutputsBatch: outputValueTensor,
+		batchSize: 1,
+		numEpochs: 30,
+		learningRate: 0.001,
+		validationSplit: 0,
+		logMessage,
+	});
 	logMessage("Model trained!");
 
 	logMessage("\nSaving model after training...");

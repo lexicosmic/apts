@@ -18,11 +18,28 @@ import AlphaZero from "../../engine/AlphaZero.js";
 
 interface BuildTrainingMemoryParams extends TrainingFunctionParams {
 	resNet: ResNet;
+	numSearches: number;
+	explorationConstant: number;
 }
 export default async function buildTrainingMemory({
 	logMessage,
 	game,
 	resNet,
+	numSearches,
+	explorationConstant,
 }: BuildTrainingMemoryParams) {
-	const alphaZeroTraining = new AlphaZero(game, resNet);
+	const alphaZeroTraining = new AlphaZero(
+		game,
+		resNet,
+		numSearches,
+		explorationConstant
+	);
+
+	const { encodedStates, policyTargets, valueTargets } =
+		await alphaZeroTraining.buildTrainingMemory({
+			numSelfPlayIterations: 1,
+			progressStep: 50,
+			showMemorySize: true,
+			logMessage,
+		});
 }
