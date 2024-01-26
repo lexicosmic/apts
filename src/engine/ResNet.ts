@@ -1,6 +1,6 @@
 import * as tf from "@tensorflow/tfjs";
 import { LogMessage, ModelType } from "../types.js";
-import { CRUDModels } from "../database.js";
+import { DBOperations_Models } from "../database.js";
 import Game from "./Game.js";
 
 const INPUT_CHANNELS = 3;
@@ -41,8 +41,9 @@ export default class ResNet {
 
 	// Saves the model to the given path, and returns a promise
 	public save(protocol: string, modelType: ModelType, innerPath: string = "") {
-		const path = `models/${this.game.getName()}/${modelType}${innerPath}`;
-		CRUDModels.add({
+		const path = `/${this.game.getName()}/${modelType}${innerPath}`;
+		DBOperations_Models.add({
+			name: path,
 			path: path,
 			game: this.game.getName(),
 			type: modelType,

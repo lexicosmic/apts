@@ -1,7 +1,7 @@
 import * as tf from "@tensorflow/tfjs";
 import ResNet from "../../engine/ResNet.js";
 import { TrainingFunctionParams } from "../../types.js";
-import AlphaZero from "../../engine/AlphaZero.js";
+import AlphaZero, { TrainingMemory } from "../../engine/AlphaZero.js";
 
 // const game = gameParams.game;
 // const path = `file://models/${gameParams.mainModelDirectory}/model.json`;
@@ -35,11 +35,10 @@ export default async function buildTrainingMemory({
 		explorationConstant
 	);
 
-	const { encodedStates, policyTargets, valueTargets } =
-		await alphaZeroTraining.buildTrainingMemory({
-			numSelfPlayIterations: 1,
-			progressStep: 50,
-			showMemorySize: true,
-			logMessage,
-		});
+	const trainingMemory = await alphaZeroTraining.buildTrainingMemory({
+		numSelfPlayIterations: 1,
+		progressStep: 50,
+		showMemorySize: true,
+		logMessage,
+	});
 }

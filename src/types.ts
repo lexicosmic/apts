@@ -68,4 +68,5 @@ export type ModelInfo = {
 	path: string;
 	game: GameName;
 	type: ModelType;
+	name: string;
 };

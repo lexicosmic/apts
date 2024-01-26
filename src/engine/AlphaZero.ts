@@ -12,7 +12,7 @@ type GameMemoryBlock = {
 };
 type GameMemory = GameMemoryBlock[];
 
-type TrainingMemory = {
+export type TrainingMemory = {
 	encodedStates: EncodedState[];
 	policyTargets: number[][];
 	valueTargets: ActionOutcome["value"][];

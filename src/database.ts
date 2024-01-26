@@ -1,3 +1,4 @@
+import { TrainingMemory } from "./engine/AlphaZero";
 import { GameName, ModelInfo, ModelType } from "./types";
 
 const idxdb = window.indexedDB;
@@ -10,6 +11,7 @@ if (!idxdb) {
 
 enum Store {
 	Models = "models",
+	Memory = "memory",
 }
 
 // openRequest.onsuccess = function (event) {
@@ -41,16 +43,21 @@ function connect(functionToRun: (db: IDBDatabase) => void) {
 
 	openRequest.onupgradeneeded = function () {
 		const db = openRequest.result;
-		const store = db.createObjectStore(Store.Models, {
+		const modelsStore = db.createObjectStore(Store.Models, {
 			keyPath: "path",
 		});
-		store.createIndex("game", "game", { unique: false });
+		modelsStore.createIndex("game", "game", { unique: false });
 		// store.createIndex("game_type", ["game", "type"], {
 		// 	unique: false,
 		// });
 		// store.createIndex("game_type_path", ["game", "type", "path"], {
 		// 	unique: true,
 		// });
+		const memoryStore = db.createObjectStore(Store.Memory, {
+			keyPath: "id",
+			autoIncrement: true,
+		});
+		memoryStore.createIndex("game", "game", { unique: false });
 	};
 
 	openRequest.onsuccess = function () {
@@ -79,6 +86,14 @@ function addModel(model: ModelInfo) {
 //     });
 // }
 
+function updateModel(model: ModelInfo) {
+	connect(function (db) {
+		const transaction = db.transaction(Store.Models, "readwrite");
+		const store = transaction.objectStore(Store.Models);
+		store.put(model);
+	});
+}
+
 function getAllModelsFromGame(
 	gameName: GameName,
 	callback: (models: ModelInfo[]) => void
@@ -94,7 +109,8 @@ function getAllModelsFromGame(
 	});
 }
 
-export const CRUDModels = {
+export const DBOperations_Models = {
 	add: addModel,
+	update: updateModel,
 	getAllFromGame: getAllModelsFromGame,
 };

@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { ModelInfo } from "../types";
 import { formatGameName } from "../util";
-import { CRUDModels } from "../database";
+import { DBOperations_Models } from "../database";
 import Game from "../engine/Game";
 import Button from "./Button";
 import ModelContainer from "./ModelContainer";
@@ -25,7 +25,7 @@ export default function ManageModels({
 		const callback = (models: ModelInfo[]) => {
 			setModels(models);
 		};
-		CRUDModels.getAllFromGame(game.getName(), callback);
+		DBOperations_Models.getAllFromGame(game.getName(), callback);
 	}, []);
 
 	let modelContainers: JSX.Element[] = [];

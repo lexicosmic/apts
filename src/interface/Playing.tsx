@@ -6,7 +6,7 @@ import Game, { Action, Player, State } from "../engine/Game";
 import ResNet from "../engine/ResNet";
 import TerminalPage from "./TerminalPage";
 import Button from "./Button";
-import { getActionFromState } from "../engine/util";
+import { getPredictionDataFromState_Action } from "../engine/util";
 
 interface PlayingProps {
 	game: Game;
@@ -83,7 +83,10 @@ export default function Playing({
 		nextPlayer = nextTurnData.nextPlayer;
 		let nextTurnActions = nextTurnData.nextTurnActions;
 		if (nextTurnActions.length > 0) {
-			const computerAction = getActionFromState(nextState, resNet);
+			const { action: computerAction } = getPredictionDataFromState_Action(
+				nextState,
+				resNet
+			);
 			nextState = performAction(
 				game,
 				nextState,
@@ -111,7 +114,10 @@ export default function Playing({
 		let nextPlayer = currentPlayer;
 		let nextTurnActions = getValidActions(state);
 		while (nextTurnActions.length > 0) {
-			const computerAction = getActionFromState(state, resNet);
+			const { action: computerAction } = getPredictionDataFromState_Action(
+				state,
+				resNet
+			);
 			nextState = performAction(
 				game,
 				nextState,
