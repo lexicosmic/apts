@@ -1,16 +1,18 @@
-import Button from "./Button";
+import Button, { ButtonProps } from "./Button";
 
-interface Option {
+export interface ButtonGroupOption {
 	name: string;
+	color?: ButtonProps["color"];
 	handleClick: () => void;
 }
 
 interface ButtonGroupProps {
-	options: Option[];
+	options: ButtonGroupOption[];
 }
 export default function ButtonGroup({ options }: ButtonGroupProps) {
 	const buttons = options.map((option, index) => (
 		<Button
+			color={option.color}
 			onClick={option.handleClick}
 			key={`${index}_${option.name}`}
 			className={`text-lg px-2`}

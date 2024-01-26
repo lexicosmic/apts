@@ -21,11 +21,15 @@ export default function ManageModels({
 }: ManageModelsProps) {
 	const [models, setModels] = useState<ModelInfo[]>([]);
 
-	useEffect(() => {
+	function getModels() {
 		const callback = (models: ModelInfo[]) => {
 			setModels(models);
 		};
 		DBOperations_Models.getAllFromGame(game.getName(), callback);
+	}
+
+	useEffect(() => {
+		getModels();
 	}, []);
 
 	let modelContainers: JSX.Element[] = [];
@@ -40,6 +44,7 @@ export default function ManageModels({
 					setSelectedModel={setSelectedModel}
 					selected={isSelected}
 					key={`model-container-${model.path}`}
+					updateModels={getModels}
 				/>
 			);
 			if (isSelected) modelContainers.unshift(modelContainer);

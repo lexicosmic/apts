@@ -3,25 +3,35 @@ import { ModelInfo } from "../types";
 import { capitalizeFirstLetter } from "../util";
 import Button from "./Button";
 import { DBOperations_Models } from "../database";
+import { ConfirmExclusionModal } from "./Modal";
 
 interface ModelContainerProps {
 	model: ModelInfo;
-	setSelectedModel: (model: ModelInfo) => void;
+	setSelectedModel: (model: ModelInfo | null) => void;
 	selected?: boolean;
+	updateModels: () => void;
 }
 
 export default function ModelContainer({
 	model,
 	setSelectedModel,
 	selected = false,
+	updateModels,
 }: ModelContainerProps) {
 	const [isEditing, setIsEditing] = useState(false);
 	const [updatedName, setUpdatedName] = useState(model.name);
+	const [isDeleting, setIsDeleting] = useState(false);
 
 	function editModel() {
 		model.name = updatedName;
 		DBOperations_Models.update(model);
 		setIsEditing(false);
+	}
+
+	function deleteModel() {
+		setSelectedModel(null);
+		DBOperations_Models.remove(model.path);
+		updateModels();
 	}
 
 	return (
@@ -149,7 +159,7 @@ export default function ModelContainer({
 						</Button>
 						<Button
 							color={`red`}
-							onClick={() => deleteModel(model)}
+							onClick={() => setIsDeleting(true)}
 							aria-label={`Delete model`}
 						>
 							<svg
@@ -166,14 +176,18 @@ export default function ModelContainer({
 					</>
 				)}
 			</div>
+			{isDeleting && (
+				<ConfirmExclusionModal
+					id={`deleting_${model.path}`}
+					entityName={`this model`}
+					confirm={() => deleteModel()}
+					cancel={() => setIsDeleting(false)}
+				/>
+			)}
 		</section>
 	);
 }
 
 function downloadModel(model: ModelInfo) {
 	console.log("Downloading", model);
-}
-
-function deleteModel(model: ModelInfo) {
-	console.log("Deleting", model);
 }

@@ -3,10 +3,18 @@ import { GameName, ModelInfo, ModelType } from "./types";
 
 const idxdb = window.indexedDB;
 
-let transaction: IDBTransaction | null = null;
-
 if (!idxdb) {
 	console.log("IndexedDB could not be found in this browser.");
+}
+
+enum Database {
+	Aptsdb = "aptsdb",
+	Tensorflowjs = "tensorflowjs",
+}
+
+enum TFStore {
+	Models = "models_store",
+	ModelsInfo = "model_info_store",
 }
 
 enum Store {
@@ -14,35 +22,33 @@ enum Store {
 	Memory = "memory",
 }
 
-// openRequest.onsuccess = function (event) {
-// const db = openRequest.result;
-// const transaction = db.transaction("models", "readwrite");
-// const store = transaction.objectStore("models");
-// const gameIndex = store.index("game");
-// store.put({ game: "TicTacToe", training_type: "blind" });
-// // const idQuery = store.get(4);
-// const gameQuery = gameIndex.getAll(["TicTacToe"]);
-// // idQuery.onsuccess = function () {
-// // 	console.log("ID Query: ", idQuery.result);
-// // };
-// gameQuery.onsuccess = function () {
-// 	console.log("Game Query", gameQuery.result);
-// };
-// transaction.oncomplete = function () {
-// 	db.close();
-// };
-// };
-
-function connect(functionToRun: (db: IDBDatabase) => void) {
-	const openRequest = idxdb.open("aptsdb", 1);
+function connect(
+	databaseName: string,
+	functionToRun: (db: IDBDatabase) => void,
+	onupgradeneeded?: (db: IDBDatabase) => void,
+	version: number = 1
+) {
+	const openRequest = idxdb.open(databaseName, version);
 
 	openRequest.onerror = function (event) {
 		console.log("An error occurred when connecting to IndexedDB");
 		console.error(event);
 	};
 
-	openRequest.onupgradeneeded = function () {
+	if (onupgradeneeded)
+		openRequest.onupgradeneeded = function () {
+			const db = openRequest.result;
+			onupgradeneeded(db);
+		};
+
+	openRequest.onsuccess = function () {
 		const db = openRequest.result;
+		functionToRun(db);
+	};
+}
+
+function connectToAptsdb(functionToRun: (db: IDBDatabase) => void) {
+	function onupgradeneeded(db: IDBDatabase) {
 		const modelsStore = db.createObjectStore(Store.Models, {
 			keyPath: "path",
 		});
@@ -58,24 +64,46 @@ function connect(functionToRun: (db: IDBDatabase) => void) {
 			autoIncrement: true,
 		});
 		memoryStore.createIndex("game", "game", { unique: false });
-	};
-
-	openRequest.onsuccess = function () {
-		const db = openRequest.result;
-		functionToRun(db);
-	};
+	}
+	connect(Database.Aptsdb, functionToRun, onupgradeneeded, 1);
 }
 
 function addModel(model: ModelInfo) {
-	connect(function (db) {
+	connectToAptsdb(function (db) {
 		const transaction = db.transaction(Store.Models, "readwrite");
 		const store = transaction.objectStore(Store.Models);
 		store.add(model);
 	});
 }
 
+function updateModel(model: ModelInfo) {
+	connectToAptsdb(function (db) {
+		const transaction = db.transaction(Store.Models, "readwrite");
+		const store = transaction.objectStore(Store.Models);
+		store.put(model);
+	});
+}
+
+function removeModel(path: string) {
+	connectToAptsdb(function (db) {
+		const transaction = db.transaction(Store.Models, "readwrite");
+		const store = transaction.objectStore(Store.Models);
+		store.delete(path);
+	});
+	connect(Database.Tensorflowjs, function (db) {
+		const transaction = db.transaction(TFStore.ModelsInfo, "readwrite");
+		const store = transaction.objectStore(TFStore.ModelsInfo);
+		store.delete(path);
+	});
+	connect(Database.Tensorflowjs, function (db) {
+		const transaction = db.transaction(TFStore.Models, "readwrite");
+		const store = transaction.objectStore(TFStore.Models);
+		store.delete(path);
+	});
+}
+
 // function getModel(game: string, type: string, callback: (model: Model) => void) {
-//     connect(function (db) {
+//     connectToAptsdb(function (db) {
 //         const transaction = db.transaction(Store.Models, "readonly");
 //         const store = transaction.objectStore(Store.Models);
 //         const index = store.index("game_type");
@@ -86,19 +114,11 @@ function addModel(model: ModelInfo) {
 //     });
 // }
 
-function updateModel(model: ModelInfo) {
-	connect(function (db) {
-		const transaction = db.transaction(Store.Models, "readwrite");
-		const store = transaction.objectStore(Store.Models);
-		store.put(model);
-	});
-}
-
 function getAllModelsFromGame(
 	gameName: GameName,
 	callback: (models: ModelInfo[]) => void
 ) {
-	connect(function (db) {
+	connectToAptsdb(function (db) {
 		const transaction = db.transaction(Store.Models, "readonly");
 		const store = transaction.objectStore(Store.Models);
 		const index = store.index("game");
@@ -112,5 +132,6 @@ function getAllModelsFromGame(
 export const DBOperations_Models = {
 	add: addModel,
 	update: updateModel,
+	remove: removeModel,
 	getAllFromGame: getAllModelsFromGame,
 };

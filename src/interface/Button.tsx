@@ -1,9 +1,10 @@
 import { HTMLAttributes, PropsWithChildren } from "react";
 
-interface ButtonProps {
+export interface ButtonProps {
 	onClick: HTMLAttributes<HTMLButtonElement>["onClick"];
 	color?: ButtonColor;
 	disabled?: boolean;
+	type?: HTMLButtonElement["type"];
 	className?: HTMLAttributes<HTMLButtonElement>["className"];
 }
 
@@ -11,12 +12,14 @@ export default function Button({
 	onClick,
 	color = `indigo`,
 	disabled = false,
+	type = `button`,
 	className = ``,
 	children,
 }: PropsWithChildren<ButtonProps>) {
 	if (disabled) onClick = () => {};
 	return (
 		<button
+			type={type}
 			disabled={disabled}
 			className={`
 				rounded p-1 font-bold
