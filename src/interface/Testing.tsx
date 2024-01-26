@@ -28,6 +28,7 @@ export default function Testing({
 		await testingFunction({
 			logMessage: writeToTerminal,
 			game,
+			fileSystemProtocol: "indexeddb",
 		});
 		setButtonDisabled(false);
 	}

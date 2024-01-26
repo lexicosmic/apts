@@ -33,3 +33,8 @@ export async function loadResNetModel(
 	const resNet = new ResNet(game, { model });
 	callback(resNet);
 }
+
+export async function saveLayersModel(path: string) {
+	const model = await tf.loadLayersModel(`indexeddb://${path}`);
+	await model.save(`downloads://${path}`);
+}

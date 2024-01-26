@@ -151,6 +151,7 @@ export default function Playing({
 
 	function quitPlaying() {
 		setTerminalText("");
+		if (resNet) resNet.dispose();
 		handleReturn();
 	}
 

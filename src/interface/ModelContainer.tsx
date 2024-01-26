@@ -1,8 +1,9 @@
 import { useState } from "react";
+import { saveLayersModel } from "./util";
 import { ModelInfo } from "../types";
 import { capitalizeFirstLetter } from "../util";
-import Button from "./Button";
 import { DBOperations_Models } from "../database";
+import Button from "./Button";
 import { ConfirmExclusionModal } from "./Modal";
 
 interface ModelContainerProps {
@@ -32,6 +33,10 @@ export default function ModelContainer({
 		setSelectedModel(null);
 		DBOperations_Models.remove(model.path);
 		updateModels();
+	}
+
+	async function downloadModel() {
+		saveLayersModel(model.path);
 	}
 
 	return (
@@ -126,7 +131,7 @@ export default function ModelContainer({
 						</Button>
 						<Button
 							color={`indigo`}
-							onClick={() => downloadModel(model)}
+							onClick={() => downloadModel()}
 							aria-label={`Download model`}
 						>
 							<svg
@@ -186,8 +191,4 @@ export default function ModelContainer({
 			)}
 		</section>
 	);
-}
-
-function downloadModel(model: ModelInfo) {
-	console.log("Downloading", model);
 }
