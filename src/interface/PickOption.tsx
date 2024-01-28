@@ -26,7 +26,12 @@ export default function PickOption({
 					</p>
 				)}
 			</header>
-			<ButtonGroup options={actions} />
+			<ButtonGroup
+				options={actions.map(({ name, handleClick }) => ({
+					content: <p>{name}</p>,
+					handleClick,
+				}))}
+			/>
 			{handleReturn && (
 				<footer className={`w-full flex flex-col`}>
 					<Button onClick={handleReturn} key={`return-button`} color={`light`}>

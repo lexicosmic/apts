@@ -6,6 +6,7 @@ export interface ButtonProps {
 	disabled?: boolean;
 	type?: HTMLButtonElement["type"];
 	className?: HTMLAttributes<HTMLButtonElement>["className"];
+	ariaLabel?: React.AriaAttributes["aria-label"];
 }
 
 export default function Button({
@@ -14,6 +15,7 @@ export default function Button({
 	disabled = false,
 	type = `button`,
 	className = ``,
+	ariaLabel,
 	children,
 }: PropsWithChildren<ButtonProps>) {
 	if (disabled) onClick = () => {};
@@ -29,6 +31,9 @@ export default function Button({
 				${className}
 			`}
 			onClick={onClick}
+			{...(ariaLabel && {
+				"aria-label": ariaLabel,
+			})}
 		>
 			{children}
 		</button>

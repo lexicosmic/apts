@@ -8,6 +8,7 @@ import Button from "./Button";
 import ModelContainer from "./ModelContainer";
 import Modal from "./Modal";
 import Icon from "./Icon";
+import ButtonGroup from "./ButtonGroup";
 
 interface ManageModelsProps {
 	game: Game;
@@ -86,26 +87,40 @@ export default function ManageModels({
 					{modelContainers}
 				</div>
 			</section>
-			<footer className={`col-start-2 col-span-1 grid grid-cols-2`}>
-				<Button
-					color={`indigo`}
-					onClick={() => setIsUploadingModel(true)}
-					key={`upload-button`}
-					className={`flex justify-center gap-0.5 flex-grow rounded-r-none`}
-				>
-					<Icon name={`file-earmark-arrow-up`} />
-					<p>Upload</p>
-				</Button>
-				<Button
-					color={`light`}
-					onClick={handleReturn}
-					key={`quit-button`}
-					className={`flex justify-center gap-0.5 flex-grow rounded-l-none`}
-				>
-					<p>Return</p>
-				</Button>
+			<footer className={`col-start-2 col-span-1`}>
+				<ButtonGroup
+					orientation={`horizontal`}
+					options={[
+						{
+							content: (
+								<p className={`flex justify-center gap-0.5`}>
+									<Icon name={`arrow-left-short`} />
+									Return
+								</p>
+							),
+							color: `light`,
+							handleClick: handleReturn,
+						},
+						{
+							content: (
+								<p className={`flex justify-center gap-0.5`}>
+									<Icon name={`file-earmark-arrow-up`} />
+									Upload
+								</p>
+							),
+							color: `indigo`,
+							handleClick: () => setIsUploadingModel(true),
+						},
+					]}
+					className={``}
+				/>
 			</footer>
-			{isUploadingModel && <Modal id={`uploading-file`}></Modal>}
+			{isUploadingModel && (
+				<Modal
+					id={`uploading-file`}
+					close={() => setIsUploadingModel(false)}
+				></Modal>
+			)}
 		</article>
 	);
 }

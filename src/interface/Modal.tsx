@@ -10,8 +10,9 @@ function ModalBase({ id, children }: PropsWithChildren<ModalBaseProps>) {
 		<div
 			id={id}
 			tabIndex={-1}
-			className={`overflow-y-auto overflow-x-hidden fixed top-0 right-0 left-0 z-50
-                        w-full md:inset-0 h-full max-h-full bg-neutral-950 bg-opacity-25
+			className={`overflow-y-hidden overflow-x-hidden fixed top-0 right-0 left-0 z-50
+                        w-full md:inset-0 h-full max-h-full py-2 px-2
+						bg-neutral-950 bg-opacity-25
                         flex justify-center items-center`}
 		>
 			{children}
@@ -30,22 +31,28 @@ export default function Modal({
 }: PropsWithChildren<ModalProps>) {
 	return (
 		<ModalBase id={id}>
-			<div className={`w-full xs:w-auto xs:min-w-88 bg-white rounded p-4 m-2`}>
+			<div
+				className={`overflow-y-scroll w-full max-h-full xs:w-auto xs:min-w-88 p-4 rounded bg-white shadow-md shadow-neutral-900`}
+			>
 				{children}
 				{close && (
-					<button
-						className={`w-full mt-4 p-2 rounded bg-neutral-950 text-white`}
-						onClick={close}
-					>
-						Close
-					</button>
+					<ButtonGroup
+						orientation={`horizontal`}
+						options={[
+							{
+								content: <p>Close</p>,
+								color: `light`,
+								handleClick: close,
+							},
+						]}
+					/>
 				)}
 			</div>
 		</ModalBase>
 	);
 }
 
-interface ConfirmModalProps extends ModalProps {
+interface ConfirmExclusionModalProps extends ModalProps {
 	entityName: string;
 	confirm: () => void;
 	cancel: () => void;
@@ -56,34 +63,30 @@ export function ConfirmExclusionModal({
 	entityName,
 	confirm,
 	cancel,
-}: ConfirmModalProps) {
+}: ConfirmExclusionModalProps) {
 	const actions: ButtonGroupOption[] = [
 		{
-			name: `Yes, I'm sure`,
+			content: <p>Yes, I'm sure</p>,
 			color: `red`,
 			handleClick: confirm,
 		},
 		{
-			name: `No, cancel`,
+			content: <p>No, cancel</p>,
 			color: `light`,
 			handleClick: cancel,
 		},
 	];
 	return (
 		<Modal id={id}>
-			<article
-				className={`w-full flex flex-col gap-2 bg-white rounded p-4 m-2`}
-			>
-				<header className={`text-center`}>
-					<h1 className={`text-4xl`} key={`title`}>
-						Do you want to delete {entityName}?
-					</h1>
-					<p className={`text-2xl font-light`} key={`subtitle`}>
-						This action cannot be undone.
-					</p>
-				</header>
-				<ButtonGroup options={actions} />
-			</article>
+			<header className={`text-center mb-2`}>
+				<h1 className={`text-3xl`} key={`title`}>
+					Do you want to delete {entityName}?
+				</h1>
+				<p className={`text-2xl font-light`} key={`subtitle`}>
+					That action cannot be undone.
+				</p>
+			</header>
+			<ButtonGroup options={actions} />
 		</Modal>
 	);
 }

@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useRef, useState } from "react";
 import { saveLayersModel } from "./util";
 import { ModelInfo } from "../types";
 import { capitalizeFirstLetter } from "../util";
@@ -23,6 +23,8 @@ export default function ModelContainer({
 	const [isEditing, setIsEditing] = useState(false);
 	const [updatedName, setUpdatedName] = useState(model.name);
 	const [isDeleting, setIsDeleting] = useState(false);
+
+	const editNameInput = useRef<HTMLInputElement>(null);
 
 	function editModel() {
 		model.name = updatedName;
@@ -49,6 +51,7 @@ export default function ModelContainer({
 			<div className={`flex flex-col items-baseline gap-1`}>
 				{isEditing ? (
 					<input
+						ref={editNameInput}
 						value={updatedName}
 						onChange={(e) => setUpdatedName(e.target.value)}
 						className={`w-full text-xl font-bold bg-transparent border-b border-black focus:outline-none`}
@@ -71,7 +74,7 @@ export default function ModelContainer({
 						<Button
 							color={`green`}
 							onClick={() => editModel()}
-							aria-label={`Save edit`}
+							ariaLabel={`Save edit`}
 						>
 							<Icon name={`check-lg`} />
 						</Button>
@@ -80,7 +83,7 @@ export default function ModelContainer({
 							onClick={() => {
 								setIsEditing(false);
 							}}
-							aria-label={`Cancel edit`}
+							ariaLabel={`Cancel edit`}
 						>
 							<Icon name={`x-lg`} fontSize={`text-xl`} />
 						</Button>
@@ -92,28 +95,33 @@ export default function ModelContainer({
 							onClick={() => {
 								setSelectedModel(model);
 							}}
-							aria-label={`Select model`}
+							ariaLabel={`Select model`}
 						>
-							<Icon name={`box-arrow-in-up-right`} />
+							<Icon name={`box-arrow-in-up-right`} ariaLabel="Select model" />
 						</Button>
 						<Button
 							color={`indigo`}
 							onClick={() => downloadModel()}
-							aria-label={`Download model`}
+							ariaLabel={`Download model`}
 						>
 							<Icon name={`file-earmark-arrow-down`} />
 						</Button>
 						<Button
 							color={`amber`}
-							onClick={() => setIsEditing(true)}
-							aria-label={`Edit model`}
+							onClick={() => {
+								setIsEditing(true);
+								setTimeout(() => {
+									editNameInput.current?.focus();
+								}, 0);
+							}}
+							ariaLabel={`Edit model`}
 						>
 							<Icon name={`pencil-fill`} fontSize="text-xl" />
 						</Button>
 						<Button
 							color={`red`}
 							onClick={() => setIsDeleting(true)}
-							aria-label={`Delete model`}
+							ariaLabel={`Delete model`}
 						>
 							<Icon name={`trash3-fill`} />
 						</Button>
