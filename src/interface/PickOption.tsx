@@ -15,7 +15,7 @@ export default function PickOption({
 	handleReturn,
 }: PickOptionProps) {
 	return (
-		<article className={`w-max flex flex-col gap-2`}>
+		<article className={`w-full xs:w-max px-2 flex flex-col gap-2`}>
 			<header className={`text-center`}>
 				<h1 className={`text-4xl`} key={`title`}>
 					{title}

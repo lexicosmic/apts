@@ -1,3 +1,4 @@
+import { LayersModel } from "@tensorflow/tfjs";
 import { useEffect, useState } from "react";
 import { ModelInfo } from "../types";
 import { formatGameName } from "../util";
@@ -5,6 +6,8 @@ import { DBOperations_Models } from "../database";
 import Game from "../engine/Game";
 import Button from "./Button";
 import ModelContainer from "./ModelContainer";
+import Modal from "./Modal";
+import Icon from "./Icon";
 
 interface ManageModelsProps {
 	game: Game;
@@ -20,6 +23,7 @@ export default function ManageModels({
 	handleReturn,
 }: ManageModelsProps) {
 	const [models, setModels] = useState<ModelInfo[]>([]);
+	const [isUploadingModel, setIsUploadingModel] = useState(false);
 
 	function getModels() {
 		const callback = (models: ModelInfo[]) => {
@@ -32,6 +36,11 @@ export default function ManageModels({
 		getModels();
 	}, []);
 
+	function handleChange(event: React.ChangeEvent<HTMLInputElement>) {
+		console.log(event);
+	}
+
+	//TODO: Sort models
 	let modelContainers: JSX.Element[] = [];
 	if (models.length > 0) {
 		for (let i = 0; i < models.length; i++) {
@@ -77,11 +86,26 @@ export default function ManageModels({
 					{modelContainers}
 				</div>
 			</section>
-			<footer className={`col-start-2 col-span-1 flex flex-col`}>
-				<Button color={`light`} onClick={handleReturn} key={`quit-button`}>
+			<footer className={`col-start-2 col-span-1 grid grid-cols-2`}>
+				<Button
+					color={`indigo`}
+					onClick={() => setIsUploadingModel(true)}
+					key={`upload-button`}
+					className={`flex justify-center gap-0.5 flex-grow rounded-r-none`}
+				>
+					<Icon name={`file-earmark-arrow-up`} />
+					<p>Upload</p>
+				</Button>
+				<Button
+					color={`light`}
+					onClick={handleReturn}
+					key={`quit-button`}
+					className={`flex justify-center gap-0.5 flex-grow rounded-l-none`}
+				>
 					<p>Return</p>
 				</Button>
 			</footer>
+			{isUploadingModel && <Modal id={`uploading-file`}></Modal>}
 		</article>
 	);
 }
