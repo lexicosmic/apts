@@ -1,9 +1,11 @@
 import { HTMLAttributes } from "react";
+import { FontSize } from "./types";
 import Button, { ButtonProps } from "./Button";
 
 export interface ButtonGroupOption {
 	content: JSX.Element;
 	color?: ButtonProps["color"];
+	fontSize?: FontSize;
 	handleClick: () => void;
 }
 
@@ -22,10 +24,14 @@ export default function ButtonGroup({
 			color={option.color}
 			onClick={option.handleClick}
 			key={`button_${index}`}
-			className={`text-lg flex-grow 
-			${index + 1 < options.length ? `rounded-r-none` : ``} 
-			${index > 0 ? `rounded-l-none` : ``}
-			`}
+			className={`flex-grow 
+						${option.fontSize ? option.fontSize : `text-lg`} 
+						${
+							orientation === "horizontal" && index + 1 < options.length
+								? `rounded-r-none`
+								: ``
+						} 
+						${orientation === "horizontal" && index > 0 ? `rounded-l-none` : ``}`}
 		>
 			{option.content}
 		</Button>

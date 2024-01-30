@@ -61,7 +61,8 @@ export type TestingFunction = ({
 export enum ModelType {
 	Structure = "structure",
 	Blind = "blind",
-	selfPlay = "selfPlay",
+	SelfPlay = "selfPlay",
+	Uploaded = "uploaded",
 }
 
 export type ModelInfo = {

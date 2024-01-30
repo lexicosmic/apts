@@ -68,10 +68,22 @@ function connectToAptsdb(functionToRun: (db: IDBDatabase) => void) {
 	connect(Database.Aptsdb, functionToRun, onupgradeneeded, 1);
 }
 
-function addModel(model: ModelInfo) {
+function addModel(
+	model: ModelInfo,
+	onComplete: () => void,
+	onError: (event: Event) => void
+) {
 	connectToAptsdb(function (db) {
 		const transaction = db.transaction(Store.Models, "readwrite");
 		const store = transaction.objectStore(Store.Models);
+		transaction.oncomplete = function () {
+			onComplete();
+		};
+		transaction.onerror = function (event) {
+			console.log("An error occurred when adding model to IndexedDB");
+			console.error(event);
+			onError(event);
+		};
 		store.add(model);
 	});
 }

@@ -3,9 +3,9 @@ import ButtonGroup, { ButtonGroupOption } from "./ButtonGroup";
 
 interface ModalBaseProps {
 	id: HTMLAttributes<HTMLDivElement>["id"];
+	close: () => void;
 }
-
-function ModalBase({ id, children }: PropsWithChildren<ModalBaseProps>) {
+function ModalBase({ id, close, children }: PropsWithChildren<ModalBaseProps>) {
 	return (
 		<div
 			id={id}
@@ -14,6 +14,9 @@ function ModalBase({ id, children }: PropsWithChildren<ModalBaseProps>) {
                         w-full md:inset-0 h-full max-h-full py-2 px-2
 						bg-neutral-950 bg-opacity-25
                         flex justify-center items-center`}
+			onClick={(event) => {
+				if (event.target === event.currentTarget && close) close();
+			}}
 		>
 			{children}
 		</div>
@@ -21,72 +24,105 @@ function ModalBase({ id, children }: PropsWithChildren<ModalBaseProps>) {
 }
 
 interface ModalProps extends ModalBaseProps {
-	close?: () => void;
+	footer?: JSX.Element;
 }
-
 export default function Modal({
 	id,
 	close,
+	footer,
 	children,
 }: PropsWithChildren<ModalProps>) {
 	return (
-		<ModalBase id={id}>
-			<div
-				className={`overflow-y-scroll w-full max-h-full xs:w-auto xs:min-w-88 p-4 rounded bg-white shadow-md shadow-neutral-900`}
+		<ModalBase id={id} close={close}>
+			<article
+				className={`overflow-y-scroll w-full max-h-full xs:w-auto xs:min-w-88 p-4 rounded text-black bg-white shadow-md shadow-neutral-900`}
 			>
 				{children}
-				{close && (
-					<ButtonGroup
-						orientation={`horizontal`}
-						options={[
-							{
-								content: <p>Close</p>,
-								color: `light`,
-								handleClick: close,
-							},
-						]}
-					/>
+				{footer ? (
+					footer
+				) : (
+					<footer>
+						<ButtonGroup
+							orientation={`horizontal`}
+							options={[
+								{
+									content: <p>Close</p>,
+									color: `light`,
+									handleClick: close,
+								},
+							]}
+						/>
+					</footer>
 				)}
-			</div>
+			</article>
 		</ModalBase>
+	);
+}
+
+interface ModalWithHeaderProps extends ModalProps {
+	title: string;
+	subtitle?: string;
+}
+export function ModalWithHeader({
+	id,
+	close,
+	footer,
+	title,
+	subtitle,
+	children,
+}: PropsWithChildren<ModalWithHeaderProps>) {
+	return (
+		<Modal id={id} close={close} footer={footer}>
+			<header className={`text-center mb-2`}>
+				<h1 className={`text-2xl`} key={`title`}>
+					{title}
+				</h1>
+				{subtitle && (
+					<p className={`text-xl font-light`} key={`subtitle`}>
+						{subtitle}
+					</p>
+				)}
+			</header>
+			{children}
+		</Modal>
 	);
 }
 
 interface ConfirmExclusionModalProps extends ModalProps {
 	entityName: string;
 	confirm: () => void;
-	cancel: () => void;
 }
-
 export function ConfirmExclusionModal({
 	id,
+	close,
 	entityName,
 	confirm,
-	cancel,
 }: ConfirmExclusionModalProps) {
 	const actions: ButtonGroupOption[] = [
 		{
 			content: <p>Yes, I'm sure</p>,
 			color: `red`,
+			fontSize: `text-base`,
 			handleClick: confirm,
 		},
 		{
 			content: <p>No, cancel</p>,
 			color: `light`,
-			handleClick: cancel,
+			fontSize: `text-base`,
+			handleClick: close,
 		},
 	];
 	return (
-		<Modal id={id}>
-			<header className={`text-center mb-2`}>
-				<h1 className={`text-3xl`} key={`title`}>
-					Do you want to delete {entityName}?
-				</h1>
-				<p className={`text-2xl font-light`} key={`subtitle`}>
-					That action cannot be undone.
-				</p>
-			</header>
-			<ButtonGroup options={actions} />
-		</Modal>
+		<ModalWithHeader
+			id={id}
+			title={`Do you want to delete ${entityName}?`}
+			subtitle={`That action cannot be undone.`}
+			close={close}
+			footer={
+				<footer>
+					<ButtonGroup options={actions} />
+				</footer>
+			}
+		/>
 	);
 }

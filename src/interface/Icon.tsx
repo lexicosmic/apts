@@ -1,14 +1,14 @@
-import { HTMLAttributes, PropsWithChildren } from "react";
+import { FontSize } from "./types";
 
 interface IconProps {
 	name: string;
-	fontSize?: "text-xl" | "text-2xl" | "text-3xl" | "text-4xl";
+	fontSize?: FontSize;
 	ariaLabel?: React.AriaAttributes["aria-label"];
 }
 
 export default function Icon({
 	name,
-	fontSize = "text-2xl",
+	fontSize = `text-2xl`,
 	ariaLabel,
 }: IconProps) {
 	return (
@@ -16,7 +16,7 @@ export default function Icon({
 			{...(ariaLabel && {
 				"aria-label": ariaLabel,
 			})}
-			aria-hidden={ariaLabel ? "false" : "true"}
+			aria-hidden={ariaLabel ? `false` : `true`}
 			className={`bi bi-${name} ${fontSize} flex leading-none justify-center items-center aspect-square `}
 		/>
 	);

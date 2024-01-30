@@ -1,14 +1,15 @@
-import { LayersModel } from "@tensorflow/tfjs";
-import { useEffect, useState } from "react";
-import { ModelInfo } from "../types";
+import * as tf from "@tensorflow/tfjs";
+import { useEffect, useRef, useState } from "react";
+import { ModelInfo, ModelType } from "../types";
 import { formatGameName } from "../util";
 import { DBOperations_Models } from "../database";
 import Game from "../engine/Game";
-import Button from "./Button";
 import ModelContainer from "./ModelContainer";
-import Modal from "./Modal";
+import { ModalWithHeader } from "./Modal";
 import Icon from "./Icon";
 import ButtonGroup from "./ButtonGroup";
+import FileInput from "./FileInput";
+import { v4 as uuidv4 } from "uuid";
 
 interface ManageModelsProps {
 	game: Game;
@@ -37,8 +38,46 @@ export default function ManageModels({
 		getModels();
 	}, []);
 
-	function handleChange(event: React.ChangeEvent<HTMLInputElement>) {
-		console.log(event);
+	const topologyInput = useRef<HTMLInputElement>(null);
+	const weightsInput = useRef<HTMLInputElement>(null);
+
+	async function uploadModel(topology: File, weights: File) {
+		if (!topology || topology.type !== `application/json`) {
+			alert(`Invalid topology file!`);
+			return;
+		}
+		if (!weights || weights.type !== `application/octet-stream`) {
+			alert(`Invalid weights file!`);
+			return;
+		}
+		const onError = () => {
+			alert(`Invalid files!`);
+		};
+		try {
+			const path = `${game.getName()}/uploaded/${uuidv4()}`;
+			const layersModel = await tf.loadLayersModel(
+				tf.io.browserFiles([topology, weights])
+			);
+			layersModel.summary();
+			layersModel.save(`indexeddb://${path}`);
+			const modelInfo: ModelInfo = {
+				path: path,
+				game: game.getName(),
+				name: topology.name,
+				type: ModelType.Uploaded,
+			};
+			DBOperations_Models.add(
+				modelInfo,
+				() => {
+					getModels();
+					setIsUploadingModel(false);
+				},
+				onError
+			);
+		} catch {
+			onError();
+			return;
+		}
 	}
 
 	//TODO: Sort models
@@ -94,16 +133,6 @@ export default function ManageModels({
 						{
 							content: (
 								<p className={`flex justify-center gap-0.5`}>
-									<Icon name={`arrow-left-short`} />
-									Return
-								</p>
-							),
-							color: `light`,
-							handleClick: handleReturn,
-						},
-						{
-							content: (
-								<p className={`flex justify-center gap-0.5`}>
 									<Icon name={`file-earmark-arrow-up`} />
 									Upload
 								</p>
@@ -111,15 +140,87 @@ export default function ManageModels({
 							color: `indigo`,
 							handleClick: () => setIsUploadingModel(true),
 						},
+						{
+							content: (
+								<p className={`flex justify-center gap-0.5`}>
+									{/* <Icon name={`arrow-left-short`} /> */}
+									Return
+								</p>
+							),
+							color: `light`,
+							handleClick: handleReturn,
+						},
 					]}
-					className={``}
 				/>
 			</footer>
 			{isUploadingModel && (
-				<Modal
-					id={`uploading-file`}
+				<ModalWithHeader
+					id={`upload-model`}
+					title={`Upload model`}
 					close={() => setIsUploadingModel(false)}
-				></Modal>
+					footer={
+						<footer>
+							<ButtonGroup
+								orientation={`horizontal`}
+								options={[
+									{
+										content: <p>Upload</p>,
+										color: `indigo`,
+										handleClick: () => {
+											if (
+												topologyInput.current?.files &&
+												topologyInput.current.files.length > 0 &&
+												topologyInput.current.files[0] !== null &&
+												topologyInput.current.files[0] !== undefined &&
+												weightsInput.current?.files &&
+												weightsInput.current.files.length > 0 &&
+												weightsInput.current.files[0] !== null &&
+												weightsInput.current.files[0] !== undefined
+											) {
+												uploadModel(
+													topologyInput.current.files[0],
+													weightsInput.current.files[0]
+												);
+											}
+										},
+									},
+									{
+										content: <p>Cancel</p>,
+										color: `light`,
+										handleClick: () => setIsUploadingModel(false),
+									},
+								]}
+							/>
+						</footer>
+					}
+				>
+					<section className={`mb-4`}>
+						<form className={`flex flex-col gap-1`}>
+							<div className={`flex flex-col`}>
+								<label htmlFor={`input-file-topology`}>
+									<p className={`text-lg`}>Topology</p>
+								</label>
+								<FileInput
+									ref={topologyInput}
+									id={`input-file-topology`}
+									name={`topology`}
+									accept={`application/json`}
+								/>
+							</div>
+							<div className={`flex flex-col`}>
+								<label htmlFor={`input-file-weights`}>
+									<p className={`text-lg`}>Weights</p>
+								</label>
+								<FileInput
+									ref={weightsInput}
+									id={`input-file-weights`}
+									name={`weights`}
+									accept={`application/octet-stream`}
+								/>
+							</div>
+						</form>
+					</section>
+				</ModalWithHeader>
 			)}
 		</article>
 	);

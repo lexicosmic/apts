@@ -95,6 +95,7 @@ export default function ModelContainer({
 							onClick={() => {
 								setSelectedModel(model);
 							}}
+							className={`min-w-max`}
 							ariaLabel={`Select model`}
 						>
 							<Icon name={`box-arrow-in-up-right`} ariaLabel="Select model" />
@@ -102,6 +103,7 @@ export default function ModelContainer({
 						<Button
 							color={`indigo`}
 							onClick={() => downloadModel()}
+							className={`min-w-max`}
 							ariaLabel={`Download model`}
 						>
 							<Icon name={`file-earmark-arrow-down`} />
@@ -114,6 +116,7 @@ export default function ModelContainer({
 									editNameInput.current?.focus();
 								}, 0);
 							}}
+							className={`min-w-max`}
 							ariaLabel={`Edit model`}
 						>
 							<Icon name={`pencil-fill`} fontSize="text-xl" />
@@ -121,6 +124,7 @@ export default function ModelContainer({
 						<Button
 							color={`red`}
 							onClick={() => setIsDeleting(true)}
+							className={`min-w-max`}
 							ariaLabel={`Delete model`}
 						>
 							<Icon name={`trash3-fill`} />
@@ -133,7 +137,7 @@ export default function ModelContainer({
 					id={`deleting_${model.path}`}
 					entityName={`this model`}
 					confirm={() => deleteModel()}
-					cancel={() => setIsDeleting(false)}
+					close={() => setIsDeleting(false)}
 				/>
 			)}
 		</section>
