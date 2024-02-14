@@ -1,45 +1,66 @@
 import { useRef, useState } from "react";
-import { saveLayersModel } from "./util";
+import { saveResNetModel } from "./util";
 import { ModelInfo } from "../types";
-import { capitalizeFirstLetter } from "../util";
+import { capitalizeFirstLetter, constructModelPath } from "../util";
 import { DBOperations_Models } from "../database";
 import Button from "./Button";
 import { ConfirmExclusionModal } from "./Modal";
 import Icon from "./Icon";
 
 interface ModelContainerProps {
-	model: ModelInfo;
-	setSelectedModel: (model: ModelInfo | null) => void;
+	modelInfo: ModelInfo;
+	setSelectedModel: (modelInfo: ModelInfo | null) => void;
 	selected?: boolean;
 	updateModels: () => void;
 }
 
 export default function ModelContainer({
-	model,
+	modelInfo,
 	setSelectedModel,
 	selected = false,
 	updateModels,
 }: ModelContainerProps) {
 	const [isEditing, setIsEditing] = useState(false);
-	const [updatedName, setUpdatedName] = useState(model.name);
+	const [updatedName, setUpdatedName] = useState(modelInfo.name);
 	const [isDeleting, setIsDeleting] = useState(false);
+
+	const modelPath = constructModelPath(
+		modelInfo.game,
+		modelInfo.type,
+		modelInfo.innerPath
+	);
 
 	const editNameInput = useRef<HTMLInputElement>(null);
 
 	function editModel() {
-		model.name = updatedName;
-		DBOperations_Models.update(model);
-		setIsEditing(false);
+		if (!updatedName || updatedName === modelInfo.name) {
+			setIsEditing(false);
+			return;
+		}
+
+		modelInfo.name = updatedName;
+		DBOperations_Models.put(
+			modelInfo,
+			() => {
+				setIsEditing(false);
+			},
+			() => {}
+		);
 	}
 
 	function deleteModel() {
 		setSelectedModel(null);
-		DBOperations_Models.remove(model.path);
-		updateModels();
+		DBOperations_Models.delete(
+			modelInfo,
+			() => {
+				updateModels();
+			},
+			() => {}
+		);
 	}
 
 	async function downloadModel() {
-		saveLayersModel(model.path);
+		saveResNetModel(modelInfo);
 	}
 
 	return (
@@ -57,14 +78,16 @@ export default function ModelContainer({
 						className={`w-full text-xl font-bold bg-transparent border-b border-black focus:outline-none`}
 					/>
 				) : (
-					<p className={`text-xl font-bold`}>{model.name}</p>
+					<p className={`text-xl font-bold`}>{modelInfo.name}</p>
 				)}
-				<p className={`font-mono`}>{`${capitalizeFirstLetter(model.type)}`}</p>
+				<p className={`font-mono`}>{`${capitalizeFirstLetter(
+					modelInfo.type
+				)}`}</p>
 			</div>
 			<p
 				className={`col-start-1 row-start-3 text-sm font-mono text-neutral-800 xs:col-span-2`}
 			>
-				{model.path}
+				{modelInfo.innerPath}
 			</p>
 			<div
 				className={`w-fit h-fit ml-auto col-start-2 row-start-1 row-span-3 2xs:row-span-2 gap-1 grid 2xs:grid-rows-2 2xs:grid-cols-2`}
@@ -93,7 +116,7 @@ export default function ModelContainer({
 						<Button
 							color={`light`}
 							onClick={() => {
-								setSelectedModel(model);
+								setSelectedModel(modelInfo);
 							}}
 							className={`min-w-max`}
 							ariaLabel={`Select model`}
@@ -134,7 +157,7 @@ export default function ModelContainer({
 			</div>
 			{isDeleting && (
 				<ConfirmExclusionModal
-					id={`deleting_${model.path}`}
+					id={`deleting_${modelPath}`}
 					entityName={`this model`}
 					confirm={() => deleteModel()}
 					close={() => setIsDeleting(false)}

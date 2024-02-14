@@ -23,7 +23,12 @@ export default async function testResNetStructure({
 	resNet.summary(logMessage);
 	logMessage("Model built!");
 	logMessage("\nSaving model...");
-	await resNet.save(fileSystemProtocol, ModelType.Structure);
+	await resNet.save({
+		protocol: fileSystemProtocol,
+		type: ModelType.Structure,
+		innerPath: "",
+		name: "structure",
+	});
 	logMessage("Model saved!\n");
 
 	// Play a few moves

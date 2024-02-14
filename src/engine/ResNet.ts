@@ -2,6 +2,8 @@ import * as tf from "@tensorflow/tfjs";
 import { LogMessage, ModelType } from "../types.js";
 import { DBOperations_Models } from "../database.js";
 import Game from "./Game.js";
+import { constructModelPath } from "../util.js";
+import { on } from "events";
 
 const INPUT_CHANNELS = 3;
 
@@ -39,16 +41,46 @@ export default class ResNet {
 
 	/// Methods
 
-	// Saves the model to the given path, and returns a promise
-	public save(protocol: string, modelType: ModelType, innerPath: string = "") {
-		const path = `/${this.game.getName()}/${modelType}${innerPath}`;
-		DBOperations_Models.add({
-			name: path,
-			path: path,
-			game: this.game.getName(),
-			type: modelType,
+	// Saves the model to the given path, both on TensorFlow and Proprietary
+	// databases, and returns a promise if the operation was successful.
+	public async save({
+		protocol,
+		type,
+		innerPath,
+		name,
+		onSuccess,
+		onError,
+	}: {
+		protocol: string;
+		type: ModelType;
+		innerPath: string;
+		name: string;
+		onSuccess?: () => void;
+		onError?: () => void;
+	}): Promise<void> {
+		const promise = new Promise<void>((resolve, reject) => {
+			const path = constructModelPath(this.game.getName(), type, innerPath);
+			DBOperations_Models.put(
+				{
+					type,
+					innerPath,
+					name,
+					game: this.game.getName(),
+				},
+				async () => {
+					await this.model.save(`${protocol}://${path}`, {});
+					onSuccess && onSuccess();
+					resolve();
+				},
+				() => {
+					onError
+						? onError()
+						: console.log(`An error occurred while saving the model.`);
+					reject();
+				}
+			);
 		});
-		return this.model.save(`${protocol}://${path}`, {});
+		return promise;
 	}
 
 	// Prints a summary of the model

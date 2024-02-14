@@ -1,14 +1,14 @@
 import * as tf from "@tensorflow/tfjs";
 import { EffectCallback, useRef, useEffect } from "react";
-import { GameName } from "../types";
+import { GameName, ModelInfo, SerializedModel } from "../types";
 import TicTacToeGame from "../engine/games/TicTacToe";
 import ConnectFourGame from "../engine/games/ConnectFour";
 import ResNet from "../engine/ResNet";
 import Game from "../engine/Game";
+import { constructModelPath } from "../util";
 
 export function useOnMountUnsafe(effect: EffectCallback) {
 	const initialized = useRef(false);
-
 	useEffect(() => {
 		if (!initialized.current) {
 			initialized.current = true;
@@ -34,7 +34,36 @@ export async function loadResNetModel(
 	callback(resNet);
 }
 
-export async function saveLayersModel(path: string) {
-	const model = await tf.loadLayersModel(`indexeddb://${path}`);
-	await model.save(`downloads://${path}`);
+// export async function saveLayersModel(path: string) {
+// 	const model = await tf.loadLayersModel(`indexeddb://${path}`);
+// 	await model.save(`downloads://${path}`);
+// }
+
+export async function saveResNetModel(modelInfo: ModelInfo) {
+	const game = loadGame(modelInfo.game);
+	const path = constructModelPath(
+		modelInfo.game,
+		modelInfo.type,
+		modelInfo.innerPath
+	);
+	loadResNetModel(game, path, (loadedModel) => {
+		const serializedModel: SerializedModel = {
+			type: modelInfo.type,
+			innerPath: modelInfo.innerPath,
+			name: modelInfo.name,
+			resNet: loadedModel,
+		};
+		const stringifiedModel = JSON.stringify(serializedModel);
+		const blob = new Blob([stringifiedModel], {
+			type: "application/json",
+		});
+		const url = URL.createObjectURL(blob);
+		const a = document.createElement("a") as HTMLAnchorElement;
+		a.href = url;
+		a.download = `${modelInfo.name}.json`;
+		a.click();
+		URL.revokeObjectURL(url);
+		a.remove();
+		loadedModel.dispose();
+	});
 }

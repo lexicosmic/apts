@@ -1,7 +1,6 @@
-import * as tf from "@tensorflow/tfjs";
 import { useEffect, useRef, useState } from "react";
-import { ModelInfo, ModelType } from "../types";
-import { formatGameName } from "../util";
+import { ModelInfo, SerializedModel } from "../types";
+import { constructModelPath, formatGameName } from "../util";
 import { DBOperations_Models } from "../database";
 import Game from "../engine/Game";
 import ModelContainer from "./ModelContainer";
@@ -9,7 +8,6 @@ import { ModalWithHeader } from "./Modal";
 import Icon from "./Icon";
 import ButtonGroup from "./ButtonGroup";
 import FileInput from "./FileInput";
-import { v4 as uuidv4 } from "uuid";
 
 interface ManageModelsProps {
 	game: Game;
@@ -38,42 +36,64 @@ export default function ManageModels({
 		getModels();
 	}, []);
 
-	const topologyInput = useRef<HTMLInputElement>(null);
-	const weightsInput = useRef<HTMLInputElement>(null);
+	const selectedModelPath = selectedModel
+		? constructModelPath(
+				game.getName(),
+				selectedModel.type,
+				selectedModel.innerPath
+		  )
+		: null;
 
-	async function uploadModel(topology: File, weights: File) {
-		if (!topology || topology.type !== `application/json`) {
-			alert(`Invalid topology file!`);
+	const modelInput = useRef<HTMLInputElement>(null);
+	// const weightsInput = useRef<HTMLInputElement>(null);
+
+	async function uploadModel(modelFile: File) {
+		if (!modelFile || modelFile.type !== `application/json`) {
+			alert(`Invalid model file!`);
 			return;
 		}
-		if (!weights || weights.type !== `application/octet-stream`) {
-			alert(`Invalid weights file!`);
-			return;
-		}
+		// if (!weights || weights.type !== `application/octet-stream`) {
+		// 	alert(`Invalid weights file!`);
+		// 	return;
+		// }
 		const onError = () => {
-			alert(`Invalid files!`);
+			alert(`Invalid file!`);
 		};
 		try {
-			const path = `${game.getName()}/uploaded/${uuidv4()}`;
-			const layersModel = await tf.loadLayersModel(
-				tf.io.browserFiles([topology, weights])
-			);
-			layersModel.summary();
-			layersModel.save(`indexeddb://${path}`);
-			const modelInfo: ModelInfo = {
-				path: path,
-				game: game.getName(),
-				name: topology.name,
-				type: ModelType.Uploaded,
-			};
-			DBOperations_Models.add(
-				modelInfo,
-				() => {
+			// const path = `${game.getName()}/uploaded/${uuidv4()}`;
+			// const layersModel = await tf.loadLayersModel(
+			// 	tf.io.browserFiles([topology, weights])
+			// );
+			// layersModel.summary();
+			// layersModel.save(`indexeddb://${path}`);
+			// const modelInfo: ModelInfo = {
+			// 	path: path,
+			// 	game: game.getName(),
+			// 	name: topology.name,
+			// 	type: ModelType.Uploaded,
+			// };
+			const stringifiedModel = await modelFile.text();
+			const serializedModel = JSON.parse(stringifiedModel) as SerializedModel;
+			serializedModel.resNet.save({
+				protocol: "indexeddb",
+				type: serializedModel.type,
+				innerPath: serializedModel.innerPath,
+				name: serializedModel.name,
+				onError,
+				onSuccess: () => {
 					getModels();
 					setIsUploadingModel(false);
 				},
-				onError
-			);
+			});
+
+			// DBOperations_Models.add(
+			// 	modelInfo,
+			// 	() => {
+			// 		getModels();
+			// 		setIsUploadingModel(false);
+			// 	},
+			// 	onError
+			// );
 		} catch {
 			onError();
 			return;
@@ -85,14 +105,19 @@ export default function ManageModels({
 	if (models.length > 0) {
 		for (let i = 0; i < models.length; i++) {
 			const model = models[i];
+			const modelPath = constructModelPath(
+				game.getName(),
+				model.type,
+				model.innerPath
+			);
 			const isSelected: boolean =
-				selectedModel !== null && model.path === selectedModel.path;
+				selectedModel !== null && modelPath === selectedModelPath;
 			const modelContainer = (
 				<ModelContainer
-					model={model}
+					modelInfo={model}
 					setSelectedModel={setSelectedModel}
 					selected={isSelected}
-					key={`model-container-${model.path}`}
+					key={`model-container-${modelPath}`}
 					updateModels={getModels}
 				/>
 			);
@@ -168,18 +193,18 @@ export default function ManageModels({
 										color: `indigo`,
 										handleClick: () => {
 											if (
-												topologyInput.current?.files &&
-												topologyInput.current.files.length > 0 &&
-												topologyInput.current.files[0] !== null &&
-												topologyInput.current.files[0] !== undefined &&
-												weightsInput.current?.files &&
-												weightsInput.current.files.length > 0 &&
-												weightsInput.current.files[0] !== null &&
-												weightsInput.current.files[0] !== undefined
+												modelInput.current?.files &&
+												modelInput.current.files.length > 0 &&
+												modelInput.current.files[0] !== null &&
+												modelInput.current.files[0] !== undefined
+												// weightsInput.current?.files &&
+												// weightsInput.current.files.length > 0 &&
+												// weightsInput.current.files[0] !== null &&
+												// weightsInput.current.files[0] !== undefined
 											) {
 												uploadModel(
-													topologyInput.current.files[0],
-													weightsInput.current.files[0]
+													modelInput.current.files[0]
+													// weightsInput.current.files[0]
 												);
 											}
 										},
@@ -197,17 +222,17 @@ export default function ManageModels({
 					<section className={`mb-4`}>
 						<form className={`flex flex-col gap-1`}>
 							<div className={`flex flex-col`}>
-								<label htmlFor={`input-file-topology`}>
-									<p className={`text-lg`}>Topology</p>
+								<label htmlFor={`input-file-model`}>
+									<p className={`text-lg`}>Model</p>
 								</label>
 								<FileInput
-									ref={topologyInput}
-									id={`input-file-topology`}
-									name={`topology`}
+									ref={modelInput}
+									id={`input-file-model`}
+									name={`model`}
 									accept={`application/json`}
 								/>
 							</div>
-							<div className={`flex flex-col`}>
+							{/* <div className={`flex flex-col`}>
 								<label htmlFor={`input-file-weights`}>
 									<p className={`text-lg`}>Weights</p>
 								</label>
@@ -215,9 +240,9 @@ export default function ManageModels({
 									ref={weightsInput}
 									id={`input-file-weights`}
 									name={`weights`}
-									accept={`application/octet-stream`}
+									accept={`.bin`}
 								/>
-							</div>
+							</div> */}
 						</form>
 					</section>
 				</ModalWithHeader>

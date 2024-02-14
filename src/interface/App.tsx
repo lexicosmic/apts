@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { GameMode, GameName, ModelInfo, TestingFunction } from "../types";
-import { formatGameName } from "../util";
+import { constructModelPath, formatGameName } from "../util";
 import { loadGame } from "./util";
 import Game from "../engine/Game";
 import testMCTSCommon from "../modelHandling/testing/testMCTSCommon";
@@ -217,7 +217,13 @@ export default function App() {
 							color={`light`}
 						>
 							<p className={`text-lg text-center font-mono`}>
-								{selectedModelInfo ? selectedModelInfo.path : `No loaded model`}
+								{gameName && selectedModelInfo
+									? constructModelPath(
+											gameName,
+											selectedModelInfo.type,
+											selectedModelInfo.innerPath
+									  )
+									: `No loaded model`}
 							</p>
 						</Anchor>
 					</footer>

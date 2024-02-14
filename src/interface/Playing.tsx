@@ -1,12 +1,12 @@
 import { useState } from "react";
 import { GameMode, ModelInfo } from "../types";
-import { formatGameName } from "../util";
 import { loadResNetModel, useOnMountUnsafe } from "./util";
+import { constructModelPath, formatGameName } from "../util";
+import { getPredictionDataFromState_Action } from "../engine/util";
 import Game, { Action, Player, State } from "../engine/Game";
 import ResNet from "../engine/ResNet";
 import TerminalPage from "./TerminalPage";
 import Button from "./Button";
-import { getPredictionDataFromState_Action } from "../engine/util";
 
 interface PlayingProps {
 	game: Game;
@@ -28,11 +28,17 @@ export default function Playing({
 	const [resNet, setResNet] = useState<ResNet | null>(null);
 
 	useOnMountUnsafe(() => {
-		if (modelInfo !== null)
-			loadResNetModel(game, modelInfo.path, (loadedModel) => {
+		if (modelInfo !== null) {
+			const modelPath = constructModelPath(
+				modelInfo.game,
+				modelInfo.type,
+				modelInfo.innerPath
+			);
+			loadResNetModel(game, modelPath, (loadedModel) => {
 				setResNet(loadedModel);
 				if (gameMode === GameMode.CvC) playCvCGame(loadedModel);
 			});
+		}
 		startGame();
 	});
 

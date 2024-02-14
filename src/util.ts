@@ -9,3 +9,11 @@ export function formatGameName(gameName: GameName) {
 export function capitalizeFirstLetter(str: string) {
 	return str.charAt(0).toUpperCase() + str.slice(1);
 }
+
+export function constructModelPath(
+	gameName: GameName,
+	type: string,
+	innerPath: string
+) {
+	return `/${gameName}/${type}${innerPath}`;
+}

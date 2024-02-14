@@ -1,4 +1,5 @@
 import Game from "./engine/Game";
+import ResNet from "./engine/ResNet";
 
 /// Common
 export enum GameName {
@@ -66,8 +67,15 @@ export enum ModelType {
 }
 
 export type ModelInfo = {
-	path: string;
 	game: GameName;
 	type: ModelType;
+	innerPath: string;
 	name: string;
+};
+
+export type SerializedModel = {
+	type: ModelType;
+	innerPath: string;
+	name: string;
+	resNet: ResNet;
 };

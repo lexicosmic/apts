@@ -22,7 +22,12 @@ export default async function testBlindTraining({
 
 	logMessage("Saving model before training...");
 	let innerPath = `/beforeTrain`;
-	await resNet.save(fileSystemProtocol, ModelType.Blind, innerPath);
+	await resNet.save({
+		protocol: fileSystemProtocol,
+		type: ModelType.Blind,
+		innerPath,
+		name: "beforeTrain",
+	});
 	logMessage("Model saved!\n");
 
 	logMessage("Training model...");
@@ -40,7 +45,12 @@ export default async function testBlindTraining({
 
 	logMessage("\nSaving model after training...");
 	innerPath = `/afterTrain`;
-	await resNet.save(fileSystemProtocol, ModelType.Blind, innerPath);
+	await resNet.save({
+		protocol: fileSystemProtocol,
+		type: ModelType.Blind,
+		innerPath,
+		name: "afterTrain",
+	});
 	logMessage("Model saved!");
 
 	inputsTensor.dispose();

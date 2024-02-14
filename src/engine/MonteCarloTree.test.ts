@@ -7,18 +7,14 @@ import Game from "./games/TicTacToe.js";
 
 describe("MonteCarloTreeSearch", () => {
 	let game: Game;
-	let model: ResNet;
+	let resNet: ResNet;
 	let params: MonteCarloTreeSearchParams;
 	let monteCarloTreeSearch: MonteCarloTreeSearch;
 
 	beforeEach(() => {
 		game = new TicTacToeGame(3, 3);
-		model = new ResNet(game, { numResBlocks: 4, numHiddenChannels: 64 });
-		params = {
-			numSearches: 100,
-			explorationConstant: 1.0,
-		};
-		monteCarloTreeSearch = new MonteCarloTreeSearch(game, model, params);
+		resNet = new ResNet(game, { numResBlocks: 4, numHiddenChannels: 64 });
+		monteCarloTreeSearch = new MonteCarloTreeSearch(game, resNet, 100, 1);
 	});
 
 	// Add test cases for MonteCarloNode methods here

@@ -1,5 +1,6 @@
 import { TrainingMemory } from "./engine/AlphaZero";
-import { GameName, ModelInfo, ModelType } from "./types";
+import { GameName, ModelInfo } from "./types";
+import { constructModelPath } from "./util";
 
 const idxdb = window.indexedDB;
 
@@ -8,7 +9,7 @@ if (!idxdb) {
 }
 
 enum Database {
-	Aptsdb = "aptsdb",
+	AptsDB = "aptsdb",
 	Tensorflowjs = "tensorflowjs",
 }
 
@@ -47,10 +48,10 @@ function connect(
 	};
 }
 
-function connectToAptsdb(functionToRun: (db: IDBDatabase) => void) {
+function connectToAptsDB(functionToRun: (db: IDBDatabase) => void) {
 	function onupgradeneeded(db: IDBDatabase) {
 		const modelsStore = db.createObjectStore(Store.Models, {
-			keyPath: "path",
+			keyPath: ["game", "type", "innerPath"],
 		});
 		modelsStore.createIndex("game", "game", { unique: false });
 		// store.createIndex("game_type", ["game", "type"], {
@@ -65,15 +66,15 @@ function connectToAptsdb(functionToRun: (db: IDBDatabase) => void) {
 		});
 		memoryStore.createIndex("game", "game", { unique: false });
 	}
-	connect(Database.Aptsdb, functionToRun, onupgradeneeded, 1);
+	connect(Database.AptsDB, functionToRun, onupgradeneeded, 1);
 }
 
-function addModel(
+async function addModel(
 	model: ModelInfo,
 	onComplete: () => void,
 	onError: (event: Event) => void
 ) {
-	connectToAptsdb(function (db) {
+	connectToAptsDB(function (db) {
 		const transaction = db.transaction(Store.Models, "readwrite");
 		const store = transaction.objectStore(Store.Models);
 		transaction.oncomplete = function () {
@@ -88,34 +89,92 @@ function addModel(
 	});
 }
 
-function updateModel(model: ModelInfo) {
-	connectToAptsdb(function (db) {
+function putModel(
+	model: ModelInfo,
+	onComplete: (() => Promise<void>) | (() => void),
+	onError: (event: Event) => void
+) {
+	connectToAptsDB(function (db) {
 		const transaction = db.transaction(Store.Models, "readwrite");
 		const store = transaction.objectStore(Store.Models);
+		transaction.oncomplete = async function () {
+			await onComplete();
+		};
+		transaction.onerror = function (event) {
+			console.log("An error occurred when updating model in IndexedDB");
+			console.error(event);
+			onError(event);
+		};
 		store.put(model);
 	});
 }
 
-function removeModel(path: string) {
-	connectToAptsdb(function (db) {
-		const transaction = db.transaction(Store.Models, "readwrite");
-		const store = transaction.objectStore(Store.Models);
-		store.delete(path);
-	});
-	connect(Database.Tensorflowjs, function (db) {
-		const transaction = db.transaction(TFStore.ModelsInfo, "readwrite");
-		const store = transaction.objectStore(TFStore.ModelsInfo);
-		store.delete(path);
-	});
-	connect(Database.Tensorflowjs, function (db) {
-		const transaction = db.transaction(TFStore.Models, "readwrite");
-		const store = transaction.objectStore(TFStore.Models);
-		store.delete(path);
-	});
+function deleteModel(
+	model: ModelInfo,
+	onComplete: () => void,
+	onError: (event: Event) => void
+) {
+	const path = constructModelPath(model.game, model.type, model.innerPath);
+
+	function deleteFromAptsModels() {
+		connectToAptsDB(function (db) {
+			const transaction = db.transaction(Store.Models, "readwrite");
+			transaction.onerror = function (event) {
+				console.log(
+					`An error occurred when deleting model from IndexedDB on ${Database.AptsDB}:${Store.Models}`
+				);
+				console.error(event);
+				onError(event);
+			};
+			transaction.oncomplete = function () {
+				deleteFromTFModelsInfo();
+			};
+			const store = transaction.objectStore(Store.Models);
+			store.delete([model.game, model.type, model.innerPath]);
+		});
+	}
+
+	function deleteFromTFModelsInfo() {
+		connect(Database.Tensorflowjs, function (db) {
+			const transaction = db.transaction(TFStore.ModelsInfo, "readwrite");
+			transaction.onerror = function (event) {
+				console.log(
+					`An error occurred when deleting model from IndexedDB on ${Database.Tensorflowjs}:${TFStore.ModelsInfo}`
+				);
+				console.error(event);
+				onError(event);
+			};
+			transaction.oncomplete = function () {
+				deleteFromTFModels();
+			};
+			const store = transaction.objectStore(TFStore.ModelsInfo);
+			store.delete(path);
+		});
+	}
+
+	function deleteFromTFModels() {
+		connect(Database.Tensorflowjs, function (db) {
+			const transaction = db.transaction(TFStore.Models, "readwrite");
+			transaction.onerror = function (event) {
+				console.log(
+					`An error occurred when deleting model from IndexedDB on ${Database.Tensorflowjs}:${TFStore.Models}`
+				);
+				console.error(event);
+				onError(event);
+			};
+			transaction.oncomplete = function () {
+				onComplete();
+			};
+			const store = transaction.objectStore(TFStore.Models);
+			store.delete(path);
+		});
+	}
+
+	deleteFromAptsModels();
 }
 
 // function getModel(game: string, type: string, callback: (model: Model) => void) {
-//     connectToAptsdb(function (db) {
+//     connectToAptsDB(function (db) {
 //         const transaction = db.transaction(Store.Models, "readonly");
 //         const store = transaction.objectStore(Store.Models);
 //         const index = store.index("game_type");
@@ -130,7 +189,7 @@ function getAllModelsFromGame(
 	gameName: GameName,
 	callback: (models: ModelInfo[]) => void
 ) {
-	connectToAptsdb(function (db) {
+	connectToAptsDB(function (db) {
 		const transaction = db.transaction(Store.Models, "readonly");
 		const store = transaction.objectStore(Store.Models);
 		const index = store.index("game");
@@ -143,7 +202,7 @@ function getAllModelsFromGame(
 
 export const DBOperations_Models = {
 	add: addModel,
-	update: updateModel,
-	remove: removeModel,
+	put: putModel,
+	delete: deleteModel,
 	getAllFromGame: getAllModelsFromGame,
 };
