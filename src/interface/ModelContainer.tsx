@@ -1,11 +1,11 @@
 import { useRef, useState } from "react";
-import { saveResNetModel } from "./util";
-import { ModelInfo } from "../types";
-import { capitalizeFirstLetter, constructModelPath } from "../util";
+import { ModelInfo, SerializedModel } from "../types";
+import { capitalizeFirstLetter, getFullModelPath } from "../util";
 import { DBOperations_Models } from "../database";
 import Button from "./Button";
 import { ConfirmExclusionModal } from "./Modal";
 import Icon from "./Icon";
+import { exportResNetModel } from "./util";
 
 interface ModelContainerProps {
 	modelInfo: ModelInfo;
@@ -24,7 +24,7 @@ export default function ModelContainer({
 	const [updatedName, setUpdatedName] = useState(modelInfo.name);
 	const [isDeleting, setIsDeleting] = useState(false);
 
-	const modelPath = constructModelPath(
+	const modelPath = getFullModelPath(
 		modelInfo.game,
 		modelInfo.type,
 		modelInfo.innerPath
@@ -37,7 +37,6 @@ export default function ModelContainer({
 			setIsEditing(false);
 			return;
 		}
-
 		modelInfo.name = updatedName;
 		DBOperations_Models.put(
 			modelInfo,
@@ -57,10 +56,6 @@ export default function ModelContainer({
 			},
 			() => {}
 		);
-	}
-
-	async function downloadModel() {
-		saveResNetModel(modelInfo);
 	}
 
 	return (
@@ -125,7 +120,7 @@ export default function ModelContainer({
 						</Button>
 						<Button
 							color={`indigo`}
-							onClick={() => downloadModel()}
+							onClick={() => exportResNetModel(modelInfo)}
 							className={`min-w-max`}
 							ariaLabel={`Download model`}
 						>

@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { TestingFunction } from "../types";
-import { formatGameName } from "../util";
+import { formatGameName, standardFileProtocol } from "../util";
 import { useOnMountUnsafe } from "./util";
 import Game from "../engine/Game";
 import TerminalPage from "./TerminalPage";
@@ -28,7 +28,7 @@ export default function Testing({
 		await testingFunction({
 			logMessage: writeToTerminal,
 			game,
-			fileSystemProtocol: "indexeddb",
+			fileSystemProtocol: standardFileProtocol,
 		});
 		setButtonDisabled(false);
 	}

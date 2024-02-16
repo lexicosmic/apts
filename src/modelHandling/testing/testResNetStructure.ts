@@ -1,5 +1,7 @@
 import * as tf from "@tensorflow/tfjs";
+import { v4 as uuidv4 } from "uuid";
 import { ModelType, TrainingFunctionParams } from "../../types.js";
+import { getFormattedDate, standardFileProtocol } from "../../util.js";
 import {
 	getPredictionDataFromState_Policy_Value_Probabilities_Action,
 	getRandomValidAction,
@@ -9,9 +11,10 @@ import ResNet from "../../engine/ResNet.js";
 export default async function testResNetStructure({
 	logMessage,
 	game,
-	fileSystemProtocol = "indexeddb",
+	fileSystemProtocol = standardFileProtocol,
 }: TrainingFunctionParams) {
-	// Set game and state data
+	// Set state data
+	const date = getFormattedDate(new Date());
 	const state = game.getInitialState();
 
 	// Build model and save it
@@ -26,8 +29,8 @@ export default async function testResNetStructure({
 	await resNet.save({
 		protocol: fileSystemProtocol,
 		type: ModelType.Structure,
-		innerPath: "",
-		name: "structure",
+		innerPath: `/${uuidv4()}`,
+		name: `Structure ${date}`,
 	});
 	logMessage("Model saved!\n");
 
@@ -75,6 +78,7 @@ export default async function testResNetStructure({
 		};
 	});
 
+	// Log prediction data
 	logMessage("Policy: " + "\n[");
 	policy.forEach((p) => logMessage(p.toString() + ","));
 	logMessage("]");
@@ -84,5 +88,6 @@ export default async function testResNetStructure({
 	logMessage("Action: " + action);
 	logMessage("Value: " + value.toString());
 
+	// Dispose tensors
 	resNet.dispose();
 }

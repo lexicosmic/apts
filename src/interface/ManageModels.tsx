@@ -1,6 +1,10 @@
 import { useEffect, useRef, useState } from "react";
 import { ModelInfo, SerializedModel } from "../types";
-import { constructModelPath, formatGameName } from "../util";
+import {
+	getFullModelPath,
+	formatGameName,
+	standardFileProtocol,
+} from "../util";
 import { DBOperations_Models } from "../database";
 import Game from "../engine/Game";
 import ModelContainer from "./ModelContainer";
@@ -8,6 +12,8 @@ import { ModalWithHeader } from "./Modal";
 import Icon from "./Icon";
 import ButtonGroup from "./ButtonGroup";
 import FileInput from "./FileInput";
+import { importResNetModel } from "./util";
+import ResNet from "../engine/ResNet";
 
 interface ManageModelsProps {
 	game: Game;
@@ -37,7 +43,7 @@ export default function ManageModels({
 	}, []);
 
 	const selectedModelPath = selectedModel
-		? constructModelPath(
+		? getFullModelPath(
 				game.getName(),
 				selectedModel.type,
 				selectedModel.innerPath
@@ -45,59 +51,41 @@ export default function ManageModels({
 		: null;
 
 	const modelInput = useRef<HTMLInputElement>(null);
-	// const weightsInput = useRef<HTMLInputElement>(null);
 
-	async function uploadModel(modelFile: File) {
+	function uploadModel(modelFile: File) {
 		if (!modelFile || modelFile.type !== `application/json`) {
 			alert(`Invalid model file!`);
 			return;
 		}
-		// if (!weights || weights.type !== `application/octet-stream`) {
-		// 	alert(`Invalid weights file!`);
-		// 	return;
-		// }
-		const onError = () => {
-			alert(`Invalid file!`);
+		const reader = new FileReader();
+		reader.onload = (event) => {
+			const onError = () => {
+				alert(`Invalid file!`);
+			};
+			const onSuccess = (modelInfo: ModelInfo, resNet: ResNet) => {
+				resNet.save({
+					protocol: standardFileProtocol,
+					type: modelInfo.type,
+					innerPath: modelInfo.innerPath,
+					name: modelInfo.name,
+					onSuccess: () => {
+						getModels();
+						setIsUploadingModel(false);
+					},
+					onError: () => {
+						alert(`Error saving model!`);
+						setIsUploadingModel(false);
+					},
+				});
+			};
+			importResNetModel(
+				event.target?.result as string,
+				game.getName(),
+				onSuccess,
+				onError
+			);
 		};
-		try {
-			// const path = `${game.getName()}/uploaded/${uuidv4()}`;
-			// const layersModel = await tf.loadLayersModel(
-			// 	tf.io.browserFiles([topology, weights])
-			// );
-			// layersModel.summary();
-			// layersModel.save(`indexeddb://${path}`);
-			// const modelInfo: ModelInfo = {
-			// 	path: path,
-			// 	game: game.getName(),
-			// 	name: topology.name,
-			// 	type: ModelType.Uploaded,
-			// };
-			const stringifiedModel = await modelFile.text();
-			const serializedModel = JSON.parse(stringifiedModel) as SerializedModel;
-			serializedModel.resNet.save({
-				protocol: "indexeddb",
-				type: serializedModel.type,
-				innerPath: serializedModel.innerPath,
-				name: serializedModel.name,
-				onError,
-				onSuccess: () => {
-					getModels();
-					setIsUploadingModel(false);
-				},
-			});
-
-			// DBOperations_Models.add(
-			// 	modelInfo,
-			// 	() => {
-			// 		getModels();
-			// 		setIsUploadingModel(false);
-			// 	},
-			// 	onError
-			// );
-		} catch {
-			onError();
-			return;
-		}
+		reader.readAsText(modelFile);
 	}
 
 	//TODO: Sort models
@@ -105,7 +93,7 @@ export default function ManageModels({
 	if (models.length > 0) {
 		for (let i = 0; i < models.length; i++) {
 			const model = models[i];
-			const modelPath = constructModelPath(
+			const modelPath = getFullModelPath(
 				game.getName(),
 				model.type,
 				model.innerPath
@@ -197,15 +185,8 @@ export default function ManageModels({
 												modelInput.current.files.length > 0 &&
 												modelInput.current.files[0] !== null &&
 												modelInput.current.files[0] !== undefined
-												// weightsInput.current?.files &&
-												// weightsInput.current.files.length > 0 &&
-												// weightsInput.current.files[0] !== null &&
-												// weightsInput.current.files[0] !== undefined
 											) {
-												uploadModel(
-													modelInput.current.files[0]
-													// weightsInput.current.files[0]
-												);
+												uploadModel(modelInput.current.files[0]);
 											}
 										},
 									},

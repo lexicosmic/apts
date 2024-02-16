@@ -1,6 +1,6 @@
 import { TrainingMemory } from "./engine/AlphaZero";
 import { GameName, ModelInfo } from "./types";
-import { constructModelPath } from "./util";
+import { getFullModelPath } from "./util";
 
 const idxdb = window.indexedDB;
 
@@ -114,7 +114,7 @@ function deleteModel(
 	onComplete: () => void,
 	onError: (event: Event) => void
 ) {
-	const path = constructModelPath(model.game, model.type, model.innerPath);
+	const path = getFullModelPath(model.game, model.type, model.innerPath);
 
 	function deleteFromAptsModels() {
 		connectToAptsDB(function (db) {

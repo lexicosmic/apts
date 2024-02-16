@@ -1,11 +1,17 @@
 import * as tf from "@tensorflow/tfjs";
 import { EffectCallback, useRef, useEffect } from "react";
-import { GameName, ModelInfo, SerializedModel } from "../types";
+import {
+	GameName,
+	ModelInfo,
+	ModelType,
+	SerializedModel,
+	TensorLikeArray,
+} from "../types";
+import { getFullModelPath } from "../util";
 import TicTacToeGame from "../engine/games/TicTacToe";
 import ConnectFourGame from "../engine/games/ConnectFour";
 import ResNet from "../engine/ResNet";
 import Game from "../engine/Game";
-import { constructModelPath } from "../util";
 
 export function useOnMountUnsafe(effect: EffectCallback) {
 	const initialized = useRef(false);
@@ -23,7 +29,8 @@ export function loadGame(gameName: GameName) {
 	else throw new Error("Unknown game name");
 }
 
-export async function loadResNetModel(
+// Retrieve a ResNet model from the Tensorflow IndexedDB, given its path, and pass it to the callback
+export async function retrieveResNetModel(
 	game: Game,
 	path: string,
 	callback: (resNet: ResNet) => void
@@ -34,24 +41,26 @@ export async function loadResNetModel(
 	callback(resNet);
 }
 
-// export async function saveLayersModel(path: string) {
-// 	const model = await tf.loadLayersModel(`indexeddb://${path}`);
-// 	await model.save(`downloads://${path}`);
-// }
-
-export async function saveResNetModel(modelInfo: ModelInfo) {
+export async function exportResNetModel(modelInfo: ModelInfo) {
 	const game = loadGame(modelInfo.game);
-	const path = constructModelPath(
+	const fullPath = getFullModelPath(
 		modelInfo.game,
 		modelInfo.type,
 		modelInfo.innerPath
 	);
-	loadResNetModel(game, path, (loadedModel) => {
+	retrieveResNetModel(game, fullPath, (loadedResNet) => {
+		const encodedWeights: string[] = [];
+		loadedResNet.getWeights().forEach((weight) => {
+			encodedWeights.push(btoa(JSON.stringify(weight)));
+		});
+		const encodedLayersModel = loadedResNet.getModel().toJSON();
 		const serializedModel: SerializedModel = {
+			game: modelInfo.game,
 			type: modelInfo.type,
 			innerPath: modelInfo.innerPath,
 			name: modelInfo.name,
-			resNet: loadedModel,
+			layersModel: encodedLayersModel as string,
+			weights: encodedWeights,
 		};
 		const stringifiedModel = JSON.stringify(serializedModel);
 		const blob = new Blob([stringifiedModel], {
@@ -60,10 +69,45 @@ export async function saveResNetModel(modelInfo: ModelInfo) {
 		const url = URL.createObjectURL(blob);
 		const a = document.createElement("a") as HTMLAnchorElement;
 		a.href = url;
-		a.download = `${modelInfo.name}.json`;
+		a.download = `${fullPath}.json`;
 		a.click();
 		URL.revokeObjectURL(url);
 		a.remove();
-		loadedModel.dispose();
+		loadedResNet.dispose();
 	});
+}
+
+export async function importResNetModel(
+	stringifiedModel: string,
+	currentGame: GameName,
+	onSuccess = (modelInfo: ModelInfo, resNet: ResNet) => {},
+	onError: () => void
+) {
+	try {
+		const serializedModel = JSON.parse(stringifiedModel) as SerializedModel;
+		if (serializedModel.game !== currentGame) {
+			alert("This model is not compatible with the current game!");
+		}
+		const decodedWeights: TensorLikeArray[] = [];
+		serializedModel.weights.forEach((base64) => {
+			decodedWeights.push(JSON.parse(atob(base64)));
+		});
+		const decodedLayersModel = await tf.models.modelFromJSON(
+			JSON.parse(serializedModel.layersModel)
+		);
+		const game = loadGame(serializedModel.game as GameName);
+		const resNet = new ResNet(game, {
+			model: decodedLayersModel,
+		});
+		resNet.setWeights(decodedWeights);
+		const modelInfo: ModelInfo = {
+			game: serializedModel.game as GameName,
+			type: serializedModel.type as ModelType,
+			innerPath: serializedModel.innerPath,
+			name: serializedModel.name,
+		};
+		onSuccess(modelInfo, resNet);
+	} catch {
+		onError();
+	}
 }

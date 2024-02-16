@@ -1,13 +1,12 @@
 import * as tf from "@tensorflow/tfjs";
-import { LogMessage, ModelType } from "../types.js";
+import { LogMessage, ModelType, TensorLikeArray } from "../types.js";
+import { getFullModelPath } from "../util.js";
 import { DBOperations_Models } from "../database.js";
 import Game from "./Game.js";
-import { constructModelPath } from "../util.js";
-import { on } from "events";
 
 const INPUT_CHANNELS = 3;
 
-interface LoadResNetModelParams {
+interface retrieveResNetModelParams {
 	model: tf.LayersModel;
 }
 interface BuildResNetParams {
@@ -15,7 +14,7 @@ interface BuildResNetParams {
 	numHiddenChannels: number; // Number of channels in the backbone
 }
 
-export type ResNetParams = LoadResNetModelParams | BuildResNetParams;
+export type ResNetParams = retrieveResNetModelParams | BuildResNetParams;
 
 /* Class that represents a ResNet model, via a Layers Model from TensorFlow.js.
  * It is important to dispose the model when it is no longer needed.
@@ -39,6 +38,21 @@ export default class ResNet {
 		}
 	}
 
+	/// Getters
+	public getModel(): tf.LayersModel {
+		return this.model;
+	}
+
+	public getWeights(): TensorLikeArray[] {
+		return this.model.getWeights().map((weight) => weight.arraySync());
+	}
+
+	/// Setters
+	public setWeights(weights: TensorLikeArray[]) {
+		const tensors = weights.map((weight) => tf.tensor(weight));
+		this.model.setWeights(tensors);
+	}
+
 	/// Methods
 
 	// Saves the model to the given path, both on TensorFlow and Proprietary
@@ -59,7 +73,7 @@ export default class ResNet {
 		onError?: () => void;
 	}): Promise<void> {
 		const promise = new Promise<void>((resolve, reject) => {
-			const path = constructModelPath(this.game.getName(), type, innerPath);
+			const path = getFullModelPath(this.game.getName(), type, innerPath);
 			DBOperations_Models.put(
 				{
 					type,

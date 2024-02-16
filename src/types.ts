@@ -1,5 +1,15 @@
+import * as tf from "@tensorflow/tfjs";
+import { PyJsonDict } from "@tensorflow/tfjs-layers/dist/keras_format/types";
 import Game from "./engine/Game";
-import ResNet from "./engine/ResNet";
+
+export type TensorLikeArray =
+	| number
+	| number[]
+	| number[][]
+	| number[][][]
+	| number[][][][]
+	| number[][][][][]
+	| number[][][][][][];
 
 /// Common
 export enum GameName {
@@ -17,14 +27,14 @@ export enum GameMode {
 /// Engine
 export type LogMessage = (message: string) => void;
 
-export interface MonteCarloTreeSearchParams {
-	readonly numSearches: number;
-	readonly explorationConstant: number;
-}
+// export interface MonteCarloTreeSearchParams {
+// 	readonly numSearches: number;
+// 	readonly explorationConstant: number;
+// }
 
-export interface SelfPlayMemoryParams extends MonteCarloTreeSearchParams {
-	numSelfPlayIterations: number;
-}
+// export interface SelfPlayMemoryParams extends MonteCarloTreeSearchParams {
+// 	numSelfPlayIterations: number;
+// }
 
 export interface TrainModelParams {
 	numIterations: number;
@@ -73,9 +83,16 @@ export type ModelInfo = {
 	name: string;
 };
 
+export type ModelFileContent = ModelInfo & {
+	layersModel: tf.LayersModel;
+	weights: Float32Array[];
+};
+
 export type SerializedModel = {
-	type: ModelType;
+	game: string;
+	type: string;
 	innerPath: string;
 	name: string;
-	resNet: ResNet;
+	layersModel: string;
+	weights: string[];
 };
