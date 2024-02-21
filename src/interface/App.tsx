@@ -1,13 +1,21 @@
 import { useEffect, useState } from "react";
-import { GameMode, GameName, ModelInfo, TestingFunction } from "../types";
-import { getFullModelPath, formatGameName } from "../util";
+import {
+	GameMode,
+	GameName,
+	ModelInfo,
+	TrainingFunction,
+	TrainingFunctionParams,
+} from "../types";
+import { formatGameName } from "../util";
 import { loadGame } from "./util";
 import Game from "../engine/Game";
 import testMCTSCommon from "../modelHandling/testing/testMCTSCommon";
 import testResNetStructure from "../modelHandling/testing/testResNetStructure";
 import testBlindTraining from "../modelHandling/testing/testBlindTraining";
+import buildTrainingMemory from "../modelHandling/training/buildMemory";
+import createModel from "../modelHandling/training/createModel";
 import PickOption from "./PickOption";
-import Testing from "./Testing";
+import Training from "./Training";
 import Playing from "./Playing";
 import Anchor from "./Anchor";
 import ManageModels from "./ManageModels";
@@ -18,6 +26,7 @@ export default function App() {
 	const [action, setAction] = useState<ActionOnGame | null>(null);
 	const [gameMode, setGameMode] = useState<GameMode | null>(null);
 	const [test, setTest] = useState<Test | null>(null);
+	const [train, setTrain] = useState<Train | null>(null);
 	const [selectedModelInfo, setSelectedModelInfo] = useState<ModelInfo | null>(
 		null
 	);
@@ -36,6 +45,7 @@ export default function App() {
 		(action === ActionOnGame.Play &&
 			gameMode !== null &&
 			selectedModelInfo !== null) ||
+		(action === ActionOnGame.Train && train !== null) ||
 		(action === ActionOnGame.Test && test !== null);
 
 	useEffect(() => {
@@ -138,7 +148,62 @@ export default function App() {
 					/>
 				);
 			case ActionOnGame.Train:
-				return <></>;
+				if (train === null)
+					if (selectedModelInfo === null)
+						return (
+							<Disclaimer
+								title={`Training`}
+								subtitle={formatGameName(gameName)}
+								text={`You must load a model before training!`}
+								handleReturn={() => setAction(null)}
+							/>
+						);
+					else
+						return (
+							<PickOption
+								title={`Training`}
+								subtitle={formatGameName(gameName)}
+								actions={[
+									{
+										name: `Build Training Memory`,
+										handleClick: () => {
+											setTrain({
+												name: `Build Training Memory`,
+												trainingFunction: buildTrainingMemory,
+												params: {
+													numSearches: 1,
+													explorationConstant: 1,
+												},
+											});
+										},
+									},
+									{
+										name: `Create Model`,
+										handleClick: () => {
+											setTrain({
+												name: `Create Model`,
+												trainingFunction: createModel,
+												params: {
+													numSearches: 1,
+													explorationConstant: 1,
+												},
+											});
+										},
+									},
+								]}
+								handleReturn={() => setAction(null)}
+							/>
+						);
+				else
+					return (
+						<Training
+							game={game}
+							modelInfo={selectedModelInfo}
+							trainingFunction={train.trainingFunction}
+							otherParams={train.params}
+							handleReturn={() => setTrain(null)}
+						/>
+					);
 			case ActionOnGame.Test:
 				if (test === null)
 					return (
@@ -178,9 +243,11 @@ export default function App() {
 						/>
 					);
 				return (
-					<Testing
+					<Training
 						game={game}
-						testingFunction={test.testingFunction}
+						modelInfo={null}
+						trainingFunction={test.testingFunction}
+						otherParams={{}}
 						handleReturn={() => setTest(null)}
 					/>
 				);
@@ -235,5 +302,10 @@ enum ActionOnGame {
 
 type Test = {
 	name: string;
-	testingFunction: TestingFunction;
+	testingFunction: TrainingFunction;
+};
+type Train = {
+	name: string;
+	trainingFunction: TrainingFunction;
+	params: TrainingFunctionParams;
 };

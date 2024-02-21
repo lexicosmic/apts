@@ -1,5 +1,5 @@
 import * as tf from "@tensorflow/tfjs";
-import { v4 as uuidv4 } from "uuid";
+// import { v4 as uuidv4 } from "uuid";
 import { ModelType, TrainingFunctionParams } from "../../types.js";
 import { getFormattedDate, standardFileProtocol } from "../../util.js";
 import Game from "../../engine/Game.js";
@@ -11,7 +11,7 @@ export default async function testBlindTraining({
 	fileSystemProtocol = standardFileProtocol,
 }: TrainingFunctionParams) {
 	// Set state data
-	const randomId = uuidv4();
+	const randomId = 1234; // uuidv4();
 	const date = getFormattedDate(new Date());
 	let state = game.getInitialState();
 	logMessage("Initial state:");

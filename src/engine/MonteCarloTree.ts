@@ -144,9 +144,10 @@ export default class MonteCarloTreeSearch {
 	/// Methods
 	// Search for the best action to take
 	public search(state: State): number[] {
+		const neutralState = State.clone(state);
 		const root = new MonteCarloNode(
 			this.game,
-			state,
+			neutralState,
 			this.numSearches,
 			this.explorationConstant
 		);

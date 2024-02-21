@@ -1,5 +1,5 @@
 import * as tf from "@tensorflow/tfjs";
-import { v4 as uuidv4 } from "uuid";
+// import { v4 as uuidv4 } from "uuid";
 import { ModelType, TrainingFunctionParams } from "../../types.js";
 import { getFormattedDate, standardFileProtocol } from "../../util.js";
 import {
@@ -29,7 +29,7 @@ export default async function testResNetStructure({
 	await resNet.save({
 		protocol: fileSystemProtocol,
 		type: ModelType.Structure,
-		innerPath: `/${uuidv4()}`,
+		innerPath: `/${1234}`,
 		name: `Structure ${date}`,
 	});
 	logMessage("Model saved!\n");

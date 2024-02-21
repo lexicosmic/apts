@@ -1,4 +1,3 @@
-import * as tf from "@tensorflow/tfjs";
 import ResNet from "../../engine/ResNet.js";
 import { TrainingFunctionParams } from "../../types.js";
 import AlphaZero, { TrainingMemory } from "../../engine/AlphaZero.js";
@@ -21,6 +20,9 @@ interface BuildTrainingMemoryParams extends TrainingFunctionParams {
 	numSearches: number;
 	explorationConstant: number;
 }
+export type BuildTrainingMemory = (
+	params: BuildTrainingMemoryParams
+) => Promise<TrainingMemory>;
 export default async function buildTrainingMemory({
 	logMessage,
 	game,
@@ -41,4 +43,6 @@ export default async function buildTrainingMemory({
 		showMemorySize: true,
 		logMessage,
 	});
+
+	return trainingMemory;
 }

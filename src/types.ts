@@ -1,6 +1,7 @@
 import * as tf from "@tensorflow/tfjs";
-import { PyJsonDict } from "@tensorflow/tfjs-layers/dist/keras_format/types";
 import Game from "./engine/Game";
+import { BuildTrainingMemory } from "./modelHandling/training/buildMemory";
+import { CreateModel } from "./modelHandling/training/createModel";
 
 export type TensorLikeArray =
 	| number
@@ -43,17 +44,13 @@ export interface TrainModelParams {
 	learningRate: number;
 }
 
-export interface TrainingFunctionParams {
+interface CommonTrainingFunctionParams {
 	logMessage: LogMessage;
 	game: Game;
 	fileSystemProtocol: string;
 }
-
-export type TestingFunction = ({
-	logMessage,
-	game,
-	fileSystemProtocol,
-}: TrainingFunctionParams) => Promise<void>;
+export type TrainingFunctionParams = CommonTrainingFunctionParams & any;
+export type TrainingFunction = (params: TrainingFunctionParams) => Promise<any>;
 
 /// Export
 // export type ParamsToExport_TrainingData = SelfPlayMemoryParams & {
