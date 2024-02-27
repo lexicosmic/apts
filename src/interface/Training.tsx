@@ -29,7 +29,7 @@ export default function Training({
 	const [buttonDisabled, setButtonDisabled] = useState<boolean>(true);
 
 	useOnMountUnsafe(() => {
-		setButtonDisabled(false);
+		setButtonDisabled(true);
 		if (modelInfo !== null) {
 			const modelPath = getFullModelPath(
 				modelInfo.game,

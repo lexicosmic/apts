@@ -63,6 +63,8 @@ export default function ModelContainer({
 			className={`text-black border rounded p-2 grid gap-x-2
 				${selected ? `bg-orange-100 border-2 border-orange-400` : `bg-neutral-50`}
 			`}
+			aria-label={`Model ${modelInfo.name}`}
+			aria-current={selected}
 		>
 			<div className={`flex flex-col items-baseline gap-1`}>
 				{isEditing ? (

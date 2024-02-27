@@ -111,3 +111,39 @@ export async function importResNetModel(
 		onError();
 	}
 }
+
+export function testTensorflow() {
+	return;
+	tf.tidy(() => {
+		const tensor = tf.tensor([
+			[
+				-0.0081886, -0.0234007, -0.0014502, 0.1438045, 0.0067312, -0.0516381,
+				-0.0702601, 0.1051653, 0.0700726,
+			],
+		]);
+		const validActions = [
+			true,
+			true,
+			true,
+			true,
+			false,
+			true,
+			true,
+			true,
+			true,
+		];
+		const softmax = tf.softmax(tensor, 1);
+		console.log("Softmax");
+		softmax.print();
+		const squeezed = softmax.squeeze();
+		console.log("Squeezed");
+		squeezed.print();
+		const masked = squeezed.mul(tf.tensor(validActions));
+		console.log("Masked");
+		masked.print();
+
+		// tensor.print();
+		// softmax.print();
+		// squeezed.print();
+	});
+}

@@ -217,7 +217,7 @@ function performAction(
 	action: Action,
 	writeToTerminal: (text: string) => void
 ): State {
-	const nextState = State.clone(state);
+	const nextState = state.clone();
 	writeToTerminal(`Player ${game.getPlayerName(player)}: ${action}`);
 	nextState.performAction(action, player);
 	writeToTerminal(nextState.toString());

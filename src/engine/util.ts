@@ -3,10 +3,10 @@ import { State, Action } from "./Game";
 import ResNet from "./ResNet";
 
 export function getRandomValidAction(state: State): Action {
-	const validActionsEncoded = state.getValidActions();
+	const encodedValidActions = state.getValidActions();
 	const validActions = [];
-	for (let i = 0; i < validActionsEncoded.length; i++) {
-		if (validActionsEncoded[i]) validActions.push(i);
+	for (let i = 0; i < encodedValidActions.length; i++) {
+		if (encodedValidActions[i]) validActions.push(i);
 	}
 	return validActions[Math.floor(Math.random() * validActions.length)];
 }
@@ -25,12 +25,12 @@ function getMaskedPrediction(
 		const tensorState = tf.tensor(encodedState).expandDims(0) as tf.Tensor4D;
 		const [policy, value] = resNet.predict(tensorState);
 		const squeezedValue = value.squeeze().squeeze() as tf.Scalar;
-		const softMaxPolicy = tf.softmax(policy, 1).squeeze([0]);
+		const squeezedSoftMaxPolicy = tf.softmax(policy).squeeze();
 		// Mask the policy to only allow valid actions
 		const validActions = state.getValidActions();
-		const maskedPolicy = softMaxPolicy
-			.mul(tf.tensor(validActions).expandDims(0))
-			.squeeze() as tf.Tensor1D;
+		const maskedPolicy = squeezedSoftMaxPolicy.mul(
+			tf.tensor(validActions)
+		) as tf.Tensor1D;
 		return {
 			policy: maskedPolicy,
 			value: squeezedValue,
@@ -46,7 +46,7 @@ function getProbabilitiesFromPolicy(policy: tf.Tensor1D): tf.Tensor1D {
 	});
 }
 
-// Returns the action as a common integer
+// Returns the action as a common integer. Probabilities must be normalized
 export function getActionFromProbabilities(probabilities: tf.Tensor1D): Action {
 	return tf.tidy(() => {
 		return tf

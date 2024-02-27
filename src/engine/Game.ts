@@ -74,6 +74,8 @@ export abstract class State {
 	/// Methods
 	public abstract toString(): string;
 
+	public abstract clone(): State;
+
 	public abstract checkWin(action: Action): boolean;
 
 	public abstract performAction(action: Action, player: Player): void;
@@ -83,10 +85,4 @@ export abstract class State {
 		currentPlayer: Player,
 		opponentPlayer: Player
 	): void;
-
-	/// Static methods
-	public static clone(state: State): State {
-		const clone = Object.create(state);
-		return clone;
-	}
 }

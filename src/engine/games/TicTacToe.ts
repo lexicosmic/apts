@@ -132,6 +132,12 @@ export class TicTacToeState extends State {
 		return boardString;
 	}
 
+	public clone(): TicTacToeState {
+		const clonedState = new TicTacToeState(this.rowCount, this.columnCount);
+		clonedState.table = this.table.map((row) => row.slice());
+		return clonedState;
+	}
+
 	public checkWin(action: number): boolean {
 		const row = Math.floor(action / this.columnCount);
 		const column = action % this.columnCount;

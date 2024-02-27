@@ -138,6 +138,12 @@ export class ConnectFourState extends State {
 		return boardString;
 	}
 
+	public clone(): State {
+		const clonedState = new ConnectFourState(this.rowCount, this.columnCount);
+		clonedState.table = this.table.map((row) => row.slice());
+		return clonedState;
+	}
+
 	private checkWinOnRow(row: number, column: number, player: Player): boolean {
 		const firstWindowColumn = Math.max(
 			0,

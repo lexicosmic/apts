@@ -48,23 +48,22 @@ export default class AlphaZero {
 	 */
 	private async selfPlay(): Promise<TrainingMemory> {
 		let player = Player.X;
-		let state = this.game.getInitialState();
-		console.log(state);
+		const state = this.game.getInitialState();
 		const gameMemory: GameMemory = [];
 
 		while (true) {
 			// Get the state from the perspective of the current player and save it in the game memory
-			// state = State.clone(state);
-			state.changePerspective(player, this.game.getOpponent(player));
-			const actionProbabilities = this.mcts.search(state);
-			gameMemory.push({ state: state, actionProbabilities, player });
+			const neutralState = state.clone();
+			neutralState.changePerspective(player, this.game.getOpponent(player));
+			const actionProbabilities = this.mcts.search(neutralState);
+			gameMemory.push({ state: neutralState, actionProbabilities, player });
 
 			// Pick an action based on the probabilities from the MCTS
 			const probabilitiesTensor = tf.tensor(actionProbabilities) as tf.Tensor1D;
 			const pickedAction = getActionFromProbabilities(probabilitiesTensor);
 			tf.dispose(probabilitiesTensor);
-			if (!state.getValidActions()[pickedAction])
-				throw new Error("Invalid action picked");
+			const validActions = state.getValidActions();
+			if (!validActions[pickedAction]) throw new Error("Invalid action picked");
 
 			// Perform the action and check if the game is over
 			state.performAction(pickedAction, player);
@@ -81,8 +80,6 @@ export default class AlphaZero {
 			// If the game is not over, switch the player and continue
 			player = this.game.getOpponent(player);
 		}
-
-		return this.convertGameMemoryToTrainingMemory(gameMemory, player, 0);
 	}
 
 	// Transpose the game memory to a format that can be used to train the model

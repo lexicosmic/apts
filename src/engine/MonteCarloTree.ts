@@ -95,7 +95,7 @@ export class MonteCarloNode {
 		policy.forEach((probability, action) => {
 			if (probability > 0) {
 				// Copy the state and play the action on the copy
-				let childState = State.clone(this.state);
+				const childState = this.state.clone();
 				childState.performAction(action, Player.X);
 				childState.changePerspective(Player.X, Player.O);
 
@@ -144,7 +144,22 @@ export default class MonteCarloTreeSearch {
 	/// Methods
 	// Search for the best action to take
 	public search(state: State): number[] {
-		const neutralState = State.clone(state);
+		// If no deep search is performed, return a distribution based on the valid actions
+		if (this.numSearches <= 1) {
+			const validActions = state.getValidActions();
+			let sum = 0;
+			const actionProbabilities = new Array(this.game.getActionSize()).fill(0);
+			for (let i = 0; i < validActions.length; i++) {
+				if (validActions[i]) {
+					actionProbabilities[i] = 1;
+					sum++;
+				}
+			}
+			return actionProbabilities.map((probability) => probability / sum);
+		}
+
+		// Perform the Monte Carlo Tree Search
+		const neutralState = state.clone();
 		const root = new MonteCarloNode(
 			this.game,
 			neutralState,
@@ -193,11 +208,10 @@ export default class MonteCarloTreeSearch {
 		).fill(0);
 		for (const child of root.getChildren()) {
 			const action = child.getActionTaken();
-			if (action == null) throw new Error("Action is null!");
+			if (action === null) throw new Error("Action is null!");
 			actionProbabilities[action] = child.getVisitCount();
 		}
 		const sum = actionProbabilities.reduce((sum, value) => sum + value, 0);
-		actionProbabilities = actionProbabilities.map((value) => value / sum);
-		return actionProbabilities;
+		return actionProbabilities.map((value) => value / sum);
 	}
 }

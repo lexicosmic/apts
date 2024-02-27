@@ -7,7 +7,7 @@ import {
 	TrainingFunctionParams,
 } from "../types";
 import { formatGameName } from "../util";
-import { loadGame } from "./util";
+import { loadGame, testTensorflow } from "./util";
 import Game from "../engine/Game";
 import testMCTSCommon from "../modelHandling/testing/testMCTSCommon";
 import testResNetStructure from "../modelHandling/testing/testResNetStructure";
@@ -22,6 +22,8 @@ import ManageModels from "./ManageModels";
 import Disclaimer from "./Disclaimer";
 
 export default function App() {
+	testTensorflow();
+
 	const [gameName, setGameName] = useState<GameName | null>(null);
 	const [action, setAction] = useState<ActionOnGame | null>(null);
 	const [gameMode, setGameMode] = useState<GameMode | null>(null);
@@ -171,8 +173,8 @@ export default function App() {
 												name: `Build Training Memory`,
 												trainingFunction: buildTrainingMemory,
 												params: {
-													numSearches: 1,
-													explorationConstant: 1,
+													numSearches: 60,
+													explorationConstant: 2,
 												},
 											});
 										},
@@ -184,8 +186,8 @@ export default function App() {
 												name: `Create Model`,
 												trainingFunction: createModel,
 												params: {
-													numSearches: 1,
-													explorationConstant: 1,
+													numSearches: 60,
+													explorationConstant: 2,
 												},
 											});
 										},

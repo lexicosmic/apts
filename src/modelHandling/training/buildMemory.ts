@@ -37,9 +37,10 @@ export default async function buildTrainingMemory({
 		explorationConstant
 	);
 
+	logMessage("=-=-=-=-=-=-=-= AlphaZero BUILDING MEMORY =-=-=-=-=-=-=-=");
 	const trainingMemory = await alphaZeroTraining.buildTrainingMemory({
-		numSelfPlayIterations: 1,
-		progressStep: 50,
+		numSelfPlayIterations: 10,
+		progressStep: 1,
 		showMemorySize: true,
 		logMessage,
 	});
