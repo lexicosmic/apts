@@ -1,6 +1,7 @@
 import * as tf from "@tensorflow/tfjs";
 import { v4 as uuidv4 } from "uuid";
-import { ModelType, TrainingParams_StructureBlind_Base } from "../../types.js";
+import { TrainingParams_StructureBlind_Base } from "../types.js";
+import { ModelType } from "../../types.js";
 import { getFormattedDate, standardFileProtocol } from "../../util.js";
 import Game from "../../engine/Game.js";
 import ResNet from "../../engine/ResNet.js";

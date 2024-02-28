@@ -1,5 +1,4 @@
-import ResNet from "../../engine/ResNet.js";
-import { TrainingParams_BuildMemoryCreateModel_Base } from "../../types.js";
+import { TrainingParams_BuildMemoryCreateModel_Base } from "../types.js";
 import AlphaZero from "../../engine/AlphaZero.js";
 
 export default async function buildTrainingMemory({
@@ -17,7 +16,7 @@ export default async function buildTrainingMemory({
 		explorationConstant
 	);
 
-	logMessage("=-=-=-=-=-=-=-= AlphaZero BUILDING MEMORY =-=-=-=-=-=-=-=");
+	logMessage("=-=-=-=-=-=-=-= APTS BUILDING MEMORY =-=-=-=-=-=-=-=");
 	const trainingMemoryPromise = await alphaZeroTraining.buildTrainingMemory({
 		numSelfPlayIterations,
 		progressStep: 1,

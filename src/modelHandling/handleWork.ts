@@ -1,6 +1,11 @@
-import { GameName, ModelInfo, WorkName } from "../types";
-import { getFullModelPath } from "../util";
-import { loadGame, retrieveResNetModel } from "../interface/util";
+import {
+	HandleWorkParams,
+	WorkName,
+	WorkerMessage,
+	WorkerStatus,
+} from "./types";
+import { ModelInfo } from "../types";
+import { getFullModelPath, loadGame, retrieveResNetModel } from "../util";
 import Game from "../engine/Game";
 import ResNet from "../engine/ResNet";
 import testMCTSCommon from "./testing/testMCTSCommon";
@@ -9,63 +14,46 @@ import testBlindTraining from "./testing/testBlindTraining";
 import buildTrainingMemory from "./training/buildMemory";
 import createModel from "./training/createModel";
 
-interface HandleWorkParams_MCTS_Base {
-	gameName: GameName;
-}
-interface HandleWorkParams_MCTS extends HandleWorkParams_MCTS_Base {
-	workName: WorkName.MCTSCommon;
-}
-
-interface HandleWorkParams_StructureBlind_Base
-	extends HandleWorkParams_MCTS_Base {
-	fileSystemProtocol: string;
-}
-interface HandleWorkParams_TestResNetStructure
-	extends HandleWorkParams_StructureBlind_Base {
-	workName: WorkName.Structure | WorkName.Blind;
-}
-
-interface HandleWorkParams_BuildMemoryCreateModel_Base
-	extends HandleWorkParams_StructureBlind_Base {
-	modelInfo: ModelInfo;
-	numSearches: number;
-	explorationConstant: number;
-	numSelfPlayIterations: number;
-}
-interface HandleWorkParams_BuildMemoryCreateModel
-	extends HandleWorkParams_BuildMemoryCreateModel_Base {
-	workName: WorkName.BuildMemory | WorkName.CreateModel;
-}
-
-export type HandleWorkParams =
-	| HandleWorkParams_MCTS
-	| HandleWorkParams_TestResNetStructure
-	| HandleWorkParams_BuildMemoryCreateModel;
-
 self.onmessage = async (e) => {
 	const params: HandleWorkParams = e.data;
 	const game = loadGame(params.gameName);
 
 	switch (params.workName) {
-		case "testMCTSCommon": {
-			testMCTSCommon({ logMessage: sendMessage, game });
+		case WorkName.MCTSCommon: {
+			const promise = testMCTSCommon({
+				logMessage: (text) => sendWorkingMessage(text),
+				game,
+			});
+			promise
+				.then(() => sendFinishedMessage("MCTS common"))
+				.catch((error) => sendErrorMessage(error.toString()));
 			break;
 		}
-		case "testResNetStructure": {
+		case WorkName.Structure: {
 			const { fileSystemProtocol } = params;
-			testResNetStructure({
-				logMessage: sendMessage,
+			const promise = testResNetStructure({
+				logMessage: (text) => sendWorkingMessage(text),
 				game,
 				fileSystemProtocol,
 			});
+			promise
+				.then(() => sendFinishedMessage("ResNet structure"))
+				.catch((error) => sendErrorMessage(error.toString()));
 			break;
 		}
-		case "testBlindTraining": {
+		case WorkName.Blind: {
 			const { fileSystemProtocol } = params;
-			testBlindTraining({ logMessage: sendMessage, game, fileSystemProtocol });
+			const promise = testBlindTraining({
+				logMessage: (text) => sendWorkingMessage(text),
+				game,
+				fileSystemProtocol,
+			});
+			promise
+				.then(() => sendFinishedMessage("Blind training"))
+				.catch((error) => sendErrorMessage(error.toString()));
 			break;
 		}
-		case "buildTrainingMemory": {
+		case WorkName.BuildMemory: {
 			let resNet = await getResNet(game, params.modelInfo);
 			const {
 				fileSystemProtocol,
@@ -73,8 +61,8 @@ self.onmessage = async (e) => {
 				explorationConstant,
 				numSelfPlayIterations,
 			} = params;
-			buildTrainingMemory({
-				logMessage: sendMessage,
+			const promise = buildTrainingMemory({
+				logMessage: (text) => sendWorkingMessage(text),
 				game,
 				fileSystemProtocol,
 				resNet,
@@ -82,9 +70,12 @@ self.onmessage = async (e) => {
 				explorationConstant,
 				numSelfPlayIterations,
 			});
+			promise
+				.then(() => sendFinishedMessage("Memory building"))
+				.catch((error) => sendErrorMessage(error.toString()));
 			break;
 		}
-		case "createModel": {
+		case WorkName.CreateModel: {
 			let resNet = await getResNet(game, params.modelInfo);
 			const {
 				fileSystemProtocol,
@@ -92,8 +83,8 @@ self.onmessage = async (e) => {
 				explorationConstant,
 				numSelfPlayIterations,
 			} = params;
-			createModel({
-				logMessage: sendMessage,
+			const promise = createModel({
+				logMessage: (text) => sendWorkingMessage(text),
 				game,
 				fileSystemProtocol,
 				resNet,
@@ -101,6 +92,9 @@ self.onmessage = async (e) => {
 				explorationConstant,
 				numSelfPlayIterations,
 			});
+			promise
+				.then(() => sendFinishedMessage("Model creation"))
+				.catch((error) => sendErrorMessage(error.toString()));
 			break;
 		}
 		default: {
@@ -109,7 +103,31 @@ self.onmessage = async (e) => {
 	}
 };
 
-function sendMessage(message: string) {
+function sendWorkingMessage(text: string) {
+	const message = {
+		text,
+		status: WorkerStatus.Working,
+	};
+	sendMessage(message);
+}
+
+function sendFinishedMessage(legibleWorkName: string) {
+	const message = {
+		text: `${legibleWorkName} finished!`,
+		status: WorkerStatus.Finished,
+	};
+	sendMessage(message);
+}
+
+function sendErrorMessage(text: string) {
+	const message = {
+		text,
+		status: WorkerStatus.Error,
+	};
+	sendMessage(message);
+}
+
+function sendMessage(message: WorkerMessage) {
 	self.postMessage(message);
 }
 

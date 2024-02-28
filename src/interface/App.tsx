@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
-import { GameMode, GameName, ModelInfo, WorkName } from "../types";
-import { formatGameName } from "../util";
-import { loadGame } from "./util";
+import { GameMode, GameName, ModelInfo } from "../types";
+import { HandleWorkParams, WorkName } from "../modelHandling/types";
+import { formatGameName, loadGame, standardFileProtocol } from "../util";
 import Game from "../engine/Game";
 import PickOption from "./PickOption";
 import Training from "./Training";
@@ -14,8 +14,8 @@ export default function App() {
 	const [gameName, setGameName] = useState<GameName | null>(null);
 	const [action, setAction] = useState<ActionOnGame | null>(null);
 	const [gameMode, setGameMode] = useState<GameMode | null>(null);
-	const [test, setTest] = useState<Test | null>(null);
-	const [train, setTrain] = useState<Train | null>(null);
+	const [handleWorkParams, setHandleWorkParams] =
+		useState<HandleWorkParams | null>(null);
 	const [selectedModelInfo, setSelectedModelInfo] = useState<ModelInfo | null>(
 		null
 	);
@@ -27,15 +27,15 @@ export default function App() {
 	const [showManageModelsScreen, setShowManageModelsScreen] =
 		useState<boolean>(false);
 	let showHeader =
-		gameMode === null && test === null && !showManageModelsScreen;
+		gameMode === null && handleWorkParams === null && !showManageModelsScreen;
 	let showFooter =
 		game !== null && !showManageModelsScreen && gameMode !== GameMode.PvP;
 	let isManageModelsButtonDisabled =
 		(action === ActionOnGame.Play &&
 			gameMode !== null &&
 			selectedModelInfo !== null) ||
-		(action === ActionOnGame.Train && train !== null) ||
-		(action === ActionOnGame.Test && test !== null);
+		((action === ActionOnGame.Train || action === ActionOnGame.Test) &&
+			handleWorkParams !== null);
 
 	useEffect(() => {
 		if (game === null) setSelectedModelInfo(null);
@@ -137,7 +137,7 @@ export default function App() {
 					/>
 				);
 			case ActionOnGame.Train:
-				if (train === null)
+				if (handleWorkParams === null)
 					if (selectedModelInfo === null)
 						return (
 							<Disclaimer
@@ -156,28 +156,28 @@ export default function App() {
 									{
 										name: `Build Training Memory`,
 										handleClick: () => {
-											setTrain({
-												name: `Build Training Memory`,
+											setHandleWorkParams({
 												workName: WorkName.BuildMemory,
-												params: {
-													numSearches: 60,
-													explorationConstant: 2,
-													numSelfPlayIterations: 10,
-												},
+												gameName: gameName,
+												fileSystemProtocol: standardFileProtocol,
+												modelInfo: selectedModelInfo,
+												numSearches: 60,
+												explorationConstant: 2,
+												numSelfPlayIterations: 10,
 											});
 										},
 									},
 									{
 										name: `Create Model`,
 										handleClick: () => {
-											setTrain({
-												name: `Create Model`,
+											setHandleWorkParams({
 												workName: WorkName.CreateModel,
-												params: {
-													numSearches: 60,
-													explorationConstant: 2,
-													numSelfPlayIterations: 10,
-												},
+												gameName: gameName,
+												fileSystemProtocol: standardFileProtocol,
+												modelInfo: selectedModelInfo,
+												numSearches: 60,
+												explorationConstant: 2,
+												numSelfPlayIterations: 10,
 											});
 										},
 									},
@@ -188,15 +188,12 @@ export default function App() {
 				else
 					return (
 						<Training
-							gameName={gameName}
-							modelInfo={selectedModelInfo}
-							workName={train.workName}
-							otherParams={train.params}
-							handleReturn={() => setTrain(null)}
+							handleWorkParams={handleWorkParams}
+							handleReturn={() => setHandleWorkParams(null)}
 						/>
 					);
 			case ActionOnGame.Test:
-				if (test === null)
+				if (handleWorkParams === null)
 					return (
 						<PickOption
 							title={`Testing`}
@@ -205,27 +202,29 @@ export default function App() {
 								{
 									name: `Monte-Carlo Search Test`,
 									handleClick: () => {
-										setTest({
-											name: `Monte-Carlo Search Test`,
+										setHandleWorkParams({
 											workName: WorkName.MCTSCommon,
+											gameName: gameName,
 										});
 									},
 								},
 								{
 									name: `ResNet Structure Test`,
 									handleClick: () => {
-										setTest({
-											name: `ResNet Structure Test`,
+										setHandleWorkParams({
 											workName: WorkName.Structure,
+											gameName: gameName,
+											fileSystemProtocol: standardFileProtocol,
 										});
 									},
 								},
 								{
 									name: `Blind Testing Test`,
 									handleClick: () => {
-										setTest({
-											name: `Blind Testing Test`,
+										setHandleWorkParams({
 											workName: WorkName.Blind,
+											gameName: gameName,
+											fileSystemProtocol: standardFileProtocol,
 										});
 									},
 								},
@@ -235,11 +234,8 @@ export default function App() {
 					);
 				return (
 					<Training
-						gameName={gameName}
-						modelInfo={null}
-						workName={test.workName}
-						otherParams={{}}
-						handleReturn={() => setTest(null)}
+						handleWorkParams={handleWorkParams}
+						handleReturn={() => setHandleWorkParams(null)}
 					/>
 				);
 			default:
@@ -289,13 +285,4 @@ enum ActionOnGame {
 	Play = "Play",
 	Train = "Train",
 	Test = "Test",
-}
-
-interface Test {
-	name: string;
-	workName: WorkName;
-}
-
-interface Train extends Test {
-	params?: any;
 }

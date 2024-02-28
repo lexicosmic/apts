@@ -1,4 +1,9 @@
+import * as tf from "@tensorflow/tfjs";
 import { GameName } from "./types";
+import Game from "./engine/Game";
+import TicTacToeGame from "./engine/games/TicTacToe";
+import ConnectFourGame from "./engine/games/ConnectFour";
+import ResNet from "./engine/ResNet";
 
 export const standardFileProtocol = "indexeddb";
 
@@ -32,4 +37,18 @@ export function getFormattedDate(date: Date) {
 	const minutes = padTwoDigits(date.getMinutes());
 	const seconds = padTwoDigits(date.getSeconds());
 	return `${year}-${month}-${day} ${hour}:${minutes}:${seconds}`;
+}
+
+export function loadGame(gameName: GameName) {
+	if (gameName === GameName.TicTacToe) return new TicTacToeGame(3, 3);
+	else if (gameName === GameName.ConnectFour) return new ConnectFourGame(6, 7);
+	else throw new Error("Unknown game name");
+}
+
+// Retrieve a ResNet model from the Tensorflow IndexedDB, given its path, and pass it to the callback
+export async function retrieveResNetModel(game: Game, path: string) {
+	const formattedPath = `indexeddb://${path}`;
+	const model = await tf.loadLayersModel(formattedPath);
+	const resNet = new ResNet(game, { model });
+	return resNet;
 }

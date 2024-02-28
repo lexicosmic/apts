@@ -1,6 +1,5 @@
-import { TrainingParams_BuildMemoryCreateModel_Base } from "../../types.js";
+import { TrainingParams_BuildMemoryCreateModel_Base } from "../types.js";
 import { standardFileProtocol } from "../../util.js";
-import ResNet from "../../engine/ResNet.js";
 import AlphaZero from "../../engine/AlphaZero.js";
 
 export default async function createModel({

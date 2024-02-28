@@ -1,7 +1,6 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { GameMode, ModelInfo } from "../types";
-import { retrieveResNetModel, useOnMountUnsafe } from "./util";
-import { getFullModelPath, formatGameName } from "../util";
+import { getFullModelPath, formatGameName, retrieveResNetModel } from "../util";
 import { getPredictionDataFromState_Action } from "../engine/util";
 import Game, { Action, Player, State } from "../engine/Game";
 import ResNet from "../engine/ResNet";
@@ -27,20 +26,25 @@ export default function Playing({
 	const [currentPlayer, setCurrentPlayer] = useState<Player>(Player.X);
 	const [resNet, setResNet] = useState<ResNet | null>(null);
 
-	useOnMountUnsafe(() => {
+	useEffect(() => {
 		if (modelInfo !== null) {
 			const modelPath = getFullModelPath(
 				modelInfo.game,
 				modelInfo.type,
 				modelInfo.innerPath
 			);
-			retrieveResNetModel(game, modelPath, (loadedModel) => {
-				setResNet(loadedModel);
-				if (gameMode === GameMode.CvC) playCvCGame(loadedModel);
+			const resNet = retrieveResNetModel(game, modelPath);
+			resNet.then((loadedResNet) => {
+				setResNet(loadedResNet);
+				if (gameMode === GameMode.CvC) playCvCGame(loadedResNet);
 			});
 		}
 		startGame();
-	});
+	}, []);
+
+	useEffect(() => {
+		if (resNet && gameMode === GameMode.CvC) playCvCGame(resNet);
+	}, [resNet]);
 
 	function startGame() {
 		writeToTerminal(`Game mode: ${gameMode}\n`);
@@ -174,7 +178,13 @@ export default function Playing({
 			title={`Playing`}
 			subtitle={formatGameName(game.getName())}
 			terminalText={terminalText}
-			handleReturn={quitPlaying}
+			footer={
+				<footer className={`col-start-2 col-span-1 flex flex-col`}>
+					<Button onClick={handleReturn} key={`return-button`}>
+						<p>Return</p>
+					</Button>
+				</footer>
+			}
 		>
 			{gameMode !== GameMode.CvC && (
 				<section className={`mt-2 sm:mt-0 sm:ml-2 flex sm:flex-col gap-1`}>

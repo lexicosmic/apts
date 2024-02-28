@@ -1,21 +1,18 @@
 import { PropsWithChildren } from "react";
-import Button from "./Button";
 import Terminal from "./Terminal";
 
 interface TerminalPageProps {
 	title: string;
 	subtitle: string;
 	terminalText: string;
-	handleReturn: () => void;
-	returnButtonDisabled?: boolean;
+	footer: JSX.Element;
 }
 
 export default function TerminalPage({
 	title,
 	subtitle,
 	terminalText,
-	handleReturn,
-	returnButtonDisabled = false,
+	footer,
 	children,
 }: PropsWithChildren<TerminalPageProps>) {
 	return (
@@ -40,15 +37,7 @@ export default function TerminalPage({
 				<Terminal text={terminalText} className={`flex-grow`} />
 				<div className={`basis-0`}>{children}</div>
 			</section>
-			<footer className={`col-start-2 col-span-1 flex flex-col`}>
-				<Button
-					onClick={handleReturn}
-					disabled={returnButtonDisabled}
-					key={`return-button`}
-				>
-					<p>Return</p>
-				</Button>
-			</footer>
+			{footer}			
 		</article>
 	);
 }

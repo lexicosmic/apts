@@ -1,4 +1,4 @@
-import { TrainingParams_MCTS_Base } from "../../types.js";
+import { TrainingParams_MCTS_Base } from "../types.js";
 import { getRandomValidAction } from "../../engine/util.js";
 import { State } from "../../engine/Game.js";
 import MonteCarloTreeSearch from "../../engine/MonteCarloTreeCommon.js";
