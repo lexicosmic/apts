@@ -1,6 +1,6 @@
 import { TrainingParams_BuildMemoryCreateModel_Base } from "../types.js";
 import { standardFileProtocol } from "../../util.js";
-import AlphaZero from "../../engine/AlphaZero.js";
+import Trainer from "../../engine/Trainer.js";
 
 export default async function createModel({
 	logMessage,
@@ -10,12 +10,7 @@ export default async function createModel({
 	numSearches,
 	explorationConstant,
 }: TrainingParams_BuildMemoryCreateModel_Base) {
-	const alphaZero = new AlphaZero(
-		game,
-		resNet,
-		numSearches,
-		explorationConstant
-	);
+	const trainer = new Trainer(game, resNet, numSearches, explorationConstant);
 	// const trainingMemoryBatch = buildTrainingMemory({
 	// 	logMessage,
 	// 	game,
@@ -33,7 +28,7 @@ export default async function createModel({
 	// 	resNetBuildModelParams,
 	// 	trainModelParams
 	// );
-	// await alphaZero.learn(
+	// await trainer.learn(
 	// 	modelDirectory,
 	// 	selfPlayMemoryParams.numSelfPlayIterations,
 	// 	trainModelParams,

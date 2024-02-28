@@ -1,8 +1,7 @@
 import { useEffect, useState } from "react";
 import { GameMode, GameName, ModelInfo } from "../types";
+import { formatGameName, standardFileProtocol } from "../util";
 import { HandleWorkParams, WorkName } from "../modelHandling/types";
-import { formatGameName, loadGame, standardFileProtocol } from "../util";
-import Game from "../engine/Game";
 import PickOption from "./PickOption";
 import Training from "./Training";
 import Playing from "./Playing";
@@ -19,17 +18,13 @@ export default function App() {
 	const [selectedModelInfo, setSelectedModelInfo] = useState<ModelInfo | null>(
 		null
 	);
-
-	let game: Game | null;
-	if (gameName !== null) game = loadGame(gameName);
-	else game = null;
-
 	const [showManageModelsScreen, setShowManageModelsScreen] =
 		useState<boolean>(false);
+
 	let showHeader =
 		gameMode === null && handleWorkParams === null && !showManageModelsScreen;
 	let showFooter =
-		game !== null && !showManageModelsScreen && gameMode !== GameMode.PvP;
+		gameName !== null && !showManageModelsScreen && gameMode !== GameMode.PvP;
 	let isManageModelsButtonDisabled =
 		(action === ActionOnGame.Play &&
 			gameMode !== null &&
@@ -38,8 +33,8 @@ export default function App() {
 			handleWorkParams !== null);
 
 	useEffect(() => {
-		if (game === null) setSelectedModelInfo(null);
-	}, [game]);
+		if (gameName === null) setSelectedModelInfo(null);
+	}, [gameName]);
 
 	function getMainContent() {
 		if (gameName === null)
@@ -58,11 +53,10 @@ export default function App() {
 					]}
 				/>
 			);
-		if (game === null) return <p>Loading game</p>;
 		if (showManageModelsScreen)
 			return (
 				<ManageModels
-					game={game}
+					gameName={gameName}
 					selectedModel={selectedModelInfo}
 					setSelectedModel={setSelectedModelInfo}
 					handleReturn={() => {
@@ -128,7 +122,7 @@ export default function App() {
 					);
 				return (
 					<Playing
-						game={game}
+						gameName={gameName}
 						modelInfo={selectedModelInfo}
 						gameMode={gameMode}
 						handleReturn={() => {

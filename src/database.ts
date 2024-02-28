@@ -1,4 +1,4 @@
-import { TrainingMemory } from "./engine/AlphaZero";
+import { TrainingMemory } from "./engine/Trainer";
 import { GameName, ModelInfo } from "./types";
 import { getFullModelPath } from "./util";
 

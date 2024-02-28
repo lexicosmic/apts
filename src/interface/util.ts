@@ -1,5 +1,4 @@
 import * as tf from "@tensorflow/tfjs";
-import { EffectCallback, useRef, useEffect } from "react";
 import {
 	GameName,
 	ModelInfo,
@@ -10,16 +9,6 @@ import {
 import { getFullModelPath, loadGame } from "../util";
 import ResNet from "../engine/ResNet";
 import Game from "../engine/Game";
-
-export function useOnMountUnsafe(effect: EffectCallback) {
-	const initialized = useRef(false);
-	useEffect(() => {
-		if (!initialized.current) {
-			initialized.current = true;
-			effect();
-		}
-	}, []);
-}
 
 // Retrieve a ResNet model from the Tensorflow IndexedDB, given its path, and pass it to the callback
 export async function retrieveResNetModelOld(

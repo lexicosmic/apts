@@ -1,29 +1,28 @@
 import { useEffect, useRef, useState } from "react";
-import { ModelInfo, SerializedModel } from "../types";
+import { GameName, ModelInfo } from "../types";
+import { importResNetModel } from "./util";
 import {
 	getFullModelPath,
 	formatGameName,
 	standardFileProtocol,
 } from "../util";
 import { DBOperations_Models } from "../database";
-import Game from "../engine/Game";
+import ResNet from "../engine/ResNet";
 import ModelContainer from "./ModelContainer";
 import { ModalWithHeader } from "./Modal";
 import Icon from "./Icon";
 import ButtonGroup from "./ButtonGroup";
 import FileInput from "./FileInput";
-import { importResNetModel } from "./util";
-import ResNet from "../engine/ResNet";
 
 interface ManageModelsProps {
-	game: Game;
+	gameName: GameName;
 	selectedModel: ModelInfo | null;
 	setSelectedModel: (model: ModelInfo | null) => void;
 	handleReturn: () => void;
 }
 
 export default function ManageModels({
-	game,
+	gameName,
 	selectedModel,
 	setSelectedModel,
 	handleReturn,
@@ -35,7 +34,7 @@ export default function ManageModels({
 		const callback = (models: ModelInfo[]) => {
 			setModels(models);
 		};
-		DBOperations_Models.getAllFromGame(game.getName(), callback);
+		DBOperations_Models.getAllFromGame(gameName, callback);
 	}
 
 	useEffect(() => {
@@ -43,11 +42,7 @@ export default function ManageModels({
 	}, []);
 
 	const selectedModelPath = selectedModel
-		? getFullModelPath(
-				game.getName(),
-				selectedModel.type,
-				selectedModel.innerPath
-		  )
+		? getFullModelPath(gameName, selectedModel.type, selectedModel.innerPath)
 		: null;
 
 	const modelInput = useRef<HTMLInputElement>(null);
@@ -80,7 +75,7 @@ export default function ManageModels({
 			};
 			importResNetModel(
 				event.target?.result as string,
-				game.getName(),
+				gameName,
 				onSuccess,
 				onError
 			);
@@ -93,11 +88,7 @@ export default function ManageModels({
 	if (models.length > 0) {
 		for (let i = 0; i < models.length; i++) {
 			const model = models[i];
-			const modelPath = getFullModelPath(
-				game.getName(),
-				model.type,
-				model.innerPath
-			);
+			const modelPath = getFullModelPath(gameName, model.type, model.innerPath);
 			const isSelected: boolean =
 				selectedModel !== null && modelPath === selectedModelPath;
 			const modelContainer = (
@@ -129,7 +120,7 @@ export default function ManageModels({
 					Manage models
 				</h1>
 				<p className={`text-2xl font-light`} key={`subtitle`}>
-					{formatGameName(game.getName())}
+					{formatGameName(gameName)}
 				</p>
 			</header>
 			<section className={`col-start-1 col-span-3 mx-2 flex flex-col`}>

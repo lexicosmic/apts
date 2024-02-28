@@ -18,7 +18,7 @@ export type TrainingMemory = {
 	valueTargets: ActionOutcome["value"][];
 };
 
-export default class AlphaZero {
+export default class Trainer {
 	/// Attributes
 	private game: Game;
 	private resNet: ResNet;
@@ -43,7 +43,7 @@ export default class AlphaZero {
 
 	/// Methods
 	/**
-	 * Performs self-play to generate training data for the AlphaZero algorithm.
+	 * Performs self-play to generate training data for the Trainer algorithm.
 	 * @returns A promise that resolves to a TrainingMemory object containing the generated training data, composed by encoded states, policy targets, and value targets.
 	 */
 	private async selfPlay(): Promise<TrainingMemory> {
@@ -142,7 +142,7 @@ export default class AlphaZero {
 	}
 
 	/**
-	 * Trains the AlphaZero model using the provided training memory.
+	 * Trains the model using the provided training memory.
 	 *
 	 * @param trainingMemory - The training memory containing encoded states, policy targets, and value targets.
 	 * @param batchSize - The size of each training batch.
@@ -207,7 +207,7 @@ export default class AlphaZero {
 		trainModelParams: TrainModelParams;
 		trainingMemoryArray?: TrainingMemory[];
 	}): Promise<void> {
-		logMessage("=-=-=-=-=-=-=-= AlphaZero LEARNING =-=-=-=-=-=-=-=");
+		logMessage("=-=-=-=-=-=-=-= APTS LEARNING =-=-=-=-=-=-=-=");
 
 		for (let i = 0; i < trainModelParams.numIterations; i++) {
 			logMessage(`ITERATION ${i + 1}/${trainModelParams.numIterations}`);

@@ -6,7 +6,7 @@ import {
 	SelfPlayMemoryParams,
 	TrainModelParams,
 } from "../types.js";
-import { TrainingMemory } from "../engine/AlphaZero.js";
+import { TrainingMemory } from "../engine/Trainer.js";
 import {
 	selfPlayMemoryParams as defaultMemoryParams,
 	gameParams,

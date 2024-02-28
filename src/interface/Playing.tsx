@@ -1,6 +1,11 @@
 import { useEffect, useState } from "react";
-import { GameMode, ModelInfo } from "../types";
-import { getFullModelPath, formatGameName, retrieveResNetModel } from "../util";
+import { GameMode, GameName, ModelInfo } from "../types";
+import {
+	getFullModelPath,
+	formatGameName,
+	retrieveResNetModel,
+	loadGame,
+} from "../util";
 import { getPredictionDataFromState_Action } from "../engine/util";
 import Game, { Action, Player, State } from "../engine/Game";
 import ResNet from "../engine/ResNet";
@@ -8,18 +13,20 @@ import TerminalPage from "./TerminalPage";
 import Button from "./Button";
 
 interface PlayingProps {
-	game: Game;
+	gameName: GameName;
 	modelInfo: ModelInfo | null;
 	gameMode: GameMode;
 	handleReturn: () => void;
 }
 
 export default function Playing({
-	game,
+	gameName,
 	modelInfo,
 	gameMode,
 	handleReturn,
 }: PlayingProps) {
+	const game = loadGame(gameName);
+
 	const [terminalText, setTerminalText] = useState<string>(``);
 	const [actions, setActions] = useState<Action[]>([]);
 	const [state, setState] = useState<State>(game.getInitialState());
@@ -27,33 +34,34 @@ export default function Playing({
 	const [resNet, setResNet] = useState<ResNet | null>(null);
 
 	useEffect(() => {
+		if (game === null) return;
 		if (modelInfo !== null) {
 			const modelPath = getFullModelPath(
 				modelInfo.game,
 				modelInfo.type,
 				modelInfo.innerPath
 			);
-			const resNet = retrieveResNetModel(game, modelPath);
-			resNet.then((loadedResNet) => {
+			const resNetPromise = retrieveResNetModel(game, modelPath);
+			resNetPromise.then((loadedResNet) => {
 				setResNet(loadedResNet);
-				if (gameMode === GameMode.CvC) playCvCGame(loadedResNet);
 			});
 		}
 		startGame();
 	}, []);
 
 	useEffect(() => {
-		if (resNet && gameMode === GameMode.CvC) playCvCGame(resNet);
+		if (gameMode === GameMode.CvC && resNet !== null) playCvCGame(resNet);
 	}, [resNet]);
 
 	function startGame() {
+		setState(state);
 		writeToTerminal(`Game mode: ${gameMode}\n`);
 		setActions(getValidActions(state));
 		writeToTerminal("Good luck!");
 		writeToTerminal(state.toString());
 	}
 
-	function playTurnPvP(action: Action) {
+	function playTurnPvP(state: State, action: Action) {
 		const nextState = performAction(
 			game,
 			state,
@@ -73,8 +81,8 @@ export default function Playing({
 		setActions(nextTurnActions);
 	}
 
-	function playTurnPvC(action: Action) {
-		if (!resNet) return;
+	function playTurnPvC(state: State, action: Action) {
+		if (resNet === null) return;
 		let nextPlayer = currentPlayer;
 		let nextState = performAction(
 			game,
@@ -122,10 +130,10 @@ export default function Playing({
 	function playCvCGame(resNet: ResNet) {
 		let nextState = state;
 		let nextPlayer = currentPlayer;
-		let nextTurnActions = getValidActions(state);
+		let nextTurnActions = getValidActions(nextState);
 		while (nextTurnActions.length > 0) {
 			const { action: computerAction } = getPredictionDataFromState_Action(
-				state,
+				nextState,
 				resNet
 			);
 			nextState = performAction(
@@ -155,8 +163,8 @@ export default function Playing({
 	}
 
 	function handleActionSelected(action: Action) {
-		if (resNet && gameMode === GameMode.PvC) playTurnPvC(action);
-		else playTurnPvP(action);
+		if (resNet && gameMode === GameMode.PvC) playTurnPvC(state, action);
+		else playTurnPvP(state, action);
 	}
 
 	function quitPlaying() {
@@ -180,7 +188,7 @@ export default function Playing({
 			terminalText={terminalText}
 			footer={
 				<footer className={`col-start-2 col-span-1 flex flex-col`}>
-					<Button onClick={handleReturn} key={`return-button`}>
+					<Button onClick={quitPlaying} key={`return-button`}>
 						<p>Return</p>
 					</Button>
 				</footer>
