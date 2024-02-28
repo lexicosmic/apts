@@ -52,7 +52,7 @@ export function getActionFromProbabilities(probabilities: tf.Tensor1D): Action {
 		return tf
 			.multinomial(probabilities, 1, undefined, true)
 			.squeeze()
-			.arraySync() as number;
+			.arraySync() as Action;
 	});
 }
 

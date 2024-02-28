@@ -30,7 +30,7 @@ export function loadGame(gameName: GameName) {
 }
 
 // Retrieve a ResNet model from the Tensorflow IndexedDB, given its path, and pass it to the callback
-export async function retrieveResNetModel(
+export async function retrieveResNetModelOld(
 	game: Game,
 	path: string,
 	callback: (resNet: ResNet) => void
@@ -41,6 +41,13 @@ export async function retrieveResNetModel(
 	callback(resNet);
 }
 
+export async function retrieveResNetModel(game: Game, path: string) {
+	const formattedPath = `indexeddb://${path}`;
+	const model = await tf.loadLayersModel(formattedPath);
+	const resNet = new ResNet(game, { model });
+	return resNet;
+}
+
 export async function exportResNetModel(modelInfo: ModelInfo) {
 	const game = loadGame(modelInfo.game);
 	const fullPath = getFullModelPath(
@@ -48,7 +55,7 @@ export async function exportResNetModel(modelInfo: ModelInfo) {
 		modelInfo.type,
 		modelInfo.innerPath
 	);
-	retrieveResNetModel(game, fullPath, (loadedResNet) => {
+	retrieveResNetModelOld(game, fullPath, (loadedResNet) => {
 		const encodedWeights: string[] = [];
 		loadedResNet.getWeights().forEach((weight) => {
 			encodedWeights.push(btoa(JSON.stringify(weight)));
@@ -112,38 +119,12 @@ export async function importResNetModel(
 	}
 }
 
-export function testTensorflow() {
-	return;
-	tf.tidy(() => {
-		const tensor = tf.tensor([
-			[
-				-0.0081886, -0.0234007, -0.0014502, 0.1438045, 0.0067312, -0.0516381,
-				-0.0702601, 0.1051653, 0.0700726,
-			],
-		]);
-		const validActions = [
-			true,
-			true,
-			true,
-			true,
-			false,
-			true,
-			true,
-			true,
-			true,
-		];
-		const softmax = tf.softmax(tensor, 1);
-		console.log("Softmax");
-		softmax.print();
-		const squeezed = softmax.squeeze();
-		console.log("Squeezed");
-		squeezed.print();
-		const masked = squeezed.mul(tf.tensor(validActions));
-		console.log("Masked");
-		masked.print();
-
-		// tensor.print();
-		// softmax.print();
-		// squeezed.print();
-	});
+export function testApplication() {
+	// tf.tidy(() => {
+	// 	const game = new TicTacToeGame(3, 3);
+	// 	const state = game.getInitialState();
+	// 	const resNet = new ResNet(game, { numResBlocks: 4, numHiddenChannels: 64 });
+	// 	const action = getPredictionDataFromState_Action(state, resNet);
+	// 	console.log(action);
+	// });
 }

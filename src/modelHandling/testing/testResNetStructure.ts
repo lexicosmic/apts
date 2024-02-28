@@ -1,6 +1,6 @@
 import * as tf from "@tensorflow/tfjs";
 import { v4 as uuidv4 } from "uuid";
-import { ModelType, TrainingFunctionParams } from "../../types.js";
+import { ModelType, TrainingParams_StructureBlind_Base } from "../../types.js";
 import { getFormattedDate, standardFileProtocol } from "../../util.js";
 import {
 	getPredictionDataFromState_Policy_Value_Probabilities_Action,
@@ -12,7 +12,7 @@ export default async function testResNetStructure({
 	logMessage,
 	game,
 	fileSystemProtocol = standardFileProtocol,
-}: TrainingFunctionParams) {
+}: TrainingParams_StructureBlind_Base) {
 	// Set state data
 	const date = getFormattedDate(new Date());
 	const state = game.getInitialState();

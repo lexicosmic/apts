@@ -1,4 +1,4 @@
-import { TrainingFunctionParams } from "../../types.js";
+import { TrainingParams_MCTS_Base } from "../../types.js";
 import { getRandomValidAction } from "../../engine/util.js";
 import { State } from "../../engine/Game.js";
 import MonteCarloTreeSearch from "../../engine/MonteCarloTreeCommon.js";
@@ -6,7 +6,7 @@ import MonteCarloTreeSearch from "../../engine/MonteCarloTreeCommon.js";
 export default async function testMCTSCommon({
 	logMessage,
 	game,
-}: TrainingFunctionParams) {
+}: TrainingParams_MCTS_Base) {
 	// Set game and state data
 	const state = game.getInitialState();
 	logMessage("Initial state:");

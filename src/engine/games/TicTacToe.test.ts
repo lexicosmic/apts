@@ -28,7 +28,7 @@ describe("TicTacToe", () => {
 	describe("getNextState", () => {
 		it("should correctly update the state with the player action", () => {
 			const initialState: State = ticTacToe.getInitialState();
-			let nextState: State = State.clone(initialState);
+			let nextState: State = initialState.clone();
 			nextState.performAction(4, Player.X);
 
 			// Expected state after placing X at position (1, 1)

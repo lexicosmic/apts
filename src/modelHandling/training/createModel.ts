@@ -1,14 +1,8 @@
-import { TrainingFunctionParams } from "../../types.js";
+import { TrainingParams_BuildMemoryCreateModel_Base } from "../../types.js";
 import { standardFileProtocol } from "../../util.js";
 import ResNet from "../../engine/ResNet.js";
 import AlphaZero from "../../engine/AlphaZero.js";
 
-export interface CreateModelParams extends TrainingFunctionParams {
-	resNet: ResNet;
-	numSearches: number;
-	explorationConstant: number;
-}
-export type CreateModel = (params: CreateModelParams) => Promise<void>;
 export default async function createModel({
 	logMessage,
 	game,
@@ -16,7 +10,7 @@ export default async function createModel({
 	resNet,
 	numSearches,
 	explorationConstant,
-}: CreateModelParams) {
+}: TrainingParams_BuildMemoryCreateModel_Base) {
 	const alphaZero = new AlphaZero(
 		game,
 		resNet,

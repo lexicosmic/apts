@@ -2,7 +2,7 @@ import { TrainingMemory } from "./engine/AlphaZero";
 import { GameName, ModelInfo } from "./types";
 import { getFullModelPath } from "./util";
 
-const idxdb = window.indexedDB;
+const idxdb = self.indexedDB;
 
 if (!idxdb) {
 	console.log("IndexedDB could not be found in this browser.");

@@ -1,19 +1,8 @@
 import { useEffect, useState } from "react";
-import {
-	GameMode,
-	GameName,
-	ModelInfo,
-	TrainingFunction,
-	TrainingFunctionParams,
-} from "../types";
+import { GameMode, GameName, ModelInfo, WorkName } from "../types";
 import { formatGameName } from "../util";
-import { loadGame, testTensorflow } from "./util";
+import { loadGame } from "./util";
 import Game from "../engine/Game";
-import testMCTSCommon from "../modelHandling/testing/testMCTSCommon";
-import testResNetStructure from "../modelHandling/testing/testResNetStructure";
-import testBlindTraining from "../modelHandling/testing/testBlindTraining";
-import buildTrainingMemory from "../modelHandling/training/buildMemory";
-import createModel from "../modelHandling/training/createModel";
 import PickOption from "./PickOption";
 import Training from "./Training";
 import Playing from "./Playing";
@@ -22,8 +11,6 @@ import ManageModels from "./ManageModels";
 import Disclaimer from "./Disclaimer";
 
 export default function App() {
-	testTensorflow();
-
 	const [gameName, setGameName] = useState<GameName | null>(null);
 	const [action, setAction] = useState<ActionOnGame | null>(null);
 	const [gameMode, setGameMode] = useState<GameMode | null>(null);
@@ -171,10 +158,11 @@ export default function App() {
 										handleClick: () => {
 											setTrain({
 												name: `Build Training Memory`,
-												trainingFunction: buildTrainingMemory,
+												workName: WorkName.BuildMemory,
 												params: {
 													numSearches: 60,
 													explorationConstant: 2,
+													numSelfPlayIterations: 10,
 												},
 											});
 										},
@@ -184,10 +172,11 @@ export default function App() {
 										handleClick: () => {
 											setTrain({
 												name: `Create Model`,
-												trainingFunction: createModel,
+												workName: WorkName.CreateModel,
 												params: {
 													numSearches: 60,
 													explorationConstant: 2,
+													numSelfPlayIterations: 10,
 												},
 											});
 										},
@@ -199,9 +188,9 @@ export default function App() {
 				else
 					return (
 						<Training
-							game={game}
+							gameName={gameName}
 							modelInfo={selectedModelInfo}
-							trainingFunction={train.trainingFunction}
+							workName={train.workName}
 							otherParams={train.params}
 							handleReturn={() => setTrain(null)}
 						/>
@@ -218,7 +207,7 @@ export default function App() {
 									handleClick: () => {
 										setTest({
 											name: `Monte-Carlo Search Test`,
-											testingFunction: testMCTSCommon,
+											workName: WorkName.MCTSCommon,
 										});
 									},
 								},
@@ -227,7 +216,7 @@ export default function App() {
 									handleClick: () => {
 										setTest({
 											name: `ResNet Structure Test`,
-											testingFunction: testResNetStructure,
+											workName: WorkName.Structure,
 										});
 									},
 								},
@@ -236,7 +225,7 @@ export default function App() {
 									handleClick: () => {
 										setTest({
 											name: `Blind Testing Test`,
-											testingFunction: testBlindTraining,
+											workName: WorkName.Blind,
 										});
 									},
 								},
@@ -246,9 +235,9 @@ export default function App() {
 					);
 				return (
 					<Training
-						game={game}
+						gameName={gameName}
 						modelInfo={null}
-						trainingFunction={test.testingFunction}
+						workName={test.workName}
 						otherParams={{}}
 						handleReturn={() => setTest(null)}
 					/>
@@ -302,12 +291,11 @@ enum ActionOnGame {
 	Test = "Test",
 }
 
-type Test = {
+interface Test {
 	name: string;
-	testingFunction: TrainingFunction;
-};
-type Train = {
-	name: string;
-	trainingFunction: TrainingFunction;
-	params: TrainingFunctionParams;
-};
+	workName: WorkName;
+}
+
+interface Train extends Test {
+	params?: any;
+}

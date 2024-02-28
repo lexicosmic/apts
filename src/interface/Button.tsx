@@ -22,11 +22,10 @@ export default function Button({
 	return (
 		<button
 			type={type}
-			disabled={disabled}
 			className={`
 				rounded p-1 font-bold
 				focus:outline-none focus:ring-2 focus:ring-opacity-50
-				disabled:bg-neutral-500 disabled:cursor-default
+				aria-disabled:bg-neutral-500 aria-disabled:cursor-default aria-disabled:pointer-events-none
 				${getColorClasses(color)}
 				${className}
 			`}
@@ -34,6 +33,7 @@ export default function Button({
 			{...(ariaLabel && {
 				"aria-label": ariaLabel,
 			})}
+			aria-disabled={disabled}
 		>
 			{children}
 		</button>

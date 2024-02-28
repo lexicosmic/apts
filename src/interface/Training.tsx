@@ -1,55 +1,60 @@
-import { useState } from "react";
-import { ModelInfo } from "../types";
-import { retrieveResNetModel, useOnMountUnsafe } from "./util";
-import {
-	formatGameName,
-	getFullModelPath,
-	standardFileProtocol,
-} from "../util";
-import Game from "../engine/Game";
+import { useEffect, useState } from "react";
+import { GameName, ModelInfo, WorkName } from "../types";
+import { formatGameName, standardFileProtocol } from "../util";
+import handleWork from "../modelHandling/handleWork?worker&url";
 import TerminalPage from "./TerminalPage";
-import ResNet from "../engine/ResNet";
+import { HandleWorkParams } from "../modelHandling/handleWork";
 
 interface TrainingProps {
-	game: Game;
-	trainingFunction: Function;
+	gameName: GameName;
+	workName: WorkName;
 	modelInfo: ModelInfo | null;
 	otherParams: any;
 	handleReturn: () => void;
 }
 
 export default function Training({
-	game,
-	trainingFunction,
+	gameName,
+	workName,
 	modelInfo,
 	otherParams,
 	handleReturn,
 }: TrainingProps) {
 	const [terminalText, setTerminalText] = useState<string>(``);
 	const [buttonDisabled, setButtonDisabled] = useState<boolean>(true);
+	const [worker, setWorker] = useState<Worker | null>(null);
 
-	useOnMountUnsafe(() => {
-		setButtonDisabled(true);
-		if (modelInfo !== null) {
-			const modelPath = getFullModelPath(
-				modelInfo.game,
-				modelInfo.type,
-				modelInfo.innerPath
-			);
-			retrieveResNetModel(game, modelPath, (loadedModel) => {
-				performTraining(loadedModel);
-			});
-		} else performTraining();
-	});
+	useEffect(() => {
+		const worker = new Worker(handleWork, { type: "module" });
+		setWorker(worker);
 
-	async function performTraining(resNet?: ResNet) {
-		await trainingFunction({
-			logMessage: writeToTerminal,
-			game,
+		return () => {
+			worker.terminate();
+		};
+	}, []);
+
+	useEffect(() => {
+		if (worker === null) return;
+		worker.onmessage = (e) => {
+			writeToTerminal(e.data);
+		};
+		worker.onerror = (e) => {
+			writeToTerminal(e.toString());
+			setButtonDisabled(false);
+		};
+		if (modelInfo === null) performTraining(worker);
+		else performTraining(worker, modelInfo);
+	}, [worker]);
+
+	async function performTraining(worker: Worker, modelInfo?: ModelInfo) {
+		const params: HandleWorkParams = {
+			workName,
+			gameName,
 			fileSystemProtocol: standardFileProtocol,
-			resNet,
+			modelInfo,
 			...otherParams,
-		});
+		};
+		worker.postMessage(params);
 		setButtonDisabled(false);
 	}
 
@@ -65,7 +70,7 @@ export default function Training({
 	return (
 		<TerminalPage
 			title={`Training`}
-			subtitle={formatGameName(game.getName())}
+			subtitle={formatGameName(gameName)}
 			terminalText={terminalText}
 			handleReturn={quitTraining}
 			returnButtonDisabled={buttonDisabled}

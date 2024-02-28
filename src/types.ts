@@ -1,8 +1,8 @@
 import * as tf from "@tensorflow/tfjs";
 import Game from "./engine/Game";
-import { BuildTrainingMemory } from "./modelHandling/training/buildMemory";
-import { CreateModel } from "./modelHandling/training/createModel";
+import ResNet from "./engine/ResNet";
 
+/// Common
 export type TensorLikeArray =
 	| number
 	| number[]
@@ -12,7 +12,6 @@ export type TensorLikeArray =
 	| number[][][][][]
 	| number[][][][][][];
 
-/// Common
 export enum GameName {
 	TicTacToe = "tictactoe",
 	ConnectFour = "connect4",
@@ -37,6 +36,14 @@ export type LogMessage = (message: string) => void;
 // 	numSelfPlayIterations: number;
 // }
 
+export enum WorkName {
+	MCTSCommon = "testMCTSCommon",
+	Structure = "testResNetStructure",
+	Blind = "testBlindTraining",
+	BuildMemory = "buildTrainingMemory",
+	CreateModel = "createModel",
+}
+
 export interface TrainModelParams {
 	numIterations: number;
 	numEpochs: number;
@@ -44,13 +51,41 @@ export interface TrainModelParams {
 	learningRate: number;
 }
 
-interface CommonTrainingFunctionParams {
+export interface TrainingParams_MCTS_Base {
 	logMessage: LogMessage;
 	game: Game;
+}
+export interface TrainingParams_MCTS extends TrainingParams_MCTS_Base {
+	workName: WorkName.MCTSCommon;
+}
+
+export interface TrainingParams_StructureBlind_Base
+	extends TrainingParams_MCTS_Base {
 	fileSystemProtocol: string;
 }
-export type TrainingFunctionParams = CommonTrainingFunctionParams & any;
-export type TrainingFunction = (params: TrainingFunctionParams) => Promise<any>;
+export interface TrainingParams_StructureBlind
+	extends TrainingParams_StructureBlind_Base {
+	workName: WorkName.Structure | WorkName.Blind;
+}
+
+export interface TrainingParams_BuildMemoryCreateModel_Base
+	extends TrainingParams_StructureBlind_Base {
+	resNet: ResNet;
+	numSearches: number;
+	explorationConstant: number;
+	numSelfPlayIterations: number;
+}
+export interface TrainingParams_BuildMemoryCreateModel
+	extends TrainingParams_BuildMemoryCreateModel_Base {
+	workName: WorkName.BuildMemory | WorkName.CreateModel;
+}
+
+export type TrainingParams =
+	| TrainingParams_MCTS
+	| TrainingParams_StructureBlind
+	| TrainingParams_BuildMemoryCreateModel;
+
+// export type TrainingFunction = (params: TrainingFunctionParams) => Promise<any>;
 
 /// Export
 // export type ParamsToExport_TrainingData = SelfPlayMemoryParams & {
@@ -73,23 +108,23 @@ export enum ModelType {
 	Uploaded = "uploaded",
 }
 
-export type ModelInfo = {
+export interface ModelInfo {
 	game: GameName;
 	type: ModelType;
 	innerPath: string;
 	name: string;
-};
+}
 
-export type ModelFileContent = ModelInfo & {
+export interface ModelFileContent extends ModelInfo {
 	layersModel: tf.LayersModel;
 	weights: Float32Array[];
-};
+}
 
-export type SerializedModel = {
+export interface SerializedModel {
 	game: string;
 	type: string;
 	innerPath: string;
 	name: string;
 	layersModel: string;
 	weights: string[];
-};
+}

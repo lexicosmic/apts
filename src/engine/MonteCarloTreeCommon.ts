@@ -112,7 +112,7 @@ class MonteCarloNode {
 		this.expandableActions[selectedAction] = false;
 
 		// Copy the state and play the action on the copy
-		let childState = State.clone(this.state);
+		let childState = this.state.clone();
 		childState.performAction(selectedAction, Player.X);
 		childState.changePerspective(Player.X, Player.O);
 
@@ -137,7 +137,7 @@ class MonteCarloNode {
 		if (isTerminal) return value;
 
 		// Copy the state and play random actions, with alternate players, until the game is over
-		let rolloutState = State.clone(this.state);
+		let rolloutState = this.state.clone();
 		let rolloutPlayer = Player.X;
 		while (true) {
 			const selectedAction = this.pickRandomAction();
