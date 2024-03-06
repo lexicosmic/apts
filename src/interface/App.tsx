@@ -5,7 +5,6 @@ import { formatGameName, standardFileProtocol } from "../util";
 import PickOption from "./PickOption";
 import Training from "./Training";
 import Playing from "./Playing";
-import ManageModels from "./ManageModels";
 import Disclaimer from "./Disclaimer";
 import Button from "./Button";
 import Icon from "./Icon";
@@ -56,14 +55,6 @@ export default function App() {
 			);
 		if (showMenuScreen)
 			return (
-				// <ManageModels
-				// 	gameName={gameName}
-				// 	selectedModel={selectedModelInfo}
-				// 	setSelectedModel={setSelectedModelInfo}
-				// 	handleReturn={() => {
-				// 		setShowMenuScreen(false);
-				// 	}}
-				// />
 				<Menu
 					gameName={gameName}
 					setShowMenuScreen={setShowMenuScreen}
@@ -252,7 +243,7 @@ export default function App() {
 		<>
 			<article className={`h-full text-white bg-neutral-900 flex flex-col`}>
 				{!showMenuScreen && (
-					<header className={`pt-2 px-2 grid grid-cols-3 grid-rows-1`}>
+					<header className={`pt-2 px-2 grid`}>
 						<h1 className={`text-4xl col-start-2 m-auto`}>
 							<span className={`hidden sm:block`}>Auto Playtest System</span>
 							<span className={`sm:hidden`}>APTS</span>

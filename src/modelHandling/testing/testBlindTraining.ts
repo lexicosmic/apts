@@ -1,6 +1,6 @@
 import * as tf from "@tensorflow/tfjs";
 import { v4 as uuidv4 } from "uuid";
-import { TrainingParams_StructureBlind_Base } from "../types.js";
+import { JobParams_StructureBlind_Base } from "../types.js";
 import { ModelType } from "../../types.js";
 import { getFormattedDate, standardFileProtocol } from "../../util.js";
 import Game from "../../engine/Game.js";
@@ -10,7 +10,7 @@ export default async function testBlindTraining({
 	logMessage,
 	game,
 	fileSystemProtocol = standardFileProtocol,
-}: TrainingParams_StructureBlind_Base) {
+}: JobParams_StructureBlind_Base) {
 	// Set state data
 	const randomId = uuidv4();
 	const date = getFormattedDate(new Date());

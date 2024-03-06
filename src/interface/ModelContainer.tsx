@@ -87,7 +87,7 @@ export default function ModelContainer({
 				{modelInfo.innerPath}
 			</p>
 			<div
-				className={`w-fit h-fit ml-auto col-start-2 row-start-1 row-span-3 2xs:row-span-2 gap-1 grid 2xs:grid-rows-2 2xs:grid-cols-2`}
+				className={`w-max h-max ml-auto col-start-2 row-start-1 row-span-3 2xs:row-span-2 gap-1 grid 2xs:grid-rows-2 2xs:grid-cols-2`}
 			>
 				{isEditing ? (
 					<>

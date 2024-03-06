@@ -1,11 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import { GameName, ModelInfo } from "../types";
 import { importResNetModel } from "./util";
-import {
-	getFullModelPath,
-	formatGameName,
-	standardFileProtocol,
-} from "../util";
+import { getFullModelPath, standardFileProtocol } from "../util";
 import { DBOperations_Models } from "../database";
 import ResNet from "../engine/ResNet";
 import ModelContainer from "./ModelContainer";
@@ -13,19 +9,18 @@ import { ModalWithHeader } from "./Modal";
 import Icon from "./Icon";
 import ButtonGroup from "./ButtonGroup";
 import FileInput from "./FileInput";
+import Button from "./Button";
 
 interface ManageModelsProps {
 	gameName: GameName;
 	selectedModel: ModelInfo | null;
 	setSelectedModel: (model: ModelInfo | null) => void;
-	handleReturn: () => void;
 }
 
 export default function ManageModels({
 	gameName,
 	selectedModel,
 	setSelectedModel,
-	handleReturn,
 }: ManageModelsProps) {
 	const [models, setModels] = useState<ModelInfo[]>([]);
 	const [isUploadingModel, setIsUploadingModel] = useState(false);
@@ -106,54 +101,23 @@ export default function ManageModels({
 	}
 
 	return (
-		<article
-			className={`w-full py-2 flex-grow
-						bg-indigo-950
-						gap-2 grid`}
-			style={{
-				gridTemplateColumns: "1fr auto 1fr",
-				gridTemplateRows: "auto 1fr auto",
-			}}
-		>
-			<header className={`col-start-2 col-span-1 text-center`}>
-				<h1 className={`text-4xl`} key={`title`}>
+		<article className={`text-white bg-neutral-900 h-full`}>
+			<header className={`text-center px-2 py-1 flex justify-between`}>
+				<h1 className={`text-2xl`} key={`title`}>
 					Manage models
 				</h1>
-			</header>
-			<section className={`col-start-1 col-span-3 mx-2 flex flex-col`}>
-				<div
-					className={`basis-px min-h-full overflow-scroll flex flex-col gap-2`}
+				<Button
+					onClick={() => setIsUploadingModel(true)}
+					color={`indigo`}
+					ariaLabel={`Upload model`}
 				>
-					{modelContainers}
-				</div>
+					<Icon name={`file-earmark-arrow-up`} />
+				</Button>
+			</header>
+			<section className={`mx-2 mb-2`}>
+				<div className={`flex flex-col gap-2`}>{modelContainers}</div>
 			</section>
-			<footer className={`col-start-2 col-span-1`}>
-				<ButtonGroup
-					orientation={`horizontal`}
-					options={[
-						{
-							content: (
-								<p className={`flex justify-center gap-0.5`}>
-									<Icon name={`file-earmark-arrow-up`} />
-									Upload
-								</p>
-							),
-							color: `indigo`,
-							handleClick: () => setIsUploadingModel(true),
-						},
-						{
-							content: (
-								<p className={`flex justify-center gap-0.5`}>
-									{/* <Icon name={`arrow-left-short`} /> */}
-									Return
-								</p>
-							),
-							color: `light`,
-							handleClick: handleReturn,
-						},
-					]}
-				/>
-			</footer>
+			<footer className={``}></footer>
 			{isUploadingModel && (
 				<ModalWithHeader
 					id={`upload-model`}
@@ -201,17 +165,6 @@ export default function ManageModels({
 									accept={`application/json`}
 								/>
 							</div>
-							{/* <div className={`flex flex-col`}>
-								<label htmlFor={`input-file-weights`}>
-									<p className={`text-lg`}>Weights</p>
-								</label>
-								<FileInput
-									ref={weightsInput}
-									id={`input-file-weights`}
-									name={`weights`}
-									accept={`.bin`}
-								/>
-							</div> */}
 						</form>
 					</section>
 				</ModalWithHeader>

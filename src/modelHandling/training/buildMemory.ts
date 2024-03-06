@@ -1,4 +1,4 @@
-import { TrainingParams_BuildMemoryCreateModel_Base } from "../types.js";
+import { JobParams_BuildMemoryCreateModel_Base } from "../types.js";
 import Trainer from "../../engine/Trainer.js";
 
 export default async function buildTrainingMemory({
@@ -8,7 +8,7 @@ export default async function buildTrainingMemory({
 	numSearches,
 	explorationConstant,
 	numSelfPlayIterations,
-}: TrainingParams_BuildMemoryCreateModel_Base) {
+}: JobParams_BuildMemoryCreateModel_Base) {
 	const trainer = new Trainer(game, resNet, numSearches, explorationConstant);
 
 	logMessage("=-= APTS BUILDING MEMORY =-=");
