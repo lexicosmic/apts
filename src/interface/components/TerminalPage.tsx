@@ -37,7 +37,7 @@ export default function TerminalPage({
 				<Terminal text={terminalText} className={`flex-grow`} />
 				<div className={`basis-0`}>{children}</div>
 			</section>
-			{footer}			
+			{footer}
 		</article>
 	);
 }

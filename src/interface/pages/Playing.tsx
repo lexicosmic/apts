@@ -1,16 +1,16 @@
 import { useEffect, useState } from "react";
-import { GameMode, GameName, ModelInfo } from "../types";
+import { GameMode, GameName, ModelInfo } from "../../types";
 import {
 	getFullModelPath,
 	formatGameName,
 	retrieveResNetModel,
 	loadGame,
-} from "../util";
-import { getPredictionDataFromState_Action } from "../engine/util";
-import Game, { Action, Player, State } from "../engine/Game";
-import ResNet from "../engine/ResNet";
-import TerminalPage from "./TerminalPage";
-import Button from "./Button";
+} from "../../util";
+import { getPredictionDataFromState_Action } from "../../engine/util";
+import Game, { Action, Player, State } from "../../engine/Game";
+import ResNet from "../../engine/ResNet";
+import TerminalPage from "../components/TerminalPage";
+import Button from "../components/Button";
 
 interface PlayingProps {
 	gameName: GameName;

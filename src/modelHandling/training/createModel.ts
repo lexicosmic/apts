@@ -11,6 +11,8 @@ export default async function createModel({
 	explorationConstant,
 }: TrainingParams_BuildMemoryCreateModel_Base) {
 	const trainer = new Trainer(game, resNet, numSearches, explorationConstant);
+	logMessage("=-= APTS LEARNING =-=");
+
 	// const trainingMemoryBatch = buildTrainingMemory({
 	// 	logMessage,
 	// 	game,

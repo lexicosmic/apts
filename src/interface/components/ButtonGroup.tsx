@@ -1,5 +1,5 @@
 import { HTMLAttributes } from "react";
-import { FontSize } from "./types";
+import { FontSize } from "../types";
 import Button, { ButtonProps } from "./Button";
 
 export interface ButtonGroupOption {

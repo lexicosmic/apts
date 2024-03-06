@@ -1,11 +1,11 @@
 import { useRef, useState } from "react";
-import { ModelInfo, SerializedModel } from "../types";
-import { capitalizeFirstLetter, getFullModelPath } from "../util";
-import { DBOperations_Models } from "../database";
+import { ModelInfo, SerializedModel } from "../../types";
+import { capitalizeFirstLetter, getFullModelPath } from "../../util";
+import { DBOperations_Models } from "../../database";
 import Button from "./Button";
 import { ConfirmExclusionModal } from "./Modal";
 import Icon from "./Icon";
-import { exportResNetModel } from "./util";
+import { exportResNetModel } from "../util";
 
 interface ModelContainerProps {
 	modelInfo: ModelInfo;

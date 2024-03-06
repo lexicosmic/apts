@@ -11,7 +11,7 @@ export default async function buildTrainingMemory({
 }: TrainingParams_BuildMemoryCreateModel_Base) {
 	const trainer = new Trainer(game, resNet, numSearches, explorationConstant);
 
-	logMessage("=-=-=-=-=-=-=-= APTS BUILDING MEMORY =-=-=-=-=-=-=-=");
+	logMessage("=-= APTS BUILDING MEMORY =-=");
 	const trainingMemoryPromise = await trainer.buildTrainingMemory({
 		numSelfPlayIterations,
 		progressStep: 1,

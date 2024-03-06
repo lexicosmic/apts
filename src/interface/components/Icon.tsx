@@ -1,4 +1,4 @@
-import { FontSize } from "./types";
+import { FontSize } from "../types";
 
 interface IconProps {
 	name: string;

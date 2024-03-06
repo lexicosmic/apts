@@ -1,18 +1,18 @@
 import { useEffect, useRef, useState } from "react";
-import { GameName, ModelInfo } from "../types";
-import { importResNetModel } from "./util";
+import { GameName, ModelInfo } from "../../types";
+import { importResNetModel } from "../util";
 import {
 	getFullModelPath,
 	formatGameName,
 	standardFileProtocol,
-} from "../util";
-import { DBOperations_Models } from "../database";
-import ResNet from "../engine/ResNet";
-import ModelContainer from "./ModelContainer";
-import { ModalWithHeader } from "./Modal";
-import Icon from "./Icon";
-import ButtonGroup from "./ButtonGroup";
-import FileInput from "./FileInput";
+} from "../../util";
+import { DBOperations_Models } from "../../database";
+import ResNet from "../../engine/ResNet";
+import ModelContainer from "../components/ModelContainer";
+import { ModalWithHeader } from "../components/Modal";
+import Icon from "../components/Icon";
+import ButtonGroup from "../components/ButtonGroup";
+import FileInput from "../components/FileInput";
 
 interface ManageModelsProps {
 	gameName: GameName;

@@ -25,14 +25,14 @@ export enum GameMode {
 /// Engine
 export type LogMessage = (message: string) => void;
 
-// export interface MonteCarloTreeSearchParams {
-// 	readonly numSearches: number;
-// 	readonly explorationConstant: number;
-// }
+export interface MonteCarloTreeSearchParams {
+	readonly numSearches: number;
+	readonly explorationConstant: number;
+}
 
-// export interface SelfPlayMemoryParams extends MonteCarloTreeSearchParams {
-// 	numSelfPlayIterations: number;
-// }
+export interface SelfPlayMemoryParams extends MonteCarloTreeSearchParams {
+	numSelfPlayIterations: number;
+}
 
 export interface TrainModelParams {
 	numIterations: number;
@@ -41,7 +41,6 @@ export interface TrainModelParams {
 	learningRate: number;
 }
 
-// export type TrainingFunction = (params: TrainingFunctionParams) => Promise<any>;
 
 /// Export
 // export type ParamsToExport_TrainingData = SelfPlayMemoryParams & {
