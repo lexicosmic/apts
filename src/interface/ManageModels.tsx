@@ -119,9 +119,6 @@ export default function ManageModels({
 				<h1 className={`text-4xl`} key={`title`}>
 					Manage models
 				</h1>
-				<p className={`text-2xl font-light`} key={`subtitle`}>
-					{formatGameName(gameName)}
-				</p>
 			</header>
 			<section className={`col-start-1 col-span-3 mx-2 flex flex-col`}>
 				<div

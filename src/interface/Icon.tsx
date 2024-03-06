@@ -1,8 +1,6 @@
-import { FontSize } from "./types";
-
 interface IconProps {
 	name: string;
-	fontSize?: FontSize;
+	fontSize?: string;
 	ariaLabel?: React.AriaAttributes["aria-label"];
 }
 
@@ -17,7 +15,7 @@ export default function Icon({
 				"aria-label": ariaLabel,
 			})}
 			aria-hidden={ariaLabel ? `false` : `true`}
-			className={`bi bi-${name} ${fontSize} flex leading-none justify-center items-center aspect-square `}
+			className={`bi bi-${name} ${fontSize} sm:text-xl flex leading-none justify-center items-center aspect-square `}
 		/>
 	);
 }

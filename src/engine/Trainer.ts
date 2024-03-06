@@ -207,8 +207,6 @@ export default class Trainer {
 		trainModelParams: TrainModelParams;
 		trainingMemoryArray?: TrainingMemory[];
 	}): Promise<void> {
-		logMessage("=-=-=-=-=-=-=-= APTS LEARNING =-=-=-=-=-=-=-=");
-
 		for (let i = 0; i < trainModelParams.numIterations; i++) {
 			logMessage(`ITERATION ${i + 1}/${trainModelParams.numIterations}`);
 			// let memory;

@@ -1,13 +1,15 @@
 import { useEffect, useState } from "react";
 import { GameMode, GameName, ModelInfo } from "../types";
+import { HandleWorkParams, JobName } from "../modelHandling/types";
 import { formatGameName, standardFileProtocol } from "../util";
-import { HandleWorkParams, WorkName } from "../modelHandling/types";
 import PickOption from "./PickOption";
 import Training from "./Training";
 import Playing from "./Playing";
-import Anchor from "./Anchor";
 import ManageModels from "./ManageModels";
 import Disclaimer from "./Disclaimer";
+import Button from "./Button";
+import Icon from "./Icon";
+import Menu from "./Menu";
 
 export default function App() {
 	const [gameName, setGameName] = useState<GameName | null>(null);
@@ -18,25 +20,24 @@ export default function App() {
 	const [selectedModelInfo, setSelectedModelInfo] = useState<ModelInfo | null>(
 		null
 	);
-	const [showManageModelsScreen, setShowManageModelsScreen] =
-		useState<boolean>(false);
+	const [showMenuScreen, setShowMenuScreen] = useState<boolean>(false);
 
-	let showHeader =
-		gameMode === null && handleWorkParams === null && !showManageModelsScreen;
-	let showFooter =
-		gameName !== null && !showManageModelsScreen && gameMode !== GameMode.PvP;
-	let isManageModelsButtonDisabled =
-		(action === ActionOnGame.Play &&
-			gameMode !== null &&
-			selectedModelInfo !== null) ||
-		((action === ActionOnGame.Train || action === ActionOnGame.Test) &&
-			handleWorkParams !== null);
+	const isMenuButtonDisabled = (): boolean => {
+		return (
+			gameName === null ||
+			(action === ActionOnGame.Play &&
+				gameMode !== null &&
+				selectedModelInfo !== null) ||
+			((action === ActionOnGame.Train || action === ActionOnGame.Test) &&
+				handleWorkParams !== null)
+		);
+	};
 
 	useEffect(() => {
 		if (gameName === null) setSelectedModelInfo(null);
 	}, [gameName]);
 
-	function getMainContent() {
+	function getMainContent(): JSX.Element {
 		if (gameName === null)
 			return (
 				<PickOption
@@ -53,15 +54,21 @@ export default function App() {
 					]}
 				/>
 			);
-		if (showManageModelsScreen)
+		if (showMenuScreen)
 			return (
-				<ManageModels
+				// <ManageModels
+				// 	gameName={gameName}
+				// 	selectedModel={selectedModelInfo}
+				// 	setSelectedModel={setSelectedModelInfo}
+				// 	handleReturn={() => {
+				// 		setShowMenuScreen(false);
+				// 	}}
+				// />
+				<Menu
 					gameName={gameName}
+					setShowMenuScreen={setShowMenuScreen}
 					selectedModel={selectedModelInfo}
 					setSelectedModel={setSelectedModelInfo}
-					handleReturn={() => {
-						setShowManageModelsScreen(false);
-					}}
 				/>
 			);
 		if (action === null)
@@ -151,7 +158,7 @@ export default function App() {
 										name: `Build Training Memory`,
 										handleClick: () => {
 											setHandleWorkParams({
-												workName: WorkName.BuildMemory,
+												jobName: JobName.BuildMemory,
 												gameName: gameName,
 												fileSystemProtocol: standardFileProtocol,
 												modelInfo: selectedModelInfo,
@@ -165,7 +172,7 @@ export default function App() {
 										name: `Create Model`,
 										handleClick: () => {
 											setHandleWorkParams({
-												workName: WorkName.CreateModel,
+												jobName: JobName.CreateModel,
 												gameName: gameName,
 												fileSystemProtocol: standardFileProtocol,
 												modelInfo: selectedModelInfo,
@@ -197,7 +204,7 @@ export default function App() {
 									name: `Monte-Carlo Search Test`,
 									handleClick: () => {
 										setHandleWorkParams({
-											workName: WorkName.MCTSCommon,
+											jobName: JobName.MCTSCommon,
 											gameName: gameName,
 										});
 									},
@@ -206,7 +213,7 @@ export default function App() {
 									name: `ResNet Structure Test`,
 									handleClick: () => {
 										setHandleWorkParams({
-											workName: WorkName.Structure,
+											jobName: JobName.Structure,
 											gameName: gameName,
 											fileSystemProtocol: standardFileProtocol,
 										});
@@ -216,7 +223,7 @@ export default function App() {
 									name: `Blind Testing Test`,
 									handleClick: () => {
 										setHandleWorkParams({
-											workName: WorkName.Blind,
+											jobName: JobName.Blind,
 											gameName: gameName,
 											fileSystemProtocol: standardFileProtocol,
 										});
@@ -244,32 +251,28 @@ export default function App() {
 	return (
 		<>
 			<article className={`h-full text-white bg-neutral-900 flex flex-col`}>
-				{showHeader && (
-					<header className={`mt-1 flex justify-center`}>
-						<h1 className={`text-4xl`}>
-							<span className={`hidden sm:block `}>Auto Playtest System</span>
+				{!showMenuScreen && (
+					<header className={`pt-2 px-2 grid grid-cols-3 grid-rows-1`}>
+						<h1 className={`text-4xl col-start-2 m-auto`}>
+							<span className={`hidden sm:block`}>Auto Playtest System</span>
 							<span className={`sm:hidden`}>APTS</span>
 						</h1>
+						<Button
+							onClick={() => {
+								setShowMenuScreen(true);
+							}}
+							disabled={isMenuButtonDisabled()}
+							color={`light`}
+							className={`col-start-3 h-min w-min ml-auto aspect-square`}
+							ariaLabel={`Open menu to manage models and data`}
+						>
+							<Icon name={`list`} />
+						</Button>
 					</header>
 				)}
 				<main className={`flex-grow flex flex-col justify-center items-center`}>
 					{getMainContent()}
 				</main>
-				{showFooter && (
-					<footer className={`flex justify-center`}>
-						<Anchor
-							onClick={() => {
-								setShowManageModelsScreen(true);
-							}}
-							disabled={isManageModelsButtonDisabled}
-							color={`light`}
-						>
-							<p className={`text-lg text-center font-mono`}>
-								{selectedModelInfo ? selectedModelInfo.name : `No loaded model`}
-							</p>
-						</Anchor>
-					</footer>
-				)}
 			</article>
 		</>
 	);

@@ -2,7 +2,7 @@ import { GameName, LogMessage, ModelInfo } from "../types";
 import Game from "../engine/Game";
 import ResNet from "../engine/ResNet";
 
-export enum WorkName {
+export enum JobName {
 	MCTSCommon = "testMCTSCommon",
 	Structure = "testResNetStructure",
 	Blind = "testBlindTraining",
@@ -11,46 +11,45 @@ export enum WorkName {
 }
 
 /// Parameters of the functions that perform some work related to models
-export interface TrainingParams_MCTS_Base {
+export interface JobParams_MCTS_Base {
 	logMessage: LogMessage;
 	game: Game;
 }
-export interface TrainingParams_MCTS extends TrainingParams_MCTS_Base {
-	workName: WorkName.MCTSCommon;
+export interface JobParams_MCTS extends JobParams_MCTS_Base {
+	jobName: JobName.MCTSCommon;
 }
 
-export interface TrainingParams_StructureBlind_Base
-	extends TrainingParams_MCTS_Base {
+export interface JobParams_StructureBlind_Base extends JobParams_MCTS_Base {
 	fileSystemProtocol: string;
 }
-export interface TrainingParams_StructureBlind
-	extends TrainingParams_StructureBlind_Base {
-	workName: WorkName.Structure | WorkName.Blind;
+export interface JobParams_StructureBlind
+	extends JobParams_StructureBlind_Base {
+	jobName: JobName.Structure | JobName.Blind;
 }
 
-export interface TrainingParams_BuildMemoryCreateModel_Base
-	extends TrainingParams_StructureBlind_Base {
+export interface JobParams_BuildMemoryCreateModel_Base
+	extends JobParams_StructureBlind_Base {
 	resNet: ResNet;
 	numSearches: number;
 	explorationConstant: number;
 	numSelfPlayIterations: number;
 }
-export interface TrainingParams_BuildMemoryCreateModel
-	extends TrainingParams_BuildMemoryCreateModel_Base {
-	workName: WorkName.BuildMemory | WorkName.CreateModel;
+export interface JobParams_BuildMemoryCreateModel
+	extends JobParams_BuildMemoryCreateModel_Base {
+	jobName: JobName.BuildMemory | JobName.CreateModel;
 }
 
-export type TrainingParams =
-	| TrainingParams_MCTS
-	| TrainingParams_StructureBlind
-	| TrainingParams_BuildMemoryCreateModel;
+export type JobParams =
+	| JobParams_MCTS
+	| JobParams_StructureBlind
+	| JobParams_BuildMemoryCreateModel;
 
 /// Parameters of the handlers that call the functions that perform some work related to models
 interface HandleWorkParams_MCTS_Base {
 	gameName: GameName;
 }
 interface HandleWorkParams_MCTS extends HandleWorkParams_MCTS_Base {
-	workName: WorkName.MCTSCommon;
+	jobName: JobName.MCTSCommon;
 }
 
 interface HandleWorkParams_StructureBlind_Base
@@ -59,7 +58,7 @@ interface HandleWorkParams_StructureBlind_Base
 }
 interface HandleWorkParams_TestResNetStructure
 	extends HandleWorkParams_StructureBlind_Base {
-	workName: WorkName.Structure | WorkName.Blind;
+	jobName: JobName.Structure | JobName.Blind;
 }
 
 interface HandleWorkParams_BuildMemoryCreateModel_Base
@@ -71,7 +70,7 @@ interface HandleWorkParams_BuildMemoryCreateModel_Base
 }
 interface HandleWorkParams_BuildMemoryCreateModel
 	extends HandleWorkParams_BuildMemoryCreateModel_Base {
-	workName: WorkName.BuildMemory | WorkName.CreateModel;
+	jobName: JobName.BuildMemory | JobName.CreateModel;
 }
 
 export type HandleWorkParams =

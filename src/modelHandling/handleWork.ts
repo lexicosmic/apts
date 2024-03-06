@@ -1,6 +1,6 @@
 import {
 	HandleWorkParams,
-	WorkName,
+	JobName,
 	WorkerMessage,
 	WorkerStatus,
 } from "./types";
@@ -18,8 +18,8 @@ self.onmessage = async (e) => {
 	const params: HandleWorkParams = e.data;
 	const game = loadGame(params.gameName);
 
-	switch (params.workName) {
-		case WorkName.MCTSCommon: {
+	switch (params.jobName) {
+		case JobName.MCTSCommon: {
 			const promise = testMCTSCommon({
 				logMessage: (text) => sendWorkingMessage(text),
 				game,
@@ -29,7 +29,7 @@ self.onmessage = async (e) => {
 				.catch((error) => sendErrorMessage(error.toString()));
 			break;
 		}
-		case WorkName.Structure: {
+		case JobName.Structure: {
 			const { fileSystemProtocol } = params;
 			const promise = testResNetStructure({
 				logMessage: (text) => sendWorkingMessage(text),
@@ -41,7 +41,7 @@ self.onmessage = async (e) => {
 				.catch((error) => sendErrorMessage(error.toString()));
 			break;
 		}
-		case WorkName.Blind: {
+		case JobName.Blind: {
 			const { fileSystemProtocol } = params;
 			const promise = testBlindTraining({
 				logMessage: (text) => sendWorkingMessage(text),
@@ -53,7 +53,7 @@ self.onmessage = async (e) => {
 				.catch((error) => sendErrorMessage(error.toString()));
 			break;
 		}
-		case WorkName.BuildMemory: {
+		case JobName.BuildMemory: {
 			let resNet = await getResNet(game, params.modelInfo);
 			const {
 				fileSystemProtocol,
@@ -75,7 +75,7 @@ self.onmessage = async (e) => {
 				.catch((error) => sendErrorMessage(error.toString()));
 			break;
 		}
-		case WorkName.CreateModel: {
+		case JobName.CreateModel: {
 			let resNet = await getResNet(game, params.modelInfo);
 			const {
 				fileSystemProtocol,
@@ -98,7 +98,7 @@ self.onmessage = async (e) => {
 			break;
 		}
 		default: {
-			throw new Error(`Unknown workName`);
+			throw new Error(`Unknown jobName`);
 		}
 	}
 };
@@ -111,9 +111,9 @@ function sendWorkingMessage(text: string) {
 	sendMessage(message);
 }
 
-function sendFinishedMessage(legibleWorkName: string) {
+function sendFinishedMessage(legibleJobName: string) {
 	const message = {
-		text: `${legibleWorkName} finished!`,
+		text: `${legibleJobName} finished!`,
 		status: WorkerStatus.Finished,
 	};
 	sendMessage(message);

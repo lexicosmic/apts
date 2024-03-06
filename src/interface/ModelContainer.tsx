@@ -139,7 +139,7 @@ export default function ModelContainer({
 							className={`min-w-max`}
 							ariaLabel={`Edit model`}
 						>
-							<Icon name={`pencil-fill`} fontSize="text-xl" />
+							<Icon name={`pencil-fill`} fontSize={`text-xl`} />
 						</Button>
 						<Button
 							color={`red`}

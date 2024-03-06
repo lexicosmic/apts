@@ -1,3 +1,5 @@
+export type ScreenSize = `2xs` | `xs` | `sm` | `md` | `lg` | `xl` | `2xl`;
+
 export type FontSize =
 	| `text-xs`
 	| `text-sm`
