@@ -81,7 +81,11 @@ self.onmessage = async (e) => {
 				fileSystemProtocol,
 				numSearches,
 				explorationConstant,
-				numSelfPlayIterations,
+				maxNumIterations,
+				numEpochs,
+				batchSize,
+				learningRate,
+				trainingMemories,
 			} = params;
 			const promise = createModel({
 				logMessage: (text) => sendWorkingMessage(text),
@@ -90,7 +94,11 @@ self.onmessage = async (e) => {
 				resNet,
 				numSearches,
 				explorationConstant,
-				numSelfPlayIterations,
+				maxNumIterations,
+				numEpochs,
+				batchSize,
+				learningRate,
+				trainingMemories,
 			});
 			promise
 				.then(() => sendFinishedMessage("Model creation"))

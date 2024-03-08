@@ -30,14 +30,20 @@ export default function App() {
 			(action === ActionOnGame.Play &&
 				gameMode !== null &&
 				selectedModelInfo !== null) ||
-			((action === ActionOnGame.Train || action === ActionOnGame.Test) &&
-				handleWorkParams !== null)
+			(action === ActionOnGame.Test && handleWorkParams !== null) ||
+			(action === ActionOnGame.Train &&
+				handleWorkParams !== null &&
+				(handleWorkParams.jobName === JobName.CreateModel
+					? selectedMemory !== null
+					: true))
 		);
 	};
 
 	useEffect(() => {
 		if (gameName === null) setSelectedModelInfo(null);
 	}, [gameName]);
+
+	console.log(selectedMemory);
 
 	function getMainContent(): JSX.Element {
 		if (gameName === null)
@@ -174,7 +180,11 @@ export default function App() {
 												modelInfo: selectedModelInfo,
 												numSearches: 60,
 												explorationConstant: 2,
-												numSelfPlayIterations: 1,
+												maxNumIterations: 1,
+												numEpochs: 10,
+												batchSize: 64,
+												learningRate: 0.01,
+												trainingMemories: [selectedMemory?.trainingMemory],
 											});
 										},
 									},
@@ -182,6 +192,18 @@ export default function App() {
 								handleReturn={() => setAction(null)}
 							/>
 						);
+				else if (
+					handleWorkParams.jobName === JobName.CreateModel &&
+					selectedMemory === null
+				)
+					return (
+						<Disclaimer
+							title={`Training`}
+							subtitle={formatGameName(gameName)}
+							text={`You must load a memory before training!`}
+							handleReturn={() => setHandleWorkParams(null)}
+						/>
+					);
 				else
 					return (
 						<Training

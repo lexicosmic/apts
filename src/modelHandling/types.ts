@@ -1,6 +1,7 @@
 import { GameName, LogMessage, ModelInfo } from "../types";
 import Game from "../engine/Game";
 import ResNet from "../engine/ResNet";
+import { TrainingMemory } from "../engine/Trainer";
 
 export enum JobName {
 	MCTSCommon = "testMCTSCommon",
@@ -27,22 +28,37 @@ export interface JobParams_StructureBlind
 	jobName: JobName.Structure | JobName.Blind;
 }
 
-export interface JobParams_BuildMemoryCreateModel_Base
+export interface JobParams_BuildMemory_Base
 	extends JobParams_StructureBlind_Base {
 	resNet: ResNet;
 	numSearches: number;
 	explorationConstant: number;
 	numSelfPlayIterations: number;
 }
-export interface JobParams_BuildMemoryCreateModel
-	extends JobParams_BuildMemoryCreateModel_Base {
-	jobName: JobName.BuildMemory | JobName.CreateModel;
+export interface JobParams_BuildMemory extends JobParams_BuildMemory_Base {
+	jobName: JobName.BuildMemory;
+}
+
+export interface JobParams_CreateModel_Base
+	extends JobParams_StructureBlind_Base {
+	resNet: ResNet;
+	numSearches: number;
+	explorationConstant: number;
+	maxNumIterations: number;
+	numEpochs: number;
+	batchSize: number;
+	learningRate: number;
+	trainingMemories: TrainingMemory[];
+}
+export interface JobParams_CreateModel extends JobParams_CreateModel_Base {
+	jobName: JobName.CreateModel;
 }
 
 export type JobParams =
 	| JobParams_MCTS
 	| JobParams_StructureBlind
-	| JobParams_BuildMemoryCreateModel;
+	| JobParams_BuildMemory
+	| JobParams_CreateModel;
 
 /// Parameters of the handlers that call the functions that perform some work related to models
 interface HandleWorkParams_MCTS_Base {
@@ -61,22 +77,39 @@ interface HandleWorkParams_TestResNetStructure
 	jobName: JobName.Structure | JobName.Blind;
 }
 
-interface HandleWorkParams_BuildMemoryCreateModel_Base
+interface HandleWorkParams_BuildMemory_Base
 	extends HandleWorkParams_StructureBlind_Base {
 	modelInfo: ModelInfo;
 	numSearches: number;
 	explorationConstant: number;
 	numSelfPlayIterations: number;
 }
-interface HandleWorkParams_BuildMemoryCreateModel
-	extends HandleWorkParams_BuildMemoryCreateModel_Base {
-	jobName: JobName.BuildMemory | JobName.CreateModel;
+interface HandleWorkParams_BuildMemory
+	extends HandleWorkParams_BuildMemory_Base {
+	jobName: JobName.BuildMemory;
+}
+
+interface HandleWorkParams_CreateModel_Base
+	extends HandleWorkParams_StructureBlind_Base {
+	modelInfo: ModelInfo;
+	numSearches: number;
+	explorationConstant: number;
+	maxNumIterations: number;
+	numEpochs: number;
+	batchSize: number;
+	learningRate: number;
+	trainingMemories: TrainingMemory[];
+}
+interface HandleWorkParams_CreateModel
+	extends HandleWorkParams_CreateModel_Base {
+	jobName: JobName.CreateModel;
 }
 
 export type HandleWorkParams =
 	| HandleWorkParams_MCTS
 	| HandleWorkParams_TestResNetStructure
-	| HandleWorkParams_BuildMemoryCreateModel;
+	| HandleWorkParams_BuildMemory
+	| HandleWorkParams_CreateModel;
 
 /// Other types used by workers
 export enum WorkerStatus {

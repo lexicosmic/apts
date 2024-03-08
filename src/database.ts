@@ -50,7 +50,7 @@ function connect(
 function connectToAptsDB(functionToRun: (db: IDBDatabase) => void) {
 	function onupgradeneeded(db: IDBDatabase) {
 		const modelsStore = db.createObjectStore(Store.Models, {
-			keyPath: ["game", "type", "innerPath"],
+			keyPath: ["game", "innerPath"],
 		});
 		modelsStore.createIndex("game", "game", { unique: false });
 		modelsStore.createIndex("name", ["game", "name"], {
@@ -128,7 +128,7 @@ function deleteModel(
 				deleteFromTFModelsInfo();
 			};
 			const store = transaction.objectStore(Store.Models);
-			store.delete([model.game, model.type, model.innerPath]);
+			store.delete([model.game, model.innerPath]);
 		});
 	}
 

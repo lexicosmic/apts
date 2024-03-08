@@ -61,8 +61,8 @@ export interface TrainModelParams {
 export enum ModelType {
 	Structure = "structure",
 	Blind = "blind",
-	SelfPlay = "selfPlay",
-	Uploaded = "uploaded",
+	Trained = "trained",
+	Retrained = "retrained",
 }
 
 export interface ModelInfo {

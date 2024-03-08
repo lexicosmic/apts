@@ -1,7 +1,7 @@
 import { v4 as uuidv4 } from "uuid";
-import { JobParams_BuildMemoryCreateModel_Base } from "../types.js";
-import Trainer from "../../engine/Trainer.js";
+import { JobParams_BuildMemory_Base } from "../types.js";
 import { DBOperations_Memories } from "../../database.js";
+import Trainer from "../../engine/Trainer.js";
 
 export default async function buildTrainingMemory({
 	logMessage,
@@ -10,7 +10,7 @@ export default async function buildTrainingMemory({
 	numSearches,
 	explorationConstant,
 	numSelfPlayIterations,
-}: JobParams_BuildMemoryCreateModel_Base) {
+}: JobParams_BuildMemory_Base) {
 	const trainer = new Trainer(game, resNet, numSearches, explorationConstant);
 
 	logMessage("=-= APTS BUILDING MEMORY =-=");
@@ -22,7 +22,6 @@ export default async function buildTrainingMemory({
 	});
 
 	const id = uuidv4();
-
 	const storedMemory = {
 		id,
 		game: game.getName(),

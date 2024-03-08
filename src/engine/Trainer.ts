@@ -1,9 +1,11 @@
 import * as tf from "@tensorflow/tfjs";
-import { LogMessage, TrainModelParams } from "../types.js";
+import { v4 as uuidv4 } from "uuid";
+import { LogMessage, ModelType, TrainModelParams } from "../types.js";
 import { getActionFromProbabilities } from "./util.js";
 import Game, { ActionOutcome, EncodedState, Player, State } from "./Game.js";
 import ResNet from "./ResNet.js";
 import MonteCarloTreeSearch from "./MonteCarloTree.js";
+import { getFormattedDate } from "../util.js";
 
 type GameMemoryBlock = {
 	state: State;
@@ -195,46 +197,37 @@ export default class Trainer {
 	public async learn({
 		fileSystemProtocol,
 		logMessage = console.log,
-		targetPath,
-		numSelfPlayIterations,
-		trainModelParams,
-		trainingMemoryArray,
+		maxNumIterations,
+		numEpochs,
+		batchSize,
+		learningRate,
+		trainingMemories,
 	}: {
 		fileSystemProtocol: string;
 		logMessage: LogMessage;
-		targetPath: string;
-		numSelfPlayIterations: number;
-		trainModelParams: TrainModelParams;
-		trainingMemoryArray?: TrainingMemory[];
+		maxNumIterations: number;
+		numEpochs: number;
+		batchSize: number;
+		learningRate: number;
+		trainingMemories: TrainingMemory[];
 	}): Promise<void> {
-		for (let i = 0; i < trainModelParams.numIterations; i++) {
-			logMessage(`ITERATION ${i + 1}/${trainModelParams.numIterations}`);
-			// let memory;
-			// if (
-			// 	typeof trainingMemoryArray === "undefined" ||
-			// 	typeof trainingMemoryArray[i] === "undefined"
-			// )
-			// 	memory = await this.buildTrainingMemory(numSelfPlayIterations, true);
-			// else memory = trainingMemoryArray[i];
-			// const trainingLog = await this.train(
-			// 	memory,
-			// 	trainModelParams.batchSize,
-			// 	trainModelParams.numEpochs,
-			// 	trainModelParams.learningRate
-			// );
-			// // Save the model architecture and optimizer weights
-			// await this.resNet.save(
-			// 	fileSystemProtocol,
-			// 	`file://models/${directoryName}/iteration_${i}`
-			// );
-			// try {
-			// 	fs.writeFileSync(
-			// 		`./models/${directoryName}/iteration_${i}/trainingLog.json`,
-			// 		JSON.stringify(trainingLog)
-			// 	);
-			// } catch (e) {
-			// 	console.error(e);
-			// }
+		const baseId = uuidv4();
+		const maxIterations = Math.min(maxNumIterations, trainingMemories.length);
+		for (let i = 0; i < maxIterations; i++) {
+			logMessage(`ITERATION ${i + 1}/${maxIterations}`);
+			await this.train({
+				trainingMemory: trainingMemories[i],
+				batchSize,
+				numEpochs,
+				learningRate,
+				logMessage,
+			});
+			await this.resNet.save({
+				protocol: fileSystemProtocol,
+				type: ModelType.Trained,
+				innerPath: `/trained/${baseId}/${i}`,
+				name: `Trained ${getFormattedDate(new Date())}`,
+			});
 		}
 	}
 }
