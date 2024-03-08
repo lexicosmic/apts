@@ -1,5 +1,5 @@
-import Button from "./Button";
-import ButtonGroup from "./ButtonGroup";
+import Button from "../components/Button";
+import ButtonGroup from "../components/ButtonGroup";
 
 interface PickOptionProps {
 	title: string;

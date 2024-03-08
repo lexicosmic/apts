@@ -1,45 +1,37 @@
 import { useRef, useState } from "react";
-import { ModelInfo, SerializedModel } from "../types";
-import { capitalizeFirstLetter, getFullModelPath } from "../util";
-import { DBOperations_Models } from "../database";
+import { StoredMemory } from "../../types";
+import { DBOperations_Memories } from "../../database";
 import Button from "./Button";
 import { ConfirmExclusionModal } from "./Modal";
 import Icon from "./Icon";
-import { exportResNetModel } from "./util";
 
-interface ModelContainerProps {
-	modelInfo: ModelInfo;
-	setSelectedModel: (modelInfo: ModelInfo | null) => void;
+interface MemoryContainerProps {
+	storedMemory: StoredMemory;
+	setSelectedMemory: (storedMemory: StoredMemory | null) => void;
 	selected?: boolean;
-	updateModels: () => void;
+	updateMemories: () => void;
 }
 
-export default function ModelContainer({
-	modelInfo,
-	setSelectedModel,
+export default function MemoryContainer({
+	storedMemory,
+	setSelectedMemory,
 	selected = false,
-	updateModels,
-}: ModelContainerProps) {
+	updateMemories,
+}: MemoryContainerProps) {
 	const [isEditing, setIsEditing] = useState(false);
-	const [updatedName, setUpdatedName] = useState(modelInfo.name);
+	const [updatedName, setUpdatedName] = useState(storedMemory.name);
 	const [isDeleting, setIsDeleting] = useState(false);
-
-	const modelPath = getFullModelPath(
-		modelInfo.game,
-		modelInfo.type,
-		modelInfo.innerPath
-	);
 
 	const editNameInput = useRef<HTMLInputElement>(null);
 
-	function editModel() {
-		if (!updatedName || updatedName === modelInfo.name) {
+	function editMemory() {
+		if (!updatedName || updatedName === storedMemory.name) {
 			setIsEditing(false);
 			return;
 		}
-		modelInfo.name = updatedName;
-		DBOperations_Models.put(
-			modelInfo,
+		storedMemory.name = updatedName;
+		DBOperations_Memories.put(
+			storedMemory,
 			() => {
 				setIsEditing(false);
 			},
@@ -47,12 +39,12 @@ export default function ModelContainer({
 		);
 	}
 
-	function deleteModel() {
-		setSelectedModel(null);
-		DBOperations_Models.delete(
-			modelInfo,
+	function deleteMemory() {
+		setSelectedMemory(null);
+		DBOperations_Memories.delete(
+			storedMemory,
 			() => {
-				updateModels();
+				updateMemories();
 			},
 			() => {}
 		);
@@ -63,7 +55,7 @@ export default function ModelContainer({
 			className={`text-black border rounded p-2 grid gap-x-2
 				${selected ? `bg-orange-100 border-2 border-orange-400` : `bg-neutral-50`}
 			`}
-			aria-label={`Model ${modelInfo.name}`}
+			aria-label={`Memory ${storedMemory.name}`}
 			aria-current={selected}
 		>
 			<div className={`flex flex-col items-baseline gap-1`}>
@@ -75,25 +67,22 @@ export default function ModelContainer({
 						className={`w-full text-xl font-bold bg-transparent border-b border-black focus:outline-none`}
 					/>
 				) : (
-					<p className={`text-xl font-bold`}>{modelInfo.name}</p>
+					<p className={`text-xl font-bold`}>{storedMemory.name}</p>
 				)}
-				<p className={`font-mono`}>{`${capitalizeFirstLetter(
-					modelInfo.type
-				)}`}</p>
 			</div>
 			<p
-				className={`col-start-1 row-start-3 text-sm font-mono text-neutral-800 xs:col-span-2`}
+				className={`col-start-1 row-start-2 text-sm font-mono text-neutral-800`}
 			>
-				{modelInfo.innerPath}
+				Length: <span className={`font-bold`}>{storedMemory.length}</span>
 			</p>
 			<div
-				className={`w-max h-max ml-auto col-start-2 row-start-1 row-span-3 2xs:row-span-2 gap-1 grid 2xs:grid-rows-2 2xs:grid-cols-2`}
+				className={`w-max h-max ml-auto col-start-2 row-start-1 row-span-2 gap-1 grid 2xs:grid-rows-2 2xs:grid-cols-2`}
 			>
 				{isEditing ? (
 					<>
 						<Button
 							color={`green`}
-							onClick={() => editModel()}
+							onClick={() => editMemory()}
 							ariaLabel={`Save edit`}
 						>
 							<Icon name={`check-lg`} />
@@ -113,21 +102,21 @@ export default function ModelContainer({
 						<Button
 							color={`light`}
 							onClick={() => {
-								setSelectedModel(modelInfo);
+								setSelectedMemory(storedMemory);
 							}}
 							className={`min-w-max`}
 							ariaLabel={`Select model`}
 						>
 							<Icon name={`box-arrow-in-up-right`} ariaLabel="Select model" />
 						</Button>
-						<Button
+						{/* <Button
 							color={`indigo`}
 							onClick={() => exportResNetModel(modelInfo)}
 							className={`min-w-max`}
 							ariaLabel={`Download model`}
 						>
 							<Icon name={`file-earmark-arrow-down`} />
-						</Button>
+						</Button> */}
 						<Button
 							color={`amber`}
 							onClick={() => {
@@ -154,9 +143,9 @@ export default function ModelContainer({
 			</div>
 			{isDeleting && (
 				<ConfirmExclusionModal
-					id={`deleting_${modelPath}`}
+					id={`deleting_${storedMemory.id}`}
 					entityName={`this model`}
-					confirm={() => deleteModel()}
+					confirm={() => deleteMemory()}
 					close={() => setIsDeleting(false)}
 				/>
 			)}

@@ -1,5 +1,4 @@
-import { TrainingMemory } from "./engine/Trainer";
-import { GameName, ModelInfo } from "./types";
+import { GameName, ModelInfo, StoredMemory } from "./types";
 import { getFullModelPath } from "./util";
 
 const idxdb = self.indexedDB;
@@ -54,17 +53,16 @@ function connectToAptsDB(functionToRun: (db: IDBDatabase) => void) {
 			keyPath: ["game", "type", "innerPath"],
 		});
 		modelsStore.createIndex("game", "game", { unique: false });
-		// store.createIndex("game_type", ["game", "type"], {
-		// 	unique: false,
-		// });
-		// store.createIndex("game_type_path", ["game", "type", "path"], {
-		// 	unique: true,
-		// });
+		modelsStore.createIndex("name", ["game", "name"], {
+			unique: false,
+		});
 		const memoryStore = db.createObjectStore(Store.Memory, {
-			keyPath: "id",
-			autoIncrement: true,
+			keyPath: ["game", "id"],
 		});
 		memoryStore.createIndex("game", "game", { unique: false });
+		memoryStore.createIndex("name", ["game", "name"], {
+			unique: false,
+		});
 	}
 	connect(Database.AptsDB, functionToRun, onupgradeneeded, 1);
 }
@@ -205,4 +203,65 @@ export const DBOperations_Models = {
 	put: putModel,
 	delete: deleteModel,
 	getAllFromGame: getAllModelsFromGame,
+};
+
+function putMemory(
+	memory: StoredMemory,
+	onComplete: (() => Promise<void>) | (() => void),
+	onError: (event: Event) => void
+) {
+	connectToAptsDB(function (db) {
+		const transaction = db.transaction(Store.Memory, "readwrite");
+		const store = transaction.objectStore(Store.Memory);
+		transaction.oncomplete = async function () {
+			await onComplete();
+		};
+		transaction.onerror = function (event) {
+			console.log("An error occurred when updating memory in IndexedDB");
+			console.error(event);
+			onError(event);
+		};
+		store.put(memory);
+	});
+}
+
+function deleteMemory(
+	memory: StoredMemory,
+	onComplete: () => void,
+	onError: (event: Event) => void
+) {
+	connectToAptsDB(function (db) {
+		const transaction = db.transaction(Store.Memory, "readwrite");
+		const store = transaction.objectStore(Store.Memory);
+		transaction.oncomplete = function () {
+			onComplete();
+		};
+		transaction.onerror = function (event) {
+			console.log("An error occurred when deleting memory from IndexedDB");
+			console.error(event);
+			onError(event);
+		};
+		store.delete([memory.game, memory.id]);
+	});
+}
+
+function getAllMemoriesFromGame(
+	gameName: GameName,
+	callback: (memories: StoredMemory[]) => void
+) {
+	connectToAptsDB(function (db) {
+		const transaction = db.transaction(Store.Memory, "readonly");
+		const store = transaction.objectStore(Store.Memory);
+		const index = store.index("game");
+		const request = index.getAll(gameName);
+		request.onsuccess = function () {
+			callback(request.result);
+		};
+	});
+}
+
+export const DBOperations_Memories = {
+	put: putMemory,
+	delete: deleteMemory,
+	getAllFromGame: getAllMemoriesFromGame,
 };

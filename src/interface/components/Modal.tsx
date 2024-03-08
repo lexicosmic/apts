@@ -35,7 +35,7 @@ export default function Modal({
 	return (
 		<ModalBase id={id} close={close}>
 			<article
-				className={`overflow-y-scroll w-full max-h-full xs:w-auto xs:min-w-88 p-4 rounded text-black bg-white shadow-md shadow-neutral-900`}
+				className={`overflow-y-auto w-full max-h-full xs:w-auto xs:min-w-88 p-4 rounded text-black bg-white shadow-md shadow-neutral-900`}
 			>
 				{children}
 				{footer ? (

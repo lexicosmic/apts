@@ -1,5 +1,5 @@
 import { PropsWithChildren } from "react";
-import Terminal from "./Terminal";
+import Terminal from "../components/Terminal";
 
 interface TerminalPageProps {
 	title: string;
@@ -37,7 +37,7 @@ export default function TerminalPage({
 				<Terminal text={terminalText} className={`flex-grow`} />
 				<div className={`basis-0`}>{children}</div>
 			</section>
-			{footer}			
+			{footer}
 		</article>
 	);
 }

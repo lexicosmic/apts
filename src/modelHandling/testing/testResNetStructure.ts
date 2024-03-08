@@ -30,7 +30,7 @@ export default async function testResNetStructure({
 	await resNet.save({
 		protocol: fileSystemProtocol,
 		type: ModelType.Structure,
-		innerPath: `/${uuidv4()}`,
+		innerPath: `/structure/${uuidv4()}`,
 		name: `Structure ${date}`,
 	});
 	logMessage("Model saved!\n");

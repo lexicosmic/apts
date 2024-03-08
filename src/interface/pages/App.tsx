@@ -1,14 +1,14 @@
 import { useEffect, useState } from "react";
-import { GameMode, GameName, ModelInfo } from "../types";
-import { HandleWorkParams, JobName } from "../modelHandling/types";
-import { formatGameName, standardFileProtocol } from "../util";
-import PickOption from "./PickOption";
-import Training from "./Training";
-import Playing from "./Playing";
-import Disclaimer from "./Disclaimer";
-import Button from "./Button";
-import Icon from "./Icon";
+import { GameMode, GameName, ModelInfo, StoredMemory } from "../../types";
+import { HandleWorkParams, JobName } from "../../modelHandling/types";
+import { formatGameName, standardFileProtocol } from "../../util";
+import Disclaimer from "../components/Disclaimer";
+import Button from "../components/Button";
+import Icon from "../components/Icon";
 import Menu from "./Menu";
+import PickOption from "./PickOption";
+import Playing from "./Playing";
+import Training from "./Training";
 
 export default function App() {
 	const [gameName, setGameName] = useState<GameName | null>(null);
@@ -17,6 +17,9 @@ export default function App() {
 	const [handleWorkParams, setHandleWorkParams] =
 		useState<HandleWorkParams | null>(null);
 	const [selectedModelInfo, setSelectedModelInfo] = useState<ModelInfo | null>(
+		null
+	);
+	const [selectedMemory, setSelectedMemory] = useState<StoredMemory | null>(
 		null
 	);
 	const [showMenuScreen, setShowMenuScreen] = useState<boolean>(false);
@@ -60,6 +63,8 @@ export default function App() {
 					setShowMenuScreen={setShowMenuScreen}
 					selectedModel={selectedModelInfo}
 					setSelectedModel={setSelectedModelInfo}
+					selectedMemory={selectedMemory}
+					setSelectedMemory={setSelectedMemory}
 				/>
 			);
 		if (action === null)
@@ -155,7 +160,7 @@ export default function App() {
 												modelInfo: selectedModelInfo,
 												numSearches: 60,
 												explorationConstant: 2,
-												numSelfPlayIterations: 10,
+												numSelfPlayIterations: 1,
 											});
 										},
 									},
@@ -169,7 +174,7 @@ export default function App() {
 												modelInfo: selectedModelInfo,
 												numSearches: 60,
 												explorationConstant: 2,
-												numSelfPlayIterations: 10,
+												numSelfPlayIterations: 1,
 											});
 										},
 									},
@@ -243,8 +248,10 @@ export default function App() {
 		<>
 			<article className={`h-full text-white bg-neutral-900 flex flex-col`}>
 				{!showMenuScreen && (
-					<header className={`pt-2 px-2 grid`}>
-						<h1 className={`text-4xl col-start-2 m-auto`}>
+					<header
+						className={`text-center pt-2 px-2 grid grid-cols-[1fr_auto_1fr]`}
+					>
+						<h1 className={`text-4xl col-start-2 flex justify-center`}>
 							<span className={`hidden sm:block`}>Auto Playtest System</span>
 							<span className={`sm:hidden`}>APTS</span>
 						</h1>

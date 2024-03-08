@@ -1,15 +1,15 @@
 import { useEffect, useRef, useState } from "react";
-import { GameName, ModelInfo } from "../types";
-import { importResNetModel } from "./util";
-import { getFullModelPath, standardFileProtocol } from "../util";
-import { DBOperations_Models } from "../database";
-import ResNet from "../engine/ResNet";
-import ModelContainer from "./ModelContainer";
-import { ModalWithHeader } from "./Modal";
-import Icon from "./Icon";
-import ButtonGroup from "./ButtonGroup";
-import FileInput from "./FileInput";
-import Button from "./Button";
+import { GameName, ModelInfo } from "../../types";
+import { importResNetModel } from "../util";
+import { getFullModelPath, standardFileProtocol } from "../../util";
+import { DBOperations_Models } from "../../database";
+import ResNet from "../../engine/ResNet";
+import ModelContainer from "../components/ModelContainer";
+import { ModalWithHeader } from "../components/Modal";
+import Icon from "../components/Icon";
+import ButtonGroup from "../components/ButtonGroup";
+import FileInput from "../components/FileInput";
+import Button from "../components/Button";
 
 interface ManageModelsProps {
 	gameName: GameName;
@@ -78,14 +78,28 @@ export default function ManageModels({
 		reader.readAsText(modelFile);
 	}
 
-	//TODO: Sort models
-	let modelContainers: JSX.Element[] = [];
+	const selectedModelContainer = selectedModel ? (
+		<ModelContainer
+			modelInfo={selectedModel}
+			setSelectedModel={setSelectedModel}
+			selected={true}
+			updateModels={getModels}
+			key={`selected-model-container`}
+		/>
+	) : null;
+	const modelContainers: JSX.Element[] = [];
 	if (models.length > 0) {
+		models.sort((a, b) => {
+			if (a.name < b.name) return -1;
+			else if (a.name > b.name) return 1;
+			else return 0;
+		});
 		for (let i = 0; i < models.length; i++) {
 			const model = models[i];
 			const modelPath = getFullModelPath(gameName, model.type, model.innerPath);
 			const isSelected: boolean =
 				selectedModel !== null && modelPath === selectedModelPath;
+			if (isSelected) continue;
 			const modelContainer = (
 				<ModelContainer
 					modelInfo={model}
@@ -95,8 +109,7 @@ export default function ManageModels({
 					updateModels={getModels}
 				/>
 			);
-			if (isSelected) modelContainers.unshift(modelContainer);
-			else modelContainers.push(modelContainer);
+			modelContainers.push(modelContainer);
 		}
 	}
 
@@ -115,9 +128,11 @@ export default function ManageModels({
 				</Button>
 			</header>
 			<section className={`mx-2 mb-2`}>
-				<div className={`flex flex-col gap-2`}>{modelContainers}</div>
+				<div className={`flex flex-col gap-2`}>
+					{selectedModelContainer}
+					{modelContainers}
+				</div>
 			</section>
-			<footer className={``}></footer>
 			{isUploadingModel && (
 				<ModalWithHeader
 					id={`upload-model`}

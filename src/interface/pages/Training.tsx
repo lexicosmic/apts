@@ -3,11 +3,11 @@ import {
 	HandleWorkParams,
 	WorkerMessage,
 	WorkerStatus,
-} from "../modelHandling/types";
-import { formatGameName } from "../util";
-import handleWork from "../modelHandling/handleWork?worker&url";
+} from "../../modelHandling/types";
+import { formatGameName } from "../../util";
+import handleWork from "../../modelHandling/handleWork?worker&url";
 import TerminalPage from "./TerminalPage";
-import Button from "./Button";
+import Button from "../components/Button";
 
 interface TrainingProps {
 	handleWorkParams: HandleWorkParams;

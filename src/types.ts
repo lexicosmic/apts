@@ -1,4 +1,5 @@
 import * as tf from "@tensorflow/tfjs";
+import { TrainingMemory } from "./engine/Trainer";
 
 /// Common
 export type TensorLikeArray =
@@ -70,6 +71,16 @@ export interface ModelInfo {
 	innerPath: string;
 	name: string;
 }
+
+export interface StoredMemory {
+	id: string;
+	game: GameName;
+	trainingMemory: TrainingMemory;
+	name: string;
+	length: number;
+}
+
+/// Export
 
 export interface ModelFileContent extends ModelInfo {
 	layersModel: tf.LayersModel;

@@ -1,16 +1,19 @@
 import { PropsWithChildren, useState } from "react";
 import { Key, Tab, TabList, TabPanel, Tabs } from "react-aria-components";
-import { GameName, ModelInfo } from "../types";
-import { formatGameName } from "../util";
-import Button from "./Button";
-import Icon from "./Icon";
+import { GameName, ModelInfo, StoredMemory } from "../../types";
+import { formatGameName } from "../../util";
+import Button from "../components/Button";
+import Icon from "../components/Icon";
 import ManageModels from "./ManageModels";
+import ManageMemories from "./ManageMemories";
 
 interface MenuProps {
 	gameName: GameName;
 	setShowMenuScreen: (show: boolean) => void;
 	selectedModel: ModelInfo | null;
 	setSelectedModel: (model: ModelInfo | null) => void;
+	selectedMemory: StoredMemory | null;
+	setSelectedMemory: (memory: StoredMemory | null) => void;
 }
 
 export default function Menu({
@@ -18,6 +21,8 @@ export default function Menu({
 	setShowMenuScreen,
 	selectedModel,
 	setSelectedModel,
+	selectedMemory,
+	setSelectedMemory,
 }: MenuProps) {
 	const [selectedDataType, setSelectedDataType] = useState<Key>(`sdt-models`);
 
@@ -60,7 +65,7 @@ export default function Menu({
 						className={`ml-2 flex justify-start gap-0.5`}
 					>
 						<CustomTab id={`sdt-models`}>Models</CustomTab>
-						<CustomTab id={`sdt-history`}>History</CustomTab>
+						<CustomTab id={`sdt-memories`}>Memories</CustomTab>
 					</TabList>
 					<TabPanel id={`sdt-models`} className={`flex-grow`}>
 						<ManageModels
@@ -69,7 +74,13 @@ export default function Menu({
 							setSelectedModel={setSelectedModel}
 						/>
 					</TabPanel>
-					<TabPanel id={`sdt-history`}>History</TabPanel>
+					<TabPanel id={`sdt-memories`} className={`flex-grow`}>
+						<ManageMemories
+							gameName={gameName}
+							selectedMemory={selectedMemory}
+							setSelectedMemory={setSelectedMemory}
+						/>
+					</TabPanel>
 				</Tabs>
 			</section>
 		</article>
